@@ -1,0 +1,6 @@
+html,
+body,
+#wearable-preview {
+  width: calc(100% - 20px);
+  height: calc(100% - 10px);
+}
