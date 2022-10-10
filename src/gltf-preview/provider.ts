@@ -1,22 +1,24 @@
 import * as vscode from 'vscode'
-import { WearablePreviewDocument } from './document'
+import { GLTFPreviewDocument } from './document'
 import {
-  ExtensionMessage,
-  ExtensionMessagePayload,
-  ExtensionMessageType,
-  PreviewType,
+  GLFTPreviewExtensionMessage,
+  GLFTPreviewExtensionMessagePayload,
+  GLFTPreviewExtensionMessageType,
+  GLTFPreviewType,
 } from './types/extension-message'
-import { WebviewMessage, WebviewMessageType } from './types/webview-message'
-import { getNonce } from './util'
-import { WebviewCollection } from './webviews'
+import {
+  GLFTPreviewWebviewMessage,
+  GLFTPreviewWebviewMessageType,
+} from './types/webview-message'
+import { WebviewCollection, getNonce } from '../utils/webviews'
 
-export class WearablePreviewEditorProvider
-  implements vscode.CustomReadonlyEditorProvider<WearablePreviewDocument>
+export class GLTFPreviewEditorProvider
+  implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>
 {
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     return vscode.window.registerCustomEditorProvider(
-      WearablePreviewEditorProvider.viewType,
-      new WearablePreviewEditorProvider(context),
+      GLTFPreviewEditorProvider.viewType,
+      new GLTFPreviewEditorProvider(context),
       {
         supportsMultipleEditorsPerDocument: false,
       }
@@ -38,15 +40,14 @@ export class WearablePreviewEditorProvider
     uri: vscode.Uri,
     _openContext: { backupId?: string },
     _token: vscode.CancellationToken
-  ): Promise<WearablePreviewDocument> {
-    const document: WearablePreviewDocument =
-      await WearablePreviewDocument.create(uri)
+  ): Promise<GLTFPreviewDocument> {
+    const document: GLTFPreviewDocument = await GLTFPreviewDocument.create(uri)
 
     return document
   }
 
   async resolveCustomEditor(
-    document: WearablePreviewDocument,
+    document: GLTFPreviewDocument,
     panel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
@@ -74,16 +75,27 @@ export class WearablePreviewEditorProvider
    */
   private async getHtml(webview: vscode.Webview) {
     // iframe url
-    const wearablePreviewUrl = await vscode.env.asExternalUri(
+    const GLTFPreviewUrl = await vscode.env.asExternalUri(
       vscode.Uri.parse(`https://wearable-preview.decentraland.org`)
     )
 
+    // files
+    const webviewDirectory = 'src/gltf-preview/webview'
+
     // Local path to script and css for the webview
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._context.extensionUri, 'media', 'script.js')
+      vscode.Uri.joinPath(
+        this._context.extensionUri,
+        webviewDirectory,
+        'script.js'
+      )
     )
     const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._context.extensionUri, 'media', 'style.css')
+      vscode.Uri.joinPath(
+        this._context.extensionUri,
+        webviewDirectory,
+        'style.css'
+      )
     )
 
     // Use a nonce to whitelist which scripts can be run
@@ -99,7 +111,7 @@ export class WearablePreviewEditorProvider
 				Use a content security policy to only allow loading images from https or from our extension directory,
 				and only allow scripts that have a specific nonce.
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; child-src 'self' ${wearablePreviewUrl}; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; child-src 'self' ${GLTFPreviewUrl}; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -110,7 +122,7 @@ export class WearablePreviewEditorProvider
 			<body>
 				<iframe 
           id="wearable-preview-iframe" 
-          src="${wearablePreviewUrl}" 
+          src="${GLTFPreviewUrl}" 
           width="100%"
           height="100%"
           frameBorder="0"
@@ -120,27 +132,27 @@ export class WearablePreviewEditorProvider
 			</html>`
   }
 
-  private postMessage<T extends ExtensionMessageType>(
+  private postMessage<T extends GLFTPreviewExtensionMessageType>(
     panel: vscode.WebviewPanel,
     type: T,
-    payload: ExtensionMessagePayload[T]
+    payload: GLFTPreviewExtensionMessagePayload[T]
   ): void {
-    const message: ExtensionMessage<T> = { type, payload }
+    const message: GLFTPreviewExtensionMessage<T> = { type, payload }
     panel.webview.postMessage(message)
   }
 
   private onMessage(
-    document: WearablePreviewDocument,
-    message: WebviewMessage<WebviewMessageType>
+    document: GLTFPreviewDocument,
+    message: GLFTPreviewWebviewMessage<GLFTPreviewWebviewMessageType>
   ) {
     switch (message.type) {
-      case WebviewMessageType.READY: {
+      case GLFTPreviewWebviewMessageType.READY: {
         const uri = document.uri.toString()
         const isEmote = uri.endsWith('.emote.glb')
         for (const webview of this.webviews.get(document.uri)) {
-          this.postMessage(webview, ExtensionMessageType.INIT, {
+          this.postMessage(webview, GLFTPreviewExtensionMessageType.INIT, {
             file: document.documentData,
-            type: isEmote ? PreviewType.EMOTE : PreviewType.MODEL,
+            type: isEmote ? GLTFPreviewType.EMOTE : GLTFPreviewType.MODEL,
           })
         }
       }

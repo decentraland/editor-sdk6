@@ -1,18 +1,18 @@
 import * as vscode from 'vscode'
-import { Disposable } from './dispose'
+import { Disposable } from '../utils/dispose'
 
 /**
  * Define the document (the data model) used for paw draw files.
  */
-export class WearablePreviewDocument
+export class GLTFPreviewDocument
   extends Disposable
   implements vscode.CustomDocument
 {
   static async create(
     uri: vscode.Uri
-  ): Promise<WearablePreviewDocument | PromiseLike<WearablePreviewDocument>> {
-    const fileData = await WearablePreviewDocument.readFile(uri)
-    return new WearablePreviewDocument(uri, fileData)
+  ): Promise<GLTFPreviewDocument | PromiseLike<GLTFPreviewDocument>> {
+    const fileData = await GLTFPreviewDocument.readFile(uri)
+    return new GLTFPreviewDocument(uri, fileData)
   }
 
   private static async readFile(uri: vscode.Uri): Promise<Uint8Array> {
