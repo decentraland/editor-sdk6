@@ -18,7 +18,7 @@
   ],
   "activationEvents": [
     "onCustomEditor:catCustoms.catScratch",
-    "onCustomEditor:catCustoms.pawDraw"
+    "onCustomEditor:decentraland.GLBPreview"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -33,11 +33,11 @@
         ]
       },
       {
-        "viewType": "catCustoms.pawDraw",
-        "displayName": "Paw Draw",
+        "viewType": "decentraland.GLBPreview",
+        "displayName": "GLB Preview",
         "selector": [
           {
-            "filenamePattern": "*.glb"
+            "filenamePattern": "*.glb,*.gltf"
           }
         ]
       }

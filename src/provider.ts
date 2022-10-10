@@ -23,7 +23,7 @@ export class WearablePreviewEditorProvider
     )
   }
 
-  private static readonly viewType = 'catCustoms.pawDraw'
+  private static readonly viewType = 'decentraland.GLBPreview'
 
   /**
    * Tracks all known webviews
