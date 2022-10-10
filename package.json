@@ -17,21 +17,11 @@
     "Other"
   ],
   "activationEvents": [
-    "onCustomEditor:catCustoms.catScratch",
     "onCustomEditor:decentraland.GLBPreview"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "customEditors": [
-      {
-        "viewType": "catCustoms.catScratch",
-        "displayName": "Cat Scratch",
-        "selector": [
-          {
-            "filenamePattern": "*.cscratch"
-          }
-        ]
-      },
       {
         "viewType": "decentraland.GLBPreview",
         "displayName": "GLB Preview",
