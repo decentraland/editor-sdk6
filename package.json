@@ -18,8 +18,7 @@
   ],
   "activationEvents": [
     "onCustomEditor:catCustoms.catScratch",
-    "onCustomEditor:catCustoms.pawDraw",
-    "onCommand:catCustoms.pawDraw.new"
+    "onCustomEditor:catCustoms.pawDraw"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -43,13 +42,7 @@
         ]
       }
     ],
-    "commands": [
-      {
-        "command": "catCustoms.pawDraw.new",
-        "title": "Create new Paw Draw Document",
-        "category": "Paw Draw"
-      }
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
