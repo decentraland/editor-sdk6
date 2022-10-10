@@ -17,17 +17,17 @@
     "Other"
   ],
   "activationEvents": [
-    "onCustomEditor:decentraland.GLBPreview"
+    "onCustomEditor:decentraland.GLTFPreview"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "decentraland.GLBPreview",
-        "displayName": "GLB Preview",
+        "viewType": "decentraland.GLTFPreview",
+        "displayName": "Preview",
         "selector": [
           {
-            "filenamePattern": "*.glb,*.gltf"
+            "filenamePattern": "*.{gltf,glb}"
           }
         ]
       }

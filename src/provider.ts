@@ -23,7 +23,7 @@ export class WearablePreviewEditorProvider
     )
   }
 
-  private static readonly viewType = 'decentraland.GLBPreview'
+  private static readonly viewType = 'decentraland.GLTFPreview'
 
   /**
    * Tracks all known webviews
