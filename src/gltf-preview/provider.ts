@@ -11,6 +11,7 @@ import {
   GLFTPreviewWebviewMessageType,
 } from './types/webview-message'
 import { WebviewCollection, getNonce } from '../utils/webviews'
+import { getPort, ServerName } from '../utils/get-port'
 
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>
@@ -75,8 +76,9 @@ export class GLTFPreviewEditorProvider
    */
   private async getHtml(webview: vscode.Webview) {
     // iframe url
+    const port = await getPort(ServerName.GTLFPreview)
     const GLTFPreviewUrl = await vscode.env.asExternalUri(
-      vscode.Uri.parse(`https://wearable-preview.decentraland.org`)
+      vscode.Uri.parse(`http://localhost:${port}`)
     )
 
     // files
