@@ -1,11 +1,12 @@
 import * as vscode from 'vscode'
 import { spawn } from 'child_process' // use cross-spawn?
 import { GLTFPreviewEditorProvider } from './gltf-preview/provider'
-import { start, stop } from './gltf-preview/server'
+import { startServer, stopServer } from './gltf-preview/server'
 import future from 'fp-future'
 import path from 'path'
-import { setExtensionPath } from './utils/get-extension-path'
+import { setExtensionPath } from './utils/path'
 import { install } from './commands/install'
+import { start } from './commands/start'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set extension path
@@ -21,12 +22,17 @@ export async function activate(context: vscode.ExtensionContext) {
     () => install()
   )
   context.subscriptions.push(installDisposable)
+  const startDisposable = vscode.commands.registerCommand(
+    'decentraland.commands.start',
+    () => start()
+  )
+  context.subscriptions.push(startDisposable)
 
   // Start gltf-preview webserver
-  await start()
+  await startServer()
 }
 
 export async function deactivate() {
   // Stop gltf-preview webserver
-  await stop()
+  await stopServer()
 }

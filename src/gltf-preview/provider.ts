@@ -11,7 +11,7 @@ import {
   GLFTPreviewWebviewMessageType,
 } from './types/webview-message'
 import { WebviewCollection, getNonce } from '../utils/webviews'
-import { getPort, ServerName } from '../utils/get-port'
+import { getPort, ServerName } from '../utils/port'
 
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>

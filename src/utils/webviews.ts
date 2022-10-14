@@ -37,7 +37,6 @@ export class WebviewCollection {
 /**
  * Get a nonce for a script tag
  */
-
 export function getNonce() {
   let text = ''
   const possible =

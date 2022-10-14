@@ -2,7 +2,7 @@ import path from 'path'
 import express from 'express'
 import { Server } from 'http'
 import future from 'fp-future'
-import { clearPort, getPort, ServerName } from '../utils/get-port'
+import { clearPort, getPort, ServerName } from '../utils/port'
 
 const app = express()
 const dir = path.join(
@@ -14,9 +14,9 @@ app.use(express.static(dir))
 
 let server: Server | null = null
 
-export async function start() {
+export async function startServer() {
   if (server) {
-    stop()
+    stopServer()
   }
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()
@@ -28,7 +28,7 @@ export async function start() {
   return promise
 }
 
-export async function stop() {
+export async function stopServer() {
   if (server) {
     server.close()
   }
