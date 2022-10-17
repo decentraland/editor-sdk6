@@ -1,9 +1,13 @@
 import * as vscode from 'vscode'
-import { spawn } from 'child_process' // use cross-spawn?
 import { GLTFPreviewEditorProvider } from './gltf-preview/provider'
-import { startServer, stopServer } from './gltf-preview/server'
-import future from 'fp-future'
-import path from 'path'
+import {
+  startServer as startGLTFPreview,
+  stopServer as stopGLTFPreview,
+} from './gltf-preview/server'
+import {
+  startServer as startDCLPreview,
+  stopServer as stopDCLPreview,
+} from './dcl-preview/server'
 import { setExtensionPath } from './utils/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
@@ -29,10 +33,16 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(startDisposable)
 
   // Start gltf-preview webserver
-  await startServer()
+  await startGLTFPreview()
+
+  // Start dcl-preview webserver
+  await startDCLPreview()
 }
 
 export async function deactivate() {
   // Stop gltf-preview webserver
-  await stopServer()
+  await stopGLTFPreview()
+
+  // Stop dcl-preview webserver
+  await startDCLPreview()
 }

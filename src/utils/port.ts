@@ -6,6 +6,7 @@ import net, { AddressInfo } from 'net'
  */
 export enum ServerName {
   GTLFPreview = 'gltf-preview',
+  DCLPreview = 'dcl-preview',
 }
 
 /**
