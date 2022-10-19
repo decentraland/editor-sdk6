@@ -1,7 +1,7 @@
 {
-  "name": "decentraland-editor",
-  "displayName": "Decentraland Editor",
-  "description": "Visual Code extension for building Decentraland scenes",
+  "name": "decentraland",
+  "displayName": "Decentraland",
+  "description": "Visual Studio Code extension for Decentraland projects",
   "version": "0.0.1",
   "publisher": "decentraland",
   "private": true,
@@ -14,12 +14,13 @@
     "vscode": "^1.65.0"
   },
   "categories": [
-    "Other"
+    "Extension Packs"
   ],
   "activationEvents": [
     "onCustomEditor:decentraland.GLTFPreview",
     "onCommand:decentraland.commands.install",
-    "onCommand:decentraland.commands.start"
+    "onCommand:decentraland.commands.start",
+    "onCommand:decentraland.commands.browser"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -42,8 +43,28 @@
       {
         "command": "decentraland.commands.start",
         "title": "Decentraland: Start Preview"
+      },
+      {
+        "command": "decentraland.commands.browser",
+        "title": "Open in browser",
+        "icon": "$(ports-open-browser-icon)"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "decentraland.commands.browser",
+          "when": "false"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "decentraland.commands.browser",
+          "group": "navigation",
+          "when": "activeWebviewPanelId == decentraland.DCLPreview"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -74,6 +95,7 @@
     "express": "^4.18.2",
     "fp-future": "^1.0.1",
     "node-fetch": "^2.6.7",
-    "npm": "^8.19.2"
+    "npm": "^8.19.2",
+    "open": "^8.4.0"
   }
 }

@@ -43,4 +43,13 @@ export async function stopServer() {
     console.log('DCLPreview: killing process')
     child.kill()
   }
+  child = null
+}
+
+export async function getServerUrl() {
+  const port = await getPort(ServerName.DCLPreview)
+  const url = await vscode.env.asExternalUri(
+    vscode.Uri.parse(`http://localhost:${port}`)
+  )
+  return url.toString()
 }

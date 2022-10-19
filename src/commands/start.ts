@@ -1,37 +1,42 @@
 import * as vscode from 'vscode'
-import { getExtensionPath } from '../utils/path'
-import { getPort, ServerName } from '../utils/port'
-import { getNonce } from '../utils/webviews'
-import { waitForServer } from '../dcl-preview/server'
 import path from 'path'
+import { getExtensionPath } from '../utils/path'
+import { getNonce } from '../utils/webviews'
+import { getServerUrl, waitForServer } from '../dcl-preview/server'
+import { loader } from '../utils/loader'
 
 export async function start() {
-  const port = await getPort(ServerName.DCLPreview)
+  const url = await getServerUrl()
 
   // Webview
   const panel = vscode.window.createWebviewPanel(
     `decentraland.DCLPreview`,
-    `Decentraland Preview`,
-    vscode.ViewColumn.One,
+    `Decentraland`,
+    vscode.ViewColumn.Two,
     { enableScripts: true, retainContextWhenHidden: true }
   )
 
-  const url = `http://localhost:${port}`
-
-  // Use a nonce to whitelist which scripts can be run
-
-  panel.webview.html = getHtml(panel.webview, url, 'Loading...')
-
-  await waitForServer()
-
-  // Local path to script and css for the webview
-
+  // Show loading screen
   panel.webview.html = getHtml(
     panel.webview,
     url,
-    `<iframe 
-      id="dcl-preview" 
-      src="${url}?position=0%2C0&SCENE_DEBUG_PANEL" 
+    '<div class="loading">Loading&hellip;<div>'
+  )
+
+  panel.iconPath = vscode.Uri.parse(
+    path.join(getExtensionPath(), 'media', 'favicon.ico')
+  )
+
+  // Wait for server to be ready
+  await loader(waitForServer)
+
+  // Show preview
+  panel.webview.html = getHtml(
+    panel.webview,
+    url,
+    `<iframe
+      id="dcl-preview"
+      src="${url}"
       width="100%"
       height="100%"
       frameBorder="0"
@@ -42,13 +47,8 @@ export async function start() {
 
 function getHtml(webview: vscode.Webview, url: string, content: string) {
   const nonce = getNonce()
-  const webviewDirectory = 'src/gltf-preview/webview'
+  const webviewDirectory = 'src/dcl-preview/webview'
 
-  const scriptUri = webview.asWebviewUri(
-    vscode.Uri.file(
-      path.join(getExtensionPath(), webviewDirectory, 'script.js')
-    )
-  )
   const styleUri = webview.asWebviewUri(
     vscode.Uri.file(
       path.join(getExtensionPath(), webviewDirectory, 'style.css')
@@ -75,7 +75,6 @@ function getHtml(webview: vscode.Webview, url: string, content: string) {
   </head>
   <body>
    ${content}
-   <script nonce="${nonce}" src="${scriptUri}"></script>
   </body>
   </html>`
 }

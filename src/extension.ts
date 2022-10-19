@@ -11,6 +11,7 @@ import {
 import { setExtensionPath } from './utils/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
+import { browser } from './commands/browser'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set extension path
@@ -32,17 +33,17 @@ export async function activate(context: vscode.ExtensionContext) {
   )
   context.subscriptions.push(startDisposable)
 
-  // Start gltf-preview webserver
-  await startGLTFPreview()
+  const browserDisposable = vscode.commands.registerCommand(
+    'decentraland.commands.browser',
+    () => browser()
+  )
+  context.subscriptions.push(browserDisposable)
 
-  // Start dcl-preview webserver
-  await startDCLPreview()
+  // Start webservers
+  await Promise.all([startGLTFPreview(), startDCLPreview()])
 }
 
 export async function deactivate() {
-  // Stop gltf-preview webserver
-  await stopGLTFPreview()
-
-  // Stop dcl-preview webserver
-  await startDCLPreview()
+  // Stop  webservers
+  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
 }
