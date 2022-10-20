@@ -1,5 +1,8 @@
+import * as vscode from 'vscode'
+import fetch from 'node-fetch'
 import future from 'fp-future'
 import net, { AddressInfo } from 'net'
+import { sleep } from './sleep'
 
 /**
  * List of all the servers
@@ -7,6 +10,7 @@ import net, { AddressInfo } from 'net'
 export enum ServerName {
   GTLFPreview = 'gltf-preview',
   DCLPreview = 'dcl-preview',
+  DCLDeploy = 'dcl-deploy',
 }
 
 /**
@@ -49,4 +53,31 @@ async function getAvailablePort() {
     })
   })
   return promise
+}
+/**
+ * Return the url for a given server
+ * @param server The name of the server
+ * @returns The url of that server
+ */
+export async function getServerUrl(server: ServerName) {
+  const port = await getPort(server)
+  const url = await vscode.env.asExternalUri(
+    vscode.Uri.parse(`http://localhost:${port}`)
+  )
+  return url.toString()
+}
+/**
+ * Waits for a server to be ready
+ * @param server The name of the server
+ * @returns Promise that resolves when the server is up
+ */
+export async function waitForServer(url: string) {
+  while (true) {
+    try {
+      await fetch(url)
+      return
+    } catch (error) {
+      await sleep(500)
+    }
+  }
 }

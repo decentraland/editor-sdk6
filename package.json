@@ -3,7 +3,7 @@
   "displayName": "Decentraland",
   "description": "Visual Studio Code extension for Decentraland projects",
   "version": "0.0.1",
-  "publisher": "decentraland",
+  "publisher": "DecentralandFoundation",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -17,13 +17,52 @@
     "Extension Packs"
   ],
   "activationEvents": [
+    "onView:decentraland",
+    "onView:dependencies",
     "onCustomEditor:decentraland.GLTFPreview",
+    "onCommand:decentraland.commands.update",
     "onCommand:decentraland.commands.install",
-    "onCommand:decentraland.commands.start",
-    "onCommand:decentraland.commands.browser"
+    "onCommand:decentraland.commands.uninstall",
+    "onCommand:decentraland.commands.play",
+    "onCommand:decentraland.commands.deploy",
+    "onCommand:dependencies.commands.delete"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "decentraland",
+          "title": "Decentraland",
+          "icon": "resources/activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "decentraland": [
+        {
+          "id": "decentraland",
+          "name": "Decentraland"
+        },
+        {
+          "id": "dependencies",
+          "name": "Dependencies",
+          "visibility": "collapsed"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "decentraland",
+        "contents": "This is a Decentraland project",
+        "when": "decentraland.isDCL"
+      },
+      {
+        "view": "decentraland",
+        "contents": "This is NOT a Decentraland project",
+        "when": "!decentraland.isDCL"
+      }
+    ],
     "customEditors": [
       {
         "viewType": "decentraland.GLTFPreview",
@@ -37,23 +76,61 @@
     ],
     "commands": [
       {
-        "command": "decentraland.commands.install",
-        "title": "Decentraland: Install Dependencies"
+        "command": "decentraland.commands.init",
+        "title": "Initialize project",
+        "enablement": "!decentraland.isDCL",
+        "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.start",
-        "title": "Decentraland: Start Preview"
+        "command": "decentraland.commands.install",
+        "title": "Install package",
+        "icon": "$(add)",
+        "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.uninstall",
+        "title": "Uninstall package",
+        "icon": "$(remove)",
+        "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.update",
+        "title": "Update dependencies",
+        "icon": "$(refresh)",
+        "category": "Decentraland"
+      },
+      {
+        "command": "dependencies.commands.delete",
+        "title": "Delete",
+        "icon": "$(trash)",
+        "category": "Dependencies"
       },
       {
         "command": "decentraland.commands.browser",
         "title": "Open in browser",
-        "icon": "$(ports-open-browser-icon)"
+        "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.deploy",
+        "title": "Deploy",
+        "icon": "$(rocket)",
+        "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.play",
+        "title": "Play",
+        "icon": "$(play)",
+        "category": "Decentraland"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "decentraland.commands.browser",
+          "when": "false"
+        },
+        {
+          "command": "dependencies.commands.delete",
           "when": "false"
         }
       ],
@@ -62,6 +139,47 @@
           "command": "decentraland.commands.browser",
           "group": "navigation",
           "when": "activeWebviewPanelId == decentraland.DCLPreview"
+        }
+      ],
+      "explorer/title": [
+        {
+          "command": "decentraland.commands.play",
+          "when": "view == decentraland",
+          "group": "navigation@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "decentraland.commands.play",
+          "when": "view == decentraland",
+          "group": "navigation@1"
+        },
+        {
+          "command": "decentraland.commands.deploy",
+          "when": "view == decentraland",
+          "group": "navigation@2"
+        },
+        {
+          "command": "decentraland.commands.install",
+          "when": "view == dependencies",
+          "group": "navigation@1"
+        },
+        {
+          "command": "decentraland.commands.uninstall",
+          "when": "view == dependencies",
+          "group": "navigation@2"
+        },
+        {
+          "command": "decentraland.commands.update",
+          "when": "view == dependencies",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dependencies.commands.delete",
+          "when": "view == dependencies && viewItem == dependency",
+          "group": "inline"
         }
       ]
     }
@@ -89,9 +207,10 @@
   },
   "dependencies": {
     "@dcl/schemas": "^5.18.1",
-    "@dcl/wearable-preview": "^1.12.2",
+    "@dcl/wearable-preview": "^1.14.0",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.12.3",
+    "decentraland-ecs": "^6.11.9",
     "express": "^4.18.2",
     "fp-future": "^1.0.1",
     "node-fetch": "^2.6.7",

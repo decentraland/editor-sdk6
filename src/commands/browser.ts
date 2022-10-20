@@ -1,7 +1,7 @@
 import open = require('open')
-import { getServerUrl } from '../dcl-preview/server'
+import { getServerUrl, ServerName } from '../utils/port'
 
 export async function browser() {
-  const url = await getServerUrl()
+  const url = await getServerUrl(ServerName.DCLPreview)
   open(url.toString())
 }

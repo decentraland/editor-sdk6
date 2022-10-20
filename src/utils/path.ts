@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import path from 'path'
+import fs from 'fs'
 
 // Stores path to the extension's directory in the filesystem
 let extensionPath: string | null = null
@@ -54,4 +55,18 @@ export function getCwd() {
     return folder.uri.fsPath
   }
   throw new Error('getCwd(): Could not get workspace folder')
+}
+
+/**
+ * Returns whether or not the workspace's current working directory is a decentraland project or not
+ */
+export function isDCL() {
+  try {
+    const sceneJsonPath = path.join(getCwd(), 'scene.json')
+    const scene = fs.readFileSync(sceneJsonPath, 'utf8')
+    JSON.parse(scene)
+    return true
+  } catch (error) {
+    return false
+  }
 }

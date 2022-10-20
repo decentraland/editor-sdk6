@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 export async function loader(
+  title: string,
   waitFor: (
     progress: vscode.Progress<{
       message?: string | undefined
@@ -12,7 +13,7 @@ export async function loader(
     {
       location: vscode.ProgressLocation.Window,
       cancellable: false,
-      title: 'Initializing preview',
+      title,
     },
     async (progress) => {
       progress.report({ increment: 0 })

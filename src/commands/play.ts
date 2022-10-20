@@ -2,11 +2,11 @@ import * as vscode from 'vscode'
 import path from 'path'
 import { getExtensionPath } from '../utils/path'
 import { getNonce } from '../utils/webviews'
-import { getServerUrl, waitForServer } from '../dcl-preview/server'
 import { loader } from '../utils/loader'
+import { getServerUrl, ServerName, waitForServer } from '../utils/port'
 
-export async function start() {
-  const url = await getServerUrl()
+export async function play() {
+  const url = await getServerUrl(ServerName.DCLPreview)
 
   // Webview
   const panel = vscode.window.createWebviewPanel(
@@ -24,11 +24,11 @@ export async function start() {
   )
 
   panel.iconPath = vscode.Uri.parse(
-    path.join(getExtensionPath(), 'media', 'favicon.ico')
+    path.join(getExtensionPath(), 'resources', 'logo.ico')
   )
 
   // Wait for server to be ready
-  await loader(waitForServer)
+  await loader('Initializing preview', () => waitForServer(url))
 
   // Show preview
   panel.webview.html = getHtml(
