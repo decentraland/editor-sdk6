@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { loader } from '../utils/loader'
+import { npmUninstall } from '../utils/npm'
 import { run } from '../utils/run'
 
 export async function uninstall() {
@@ -9,8 +10,6 @@ export async function uninstall() {
     prompt: 'Enter the name of the package',
   })
   if (dependency) {
-    return loader(`Uninstalling ${dependency}`, () =>
-      run('npm', ['uninstall', dependency])
-    )
+    return npmUninstall(dependency)
   }
 }

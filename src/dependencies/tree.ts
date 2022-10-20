@@ -48,6 +48,20 @@ export class DependenciesProvider
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
 
       const toDep = (moduleName: string, version: string): Dependency => {
+        const modulePackageJsonPath = path.join(
+          this.workspaceRoot,
+          'node_modules',
+          moduleName,
+          'package.json'
+        )
+        if (this.pathExists(modulePackageJsonPath)) {
+          try {
+            const pkg = JSON.parse(
+              fs.readFileSync(modulePackageJsonPath, 'utf-8')
+            )
+            version = pkg.version
+          } catch (error) {}
+        }
         return new Dependency(
           moduleName,
           version,
@@ -65,7 +79,6 @@ export class DependenciesProvider
             toDep(dep, packageJson.devDependencies[dep])
           )
         : []
-      console.log('deps', deps)
       return deps.concat(devDeps)
     } else {
       return []

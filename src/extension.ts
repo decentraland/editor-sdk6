@@ -8,74 +8,63 @@ import {
   startServer as startDCLPreview,
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
+import {
+  startServer as startDCLDeploy,
+  stopServer as stopDCLDeploy,
+} from './dcl-deploy/server'
 import { getCwd, isDCL, setExtensionPath } from './utils/path'
 import { install } from './commands/install'
 import { play } from './commands/play'
 import { browser } from './commands/browser'
-import { update } from './commands/update'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
 import { DependenciesProvider } from './dependencies/tree'
 import { Dependency } from './dependencies/types'
-import { remove } from './commands/remove'
+import { npmInstall, npmUninstall } from './utils/npm'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set extension path
   setExtensionPath(context.extensionUri.fsPath)
 
-  // Check if is valid project
+  // Check if it is valid project
   vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
 
-  // Dependency tree
+  // Dependency tree (UI)
   const dependencies = new DependenciesProvider(getCwd())
 
-  // Register custom editor
-  const gltfPreviewDiposable = GLTFPreviewEditorProvider.register(context)
-  context.subscriptions.push(gltfPreviewDiposable)
+  const disposables = [
+    // Register GLTF preview custom editor
+    GLTFPreviewEditorProvider.register(context),
+    // Decentraland Commands
+    vscode.commands.registerCommand('decentraland.commands.update', () =>
+      npmInstall().then(() => dependencies.refresh())
+    ),
+    vscode.commands.registerCommand('decentraland.commands.install', () =>
+      install().then(() => dependencies.refresh())
+    ),
+    vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
+      uninstall().then(() => dependencies.refresh())
+    ),
+    vscode.commands.registerCommand('decentraland.commands.play', () => play()),
+    vscode.commands.registerCommand('decentraland.commands.deploy', () =>
+      deploy()
+    ),
+    vscode.commands.registerCommand('decentraland.commands.browser', () =>
+      browser()
+    ),
+    // Dependencies
+    vscode.window.registerTreeDataProvider('dependencies', dependencies),
+    vscode.commands.registerCommand(
+      'dependencies.commands.delete',
+      (node: Dependency) =>
+        npmUninstall(node.label).then(() => dependencies.refresh())
+    ),
+  ]
 
-  // Register commands
-  const updateDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.update',
-    () => update().then(() => dependencies.refresh())
-  )
-  context.subscriptions.push(updateDisposable)
-  const installDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.install',
-    () => install().then(() => dependencies.refresh())
-  )
-  context.subscriptions.push(installDisposable)
-  const uninstallDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.uninstall',
-    () => uninstall().then(() => dependencies.refresh())
-  )
-  context.subscriptions.push(uninstallDisposable)
-  const playDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.play',
-    () => play()
-  )
-  context.subscriptions.push(playDisposable)
-  const deployDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.deploy',
-    () => deploy()
-  )
-  context.subscriptions.push(deployDisposable)
-  const browserDisposable = vscode.commands.registerCommand(
-    'decentraland.commands.browser',
-    () => browser()
-  )
-  context.subscriptions.push(browserDisposable)
-
-  const treeDisposable = vscode.window.registerTreeDataProvider(
-    'dependencies',
-    dependencies
-  )
-  context.subscriptions.push(treeDisposable)
-
-  const deleteDisposable = vscode.commands.registerCommand(
-    'dependencies.commands.delete',
-    (node: Dependency) => remove(node.label).then(() => dependencies.refresh())
-  )
-  context.subscriptions.push(deleteDisposable)
+  // push all disposables into subscriptions
+  for (const disposable of disposables) {
+    context.subscriptions.push(disposable)
+  }
 
   // Start webservers
   await Promise.all([startGLTFPreview(), startDCLPreview()])
@@ -83,5 +72,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate() {
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
+  await Promise.all([stopGLTFPreview(), stopDCLPreview(), stopDCLDeploy()])
 }

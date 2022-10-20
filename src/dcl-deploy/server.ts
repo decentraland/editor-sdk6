@@ -6,13 +6,17 @@ import { getPort, ServerName } from '../utils/port'
 let child: ChildProcess | null = null
 
 export async function startServer() {
+  if (child) {
+    stopServer()
+  }
+
   const path = getLocalBinPath('dcl')
   const cwd = getCwd()
   const port = await getPort(ServerName.DCLDeploy)
 
   console.log(`DCLDeploy: deploy server started on port ${port}`)
 
-  child = crossSpawn(path, ['deploy', `-p ${port}`, '--no-browser'], {
+  child = crossSpawn(path, ['deploy', `-p ${port}`, `--no-browser`], {
     shell: true,
     cwd,
     env: { ...process.env },
@@ -20,6 +24,11 @@ export async function startServer() {
 
   child.stdout!.pipe(process.stdout)
   child.stderr!.pipe(process.stderr)
+
+  child.on('close', (code) => {
+    console.log(`DCLDeploy: closing server with status code ${code}`)
+    child = null
+  })
 }
 
 export async function stopServer() {

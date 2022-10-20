@@ -6,6 +6,9 @@ import { getPort, ServerName } from '../utils/port'
 let child: ChildProcess | null = null
 
 export async function startServer() {
+  if (child) {
+    stopServer()
+  }
   try {
     const path = getLocalBinPath('dcl')
     const cwd = getCwd()
@@ -21,6 +24,11 @@ export async function startServer() {
 
     child.stdout!.pipe(process.stdout)
     child.stderr!.pipe(process.stderr)
+
+    child.on('close', (code) => {
+      console.log(`DCLDeploy: closing server with status code ${code}`)
+      child = null
+    })
   } catch (error) {
     console.error('Could not initialize DCLPreview server')
   }

@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
-import { loader } from '../utils/loader'
-import { run } from '../utils/run'
+import { npmInstall } from '../utils/npm'
 
 export async function install() {
   const dependency = await vscode.window.showInputBox({
@@ -9,8 +8,6 @@ export async function install() {
     prompt: 'Enter the name of the package',
   })
   if (dependency) {
-    return loader(`Installing ${dependency}`, () =>
-      run('npm', ['install', dependency])
-    )
+    return npmInstall(dependency)
   }
 }
