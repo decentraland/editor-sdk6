@@ -6,7 +6,7 @@ import { loader } from '../utils/loader'
 import { getServerUrl, ServerName, waitForServer } from '../utils/port'
 import { startServer } from '../dcl-deploy/server'
 
-export async function deploy() {
+export async function deploy(...args: string[]) {
   const url = await getServerUrl(ServerName.DCLDeploy)
 
   // Webview
@@ -25,16 +25,24 @@ export async function deploy() {
   )
 
   panel.iconPath = vscode.Uri.parse(
-    path.join(getExtensionPath(), 'media', 'favicon.ico')
+    path.join(getExtensionPath(), 'resources', 'logo.ico')
   )
 
   // start server
-  startServer()
+  startServer(...args)
+    .then(() => {
+      panel.dispose()
+      vscode.window.showInformationMessage(`Scene deployed successfully!`)
+    })
+    .catch((code) => {
+      vscode.window.showErrorMessage(
+        `An error ocurred while deploying the scene (reason=${code})`
+      )
+      panel.dispose()
+    })
 
   // Wait for server to be ready
-  await loader('Opening deployment screen', () =>
-    waitForServer(ServerName.DCLDeploy)
-  )
+  await loader('Opening deployment screen...', () => waitForServer(url))
 
   // Show preview
   panel.webview.html = getHtml(

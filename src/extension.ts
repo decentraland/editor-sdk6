@@ -14,20 +14,19 @@ import {
 } from './dcl-deploy/server'
 import { getCwd, isDCL, setExtensionPath } from './utils/path'
 import { install } from './commands/install'
-import { play } from './commands/play'
+import { run } from './commands/run'
 import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
 import { DependenciesProvider } from './dependencies/tree'
+import { init } from './commands/init'
 import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
+import { ServerName } from './utils/port'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set extension path
   setExtensionPath(context.extensionUri.fsPath)
-
-  // Check if it is valid project
-  vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
 
   // Dependency tree (UI)
   const dependencies = new DependenciesProvider(getCwd())
@@ -36,6 +35,9 @@ export async function activate(context: vscode.ExtensionContext) {
     // Register GLTF preview custom editor
     GLTFPreviewEditorProvider.register(context),
     // Decentraland Commands
+    vscode.commands.registerCommand('decentraland.commands.init', () =>
+      init().then(() => validate())
+    ),
     vscode.commands.registerCommand('decentraland.commands.update', () =>
       npmInstall().then(() => dependencies.refresh())
     ),
@@ -45,12 +47,27 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
       uninstall().then(() => dependencies.refresh())
     ),
-    vscode.commands.registerCommand('decentraland.commands.play', () => play()),
+    vscode.commands.registerCommand('decentraland.commands.run', () => run()),
     vscode.commands.registerCommand('decentraland.commands.deploy', () =>
       deploy()
     ),
-    vscode.commands.registerCommand('decentraland.commands.browser', () =>
-      browser()
+    vscode.commands.registerCommand(
+      'decentraland.commands.deployCustom',
+      async () =>
+        deploy(
+          `--target ${await vscode.window.showInputBox({
+            title: 'Deploy to custom Catalyst',
+            prompt: 'Enter the URL of the Catalyst',
+            placeHolder: 'peer-testing.decentraland.org',
+          })}`
+        )
+    ),
+    vscode.commands.registerCommand('decentraland.commands.browser.run', () =>
+      browser(ServerName.DCLPreview)
+    ),
+    vscode.commands.registerCommand(
+      'decentraland.commands.browser.deploy',
+      () => browser(ServerName.DCLDeploy)
     ),
     // Dependencies
     vscode.window.registerTreeDataProvider('dependencies', dependencies),
@@ -66,11 +83,24 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable)
   }
 
-  // Start webservers
-  await Promise.all([startGLTFPreview(), startDCLPreview()])
+  // Validate the project folder
+  await validate()
 }
 
 export async function deactivate() {
   // Stop  webservers
   await Promise.all([stopGLTFPreview(), stopDCLPreview(), stopDCLDeploy()])
+}
+
+export async function validate() {
+  // Check if it's a valid project
+  const isValid = isDCL()
+
+  // Set in context if it is valid project
+  vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isValid)
+
+  // Start webservers
+  await (isValid
+    ? Promise.all([startGLTFPreview(), startDCLPreview()])
+    : startGLTFPreview())
 }

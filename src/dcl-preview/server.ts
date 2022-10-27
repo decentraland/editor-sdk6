@@ -1,6 +1,7 @@
 import { ChildProcess } from 'child_process'
 import crossSpawn from 'cross-spawn'
-import { getCwd, getLocalBinPath } from '../utils/path'
+import { npmInstall } from '../utils/npm'
+import { getCwd, getLocalBinPath, hasNodeModules } from '../utils/path'
 import { getPort, ServerName } from '../utils/port'
 
 let child: ChildProcess | null = null
@@ -10,17 +11,25 @@ export async function startServer() {
     stopServer()
   }
   try {
+    if (!hasNodeModules()) {
+      await npmInstall()
+    }
+
     const path = getLocalBinPath('dcl')
     const cwd = getCwd()
     const port = await getPort(ServerName.DCLPreview)
 
     console.log(`DCLPreview: preview server started on port ${port}`)
 
-    child = crossSpawn(path, ['start', `-p ${port}`, '--no-browser'], {
-      shell: true,
-      cwd,
-      env: { ...process.env },
-    })
+    child = crossSpawn(
+      path,
+      ['start', `-p ${port}`, '--no-browser', '--skip-install'],
+      {
+        shell: true,
+        cwd,
+        env: { ...process.env },
+      }
+    )
 
     child.stdout!.pipe(process.stdout)
     child.stderr!.pipe(process.stderr)

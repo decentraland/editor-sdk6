@@ -8,7 +8,7 @@ import { spawn, SpawnOptions } from './spawn'
  * @param options Options for the child process spawned
  * @returns Promise<void>
  */
-export async function run(
+export function exec(
   command: string,
   args: string[] = [],
   options: SpawnOptions = {}

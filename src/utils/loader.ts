@@ -7,12 +7,14 @@ export async function loader(
       message?: string | undefined
       increment?: number | undefined
     }>
-  ) => Promise<void>
+  ) => Promise<void>,
+  location: vscode.ProgressLocation = vscode.ProgressLocation.Window,
+  cancellable = false
 ) {
   return vscode.window.withProgress(
     {
-      location: vscode.ProgressLocation.Window,
-      cancellable: false,
+      location,
+      cancellable,
       title,
     },
     async (progress) => {

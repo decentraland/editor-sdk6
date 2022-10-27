@@ -5,7 +5,7 @@ import { getNonce } from '../utils/webviews'
 import { loader } from '../utils/loader'
 import { getServerUrl, ServerName, waitForServer } from '../utils/port'
 
-export async function play() {
+export async function run() {
   const url = await getServerUrl(ServerName.DCLPreview)
 
   // Webview

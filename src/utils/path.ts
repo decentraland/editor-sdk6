@@ -70,3 +70,19 @@ export function isDCL() {
     return false
   }
 }
+
+/**
+ * Return whether or not the workspace's current working directory has a node_modules directory
+ */
+export function hasNodeModules() {
+  try {
+    const nodeModulesPath = path.join(getCwd(), 'node_modules')
+    if (fs.existsSync(nodeModulesPath)) {
+      return true
+    } else {
+      return false
+    }
+  } catch (error) {
+    return false
+  }
+}
