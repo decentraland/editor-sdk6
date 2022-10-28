@@ -146,6 +146,14 @@
         "category": "Decentraland"
       }
     ],
+    "keybindings": [
+      {
+        "command": "decentraland.commands.start",
+        "key": "ctrl+e",
+        "mac": "cmd+e",
+        "when": "decentraland.isDCL"
+      }
+    ],
     "menus": {
       "commandPalette": [
         {
