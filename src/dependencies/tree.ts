@@ -34,7 +34,7 @@ export class DependenciesProvider
       if (this.pathExists(packageJsonPath)) {
         return Promise.resolve(this.getDepsInPackageJson(packageJsonPath))
       } else {
-        vscode.window.showInformationMessage('Workspace has no package.json')
+        vscode.window.showWarningMessage('Workspace has no package.json')
         return Promise.resolve([])
       }
     }
