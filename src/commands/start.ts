@@ -5,7 +5,7 @@ import { getNonce } from '../utils/webviews'
 import { loader } from '../utils/loader'
 import { getServerUrl, ServerName, waitForServer } from '../utils/port'
 
-export async function run() {
+export async function start() {
   const url = await getServerUrl(ServerName.DCLPreview)
 
   // Webview
@@ -28,7 +28,7 @@ export async function run() {
   )
 
   // Wait for server to be ready
-  await loader('Initializing preview', () => waitForServer(url))
+  await loader('Initializing scene...', () => waitForServer(url))
 
   // Show preview
   panel.webview.html = getHtml(
@@ -45,7 +45,7 @@ export async function run() {
   )
 }
 
-function getHtml(webview: vscode.Webview, url: string, content: string) {
+export function getHtml(webview: vscode.Webview, url: string, content: string) {
   const nonce = getNonce()
   const webviewDirectory = 'src/dcl-preview/webview'
 

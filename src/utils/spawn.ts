@@ -54,7 +54,7 @@ export function spawn(
   child.stderr!.pipe(process.stderr)
 
   child.on('close', (code) => {
-    if (code !== 0) {
+    if (code !== 0 && code !== null) {
       promise.reject(new Error(`Error: npm exited with code "${code}".`))
     } else {
       promise.resolve(void 0)

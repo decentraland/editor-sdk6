@@ -8,13 +8,9 @@ import {
   startServer as startDCLPreview,
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
-import {
-  startServer as startDCLDeploy,
-  stopServer as stopDCLDeploy,
-} from './dcl-deploy/server'
 import { getCwd, isDCL, setExtensionPath } from './utils/path'
 import { install } from './commands/install'
-import { run } from './commands/run'
+import { start } from './commands/start'
 import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
@@ -47,7 +43,9 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
       uninstall().then(() => dependencies.refresh())
     ),
-    vscode.commands.registerCommand('decentraland.commands.run', () => run()),
+    vscode.commands.registerCommand('decentraland.commands.start', () =>
+      start()
+    ),
     vscode.commands.registerCommand('decentraland.commands.deploy', () =>
       deploy()
     ),
@@ -89,7 +87,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate() {
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopDCLPreview(), stopDCLDeploy()])
+  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
 }
 
 export async function validate() {
