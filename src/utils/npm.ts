@@ -25,27 +25,29 @@ export async function npmInstall(...dependencies: string[]) {
             : `Installing dependencies...`,
       },
       async (progress) => {
-        let increment = 0
+        let increment = 1
+        let total = 0
         progress.report({ increment })
 
         // once the process finishes, move fast towards 100%
         let finished = false
-        let ease = 5000
+        let target = 0
         const done = () => {
           finished = true
-          ease = 20
+          target = 100
         }
         child.wait().then(done).catch(done)
 
         // move slowly towards 100% while process not finished
-        while (!finished || increment < 95) {
-          increment += (100 - increment) / ease
+        while (!finished || total < 99) {
+          increment += (target - increment) / 50
+          total += increment
           progress.report({ increment })
           await sleep(50)
         }
 
         // finish progress
-        progress.report({ increment })
+        progress.report({ increment: 100 })
 
         // this await here is just in case the promise rejected, then this bubbles the error up, if it resolved then it just ignores it
         await child.wait()
