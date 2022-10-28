@@ -16,7 +16,7 @@ export async function init() {
     }
   )
   if (!selected) {
-    return vscode.window.showErrorMessage('You must select a project type')
+    return
   }
 
   const option = options.find((option) => option.name === selected)!
@@ -27,20 +27,28 @@ export async function init() {
     `--skip-install`,
   ])
 
-  child.wait().catch((error) => console.log(error))
-
   try {
-    await loader(
-      `Creating ${option.name.toLowerCase()} project...`,
-      () => child.waitFor(/success/gi, /error/gi),
-      vscode.ProgressLocation.Notification
-    )
+    await Promise.race([
+      child.wait(), // if main process halts we stop waiting
+      loader(
+        `Creating ${option.name.toLowerCase()} project...`,
+        () => child.waitFor(/success/gi, /error/gi),
+        vscode.ProgressLocation.Notification
+      ),
+    ])
   } catch (error) {
     if (error instanceof Error) {
       if (/empty/gi.test(error.message)) {
-        vscode.window.showErrorMessage(
-          'The folder where you are trying to create the project must be empty'
+        const option = 'Change folder'
+        const selected = await vscode.window.showErrorMessage<string>(
+          'The folder where you are trying to create the project must be empty',
+          { modal: true },
+          option
         )
+        const didSelect = selected === option
+        if (didSelect) {
+          vscode.commands.executeCommand('vscode.openFolder')
+        }
       } else {
         vscode.window.showErrorMessage(error.message)
       }
@@ -50,11 +58,5 @@ export async function init() {
     return
   }
 
-  await sleep(1000)
-
-  await loader(
-    `Installing dependencies...`,
-    () => npmInstall(),
-    vscode.ProgressLocation.Notification
-  )
+  await npmInstall()
 }
