@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { loader } from './loader'
 import { exec } from './run'
+import { sleep } from './sleep'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -9,11 +10,46 @@ import { exec } from './run'
  */
 export async function npmInstall(...dependencies: string[]) {
   try {
-    return await loader(
-      dependencies.length > 0
-        ? `Installing ${dependencies.join(', ')}`
-        : `Installing dependencies`,
-      () => exec('npm', ['install', ...dependencies]).wait()
+    const child = exec('npm', ['install', ...dependencies])
+
+    return vscode.window.withProgress(
+      {
+        location:
+          dependencies.length > 0
+            ? vscode.ProgressLocation.Window
+            : vscode.ProgressLocation.Notification,
+        cancellable: false,
+        title:
+          dependencies.length > 0
+            ? `Installing ${dependencies.join(', ')}...`
+            : `Installing dependencies...`,
+      },
+      async (progress) => {
+        let increment = 0
+        progress.report({ increment })
+
+        // once the process finishes, move fast towards 100%
+        let finished = false
+        let ease = 5000
+        const done = () => {
+          finished = true
+          ease = 20
+        }
+        child.wait().then(done).catch(done)
+
+        // move slowly towards 100% while process not finished
+        while (!finished || increment < 95) {
+          increment += (100 - increment) / ease
+          progress.report({ increment })
+          await sleep(50)
+        }
+
+        // finish progress
+        progress.report({ increment })
+
+        // this await here is just in case the promise rejected, then this bubbles the error up, if it resolved then it just ignores it
+        await child.wait()
+      }
     )
   } catch (error) {
     vscode.window.showErrorMessage(
@@ -31,7 +67,7 @@ export async function npmInstall(...dependencies: string[]) {
  */
 export async function npmUninstall(...dependencies: string[]) {
   if (dependencies.length > 0) {
-    return loader(`Uninstalling ${dependencies.join(', ')}`, () =>
+    return loader(`Uninstalling ${dependencies.join(', ')}...`, () =>
       exec('npm', ['uninstall', ...dependencies]).wait()
     )
   }
