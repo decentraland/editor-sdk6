@@ -25,7 +25,12 @@ export async function activate(context: vscode.ExtensionContext) {
   setExtensionPath(context.extensionUri.fsPath)
 
   // Dependency tree (UI)
-  const dependencies = new DependenciesProvider(getCwd())
+  let dependencies: DependenciesProvider | null = null
+  try {
+    dependencies = new DependenciesProvider(getCwd())
+  } catch (error) {
+    // This will fail if the workbench is in empty state, we just ignore it
+  }
 
   const disposables = [
     // Register GLTF preview custom editor
@@ -35,13 +40,13 @@ export async function activate(context: vscode.ExtensionContext) {
       init().then(() => validate())
     ),
     vscode.commands.registerCommand('decentraland.commands.update', () =>
-      npmInstall().then(() => dependencies.refresh())
+      npmInstall().then(() => dependencies?.refresh())
     ),
     vscode.commands.registerCommand('decentraland.commands.install', () =>
-      install().then(() => dependencies.refresh())
+      install().then(() => dependencies?.refresh())
     ),
     vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
-      uninstall().then(() => dependencies.refresh())
+      uninstall().then(() => dependencies?.refresh())
     ),
     vscode.commands.registerCommand('decentraland.commands.start', () =>
       start()
@@ -68,17 +73,21 @@ export async function activate(context: vscode.ExtensionContext) {
       () => browser(ServerName.DCLDeploy)
     ),
     // Dependencies
-    vscode.window.registerTreeDataProvider('dependencies', dependencies),
+    dependencies
+      ? vscode.window.registerTreeDataProvider('dependencies', dependencies)
+      : null,
     vscode.commands.registerCommand(
       'dependencies.commands.delete',
       (node: Dependency) =>
-        npmUninstall(node.label).then(() => dependencies.refresh())
+        npmUninstall(node.label).then(() => dependencies?.refresh())
     ),
   ]
 
   // push all disposables into subscriptions
   for (const disposable of disposables) {
-    context.subscriptions.push(disposable)
+    if (disposable) {
+      context.subscriptions.push(disposable)
+    }
   }
 
   // Validate the project folder
