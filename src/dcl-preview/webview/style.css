@@ -1,0 +1,15 @@
+html {
+  width: calc(100% - 40px);
+  height: calc(100% - 20px);
+}
+body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loading {
+  flex: 1 0 auto;
+  text-align: center;
+}
