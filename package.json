@@ -26,7 +26,10 @@
     "onCommand:decentraland.commands.start",
     "onCommand:decentraland.commands.deploy",
     "onCommand:decentraland.commands.deployCustom",
-    "onCommand:dependencies.commands.delete"
+    "onCommand:dependencies.commands.delete",
+    "onCommand:dependencies.commands.delete",
+    "onCommand:walkthrough.createProject",
+    "onCommand:walkthrough.viewCode"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -210,7 +213,81 @@
           "group": "inline"
         }
       ]
-    }
+    },
+    "walkthroughs": [
+      {
+        "id": "decentraland",
+        "title": "Decentraland",
+        "description": "This guide will walk you through creating a Decentraland scene.",
+        "steps": [
+          {
+            "id": "open",
+            "title": "Open Folder",
+            "description": "Open an empty folder to create where you will create your Decentraland project.\n[Open Folder](command:vscode.openFolder)",
+            "media": {
+              "image": "resources/activitybar.svg",
+              "altText": "Empty image"
+            },
+            "completionEvents": [
+              "onCommand:command:vscode.openFolder"
+            ],
+            "when": "workbenchState == empty"
+          },
+          {
+            "id": "init",
+            "title": "Create project",
+            "description": "Scaffold an example scene project.\n[Create Project](command:walkthrough.createProject)",
+            "media": {
+              "image": "resources/activitybar.svg",
+              "altText": "Empty image"
+            },
+            "completionEvents": [
+              "onCommand:walkthrough.createProject"
+            ],
+            "when": "workbenchState != empty"
+          },
+          {
+            "id": "run",
+            "title": "Run scene",
+            "description": "Run the scene you just created, try interacting with the cube.\n[Run Scene](command:decentraland.commands.start)",
+            "media": {
+              "image": "resources/activitybar.svg",
+              "altText": "Run scene"
+            },
+            "completionEvents": [
+              "onCommand:decentraland.commands.start"
+            ],
+            "when": "workbenchState != empty"
+          },
+          {
+            "id": "code",
+            "title": "View code",
+            "description": "Open the source code of the scene, try making changes to it and see them reflected on the preview screen.\n[View Code](command:walkthrough.viewCode)",
+            "media": {
+              "image": "resources/activitybar.svg",
+              "altText": "View code"
+            },
+            "completionEvents": [
+              "onCommand:walkthrough.viewCode"
+            ],
+            "when": "workbenchState != empty"
+          },
+          {
+            "id": "docs",
+            "title": "Read docs",
+            "description": "You can learn more by reading our docs.\n[Open Docs](https://docs.decentraland.org)",
+            "media": {
+              "image": "resources/activitybar.svg",
+              "altText": "Read docs"
+            },
+            "completionEvents": [
+              "onLink:https://docs.decentraland.org"
+            ],
+            "when": "workbenchState != empty"
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

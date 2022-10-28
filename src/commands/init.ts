@@ -3,23 +3,32 @@ import { loader } from '../utils/loader'
 import { npmInstall } from '../utils/npm'
 import { getTypeOptions, ProjectType } from '../utils/project'
 import { exec } from '../utils/run'
-import { sleep } from '../utils/sleep'
 
-export async function init() {
+export async function init(type?: ProjectType) {
   const options = getTypeOptions()
-  const selected = await vscode.window.showQuickPick(
-    options.map((option) => option.name),
-    {
-      ignoreFocusOut: true,
-      title: 'Create Project',
-      placeHolder: 'Select the project type',
-    }
-  )
-  if (!selected) {
-    return
-  }
 
-  const option = options.find((option) => option.name === selected)!
+  let option: {
+    type: ProjectType
+    name: string
+  } | null = type
+    ? options.find((option) => option.type === type) || null
+    : null
+
+  if (!option) {
+    const selected = await vscode.window.showQuickPick(
+      options.map((option) => option.name),
+      {
+        ignoreFocusOut: true,
+        title: 'Create Project',
+        placeHolder: 'Select the project type',
+      }
+    )
+    if (!selected) {
+      return
+    }
+
+    option = options.find((option) => option.name === selected)!
+  }
 
   const child = exec('dcl', [
     'init',

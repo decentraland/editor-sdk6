@@ -19,6 +19,7 @@ import { init } from './commands/init'
 import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
 import { ServerName } from './utils/port'
+import { ProjectType } from './utils/project'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set extension path
@@ -37,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
     GLTFPreviewEditorProvider.register(context),
     // Decentraland Commands
     vscode.commands.registerCommand('decentraland.commands.init', () =>
-      init().then(() => validate())
+      init().then(validate)
     ),
     vscode.commands.registerCommand('decentraland.commands.update', () =>
       npmInstall().then(() => dependencies?.refresh())
@@ -81,6 +82,16 @@ export async function activate(context: vscode.ExtensionContext) {
       (node: Dependency) =>
         npmUninstall(node.label).then(() => dependencies?.refresh())
     ),
+    // Walkthrough
+    vscode.commands.registerCommand('walkthrough.createProject', () =>
+      init(ProjectType.SCENE).then(validate)
+    ),
+    vscode.commands.registerCommand('walkthrough.viewCode', () => {
+      vscode.commands.executeCommand(
+        'vscode.openFolder',
+        vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
+      )
+    }),
   ]
 
   // push all disposables into subscriptions
