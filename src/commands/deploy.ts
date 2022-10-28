@@ -60,13 +60,19 @@ export async function deploy(...args: string[]) {
         error instanceof Error ? error.message : error.toString()
       )
       kill()
+      return
     } else {
       console.log('DCLDeploy: main promise failed, but server was already up')
     }
   })
 
+  // Listen for the user closing the webview
+  let didDispose = false
+  panel.onDidDispose(() => (didDispose = true))
+
   try {
     await loader('Opening publish screen...', () => waitForServer(url))
+    if (!child) return
     isLoaded = true
     // Show preview
     panel.webview.html = getHtml(
@@ -84,12 +90,16 @@ export async function deploy(...args: string[]) {
     isLoaded = true
   } catch (error) {
     kill()
-    vscode.window.showErrorMessage(
-      'Something went wrong opening publish screen'
-    )
+    if (!didDispose) {
+      vscode.window.showErrorMessage(
+        'Something went wrong opening publish screen'
+      )
+    }
+    return
   }
 
   try {
+    if (!child) return
     await child.waitFor(/content uploaded/gi, /error/gi)
     panel.dispose()
     vscode.window.showInformationMessage(`Scene published successfully!`)
