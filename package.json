@@ -108,7 +108,7 @@
       {
         "command": "decentraland.commands.update",
         "title": "Update Dependencies",
-        "icon": "$(refresh)",
+        "icon": "$(sync)",
         "category": "Decentraland"
       },
       {
