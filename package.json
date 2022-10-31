@@ -3,7 +3,7 @@
   "displayName": "Decentraland",
   "description": "Visual Studio Code extension for Decentraland projects",
   "icon": "resources/logo128x128.png",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "publisher": "DecentralandFoundation",
   "private": true,
   "license": "MIT",
