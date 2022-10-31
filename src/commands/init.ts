@@ -68,4 +68,6 @@ export async function init(type?: ProjectType) {
   }
 
   await npmInstall()
+
+  vscode.window.showInformationMessage('Project created successfully!')
 }
