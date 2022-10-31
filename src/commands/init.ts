@@ -37,14 +37,15 @@ export async function init(type?: ProjectType) {
   ])
 
   try {
-    await Promise.race([
-      child.wait(), // if main process halts we stop waiting
-      loader(
-        `Creating ${option.name.toLowerCase()} project...`,
-        () => child.waitFor(/success/gi, /error/gi),
-        vscode.ProgressLocation.Notification
-      ),
-    ])
+    await loader(
+      `Creating ${option.name.toLowerCase()} project...`,
+      () =>
+        Promise.race([
+          child.wait(), // if main process halts we stop waiting
+          child.waitFor(/success/gi, /error/gi),
+        ]),
+      vscode.ProgressLocation.Notification
+    )
   } catch (error) {
     if (error instanceof Error) {
       if (/empty/gi.test(error.message)) {
