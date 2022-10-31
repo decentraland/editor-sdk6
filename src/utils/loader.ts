@@ -36,7 +36,7 @@ export async function loader(
 
       // move slowly towards 100% while process not finished
       while (!finished || total < 99) {
-        increment += (target - increment) / 50
+        increment += (target - increment) / 75
         total += increment
         progress.report({ increment })
         await sleep(50)
