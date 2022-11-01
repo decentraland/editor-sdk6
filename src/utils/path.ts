@@ -83,6 +83,18 @@ export function isDCL() {
 }
 
 /**
+ * Returns whether or not the workspace's current working directory is empty or not
+ */
+export function isEmpty() {
+  try {
+    const files = fs.readdirSync(getCwd())
+    return files.length === 0
+  } catch (error) {
+    return false
+  }
+}
+
+/**
  * Return whether or not the workspace's current working directory has a node_modules directory
  */
 export function hasNodeModules() {

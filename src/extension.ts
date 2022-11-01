@@ -8,7 +8,7 @@ import {
   startServer as startDCLPreview,
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
-import { getCwd, isDCL, setExtensionPath } from './utils/path'
+import { getCwd, isDCL, isEmpty, setExtensionPath } from './utils/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
 import { browser } from './commands/browser'
@@ -116,6 +116,13 @@ export async function validate() {
 
   // Set in context if it is valid project
   vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isValid)
+
+  // Set in context if it is an empty folder
+  vscode.commands.executeCommand(
+    'setContext',
+    'decentraland.isEmpty',
+    isEmpty()
+  )
 
   // Start webservers
   await (isValid
