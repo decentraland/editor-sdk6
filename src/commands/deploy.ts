@@ -4,7 +4,7 @@ import { getExtensionPath } from '../utils/path'
 import { getNonce } from '../utils/webviews'
 import { loader } from '../utils/loader'
 import { getPort, getServerUrl, ServerName, waitForServer } from '../utils/port'
-import { exec } from '../utils/run'
+import { bin } from '../utils/bin'
 import { SpanwedChild } from '../utils/spawn'
 
 let child: SpanwedChild | null = null
@@ -50,7 +50,12 @@ export async function deploy(...args: string[]) {
 
   // start server
   const port = await getPort(ServerName.DCLDeploy)
-  child = exec('dcl', ['deploy', `--port ${port}`, `--no-browser`, ...args])
+  child = bin('decentraland', 'dcl', [
+    'deploy',
+    `--port ${port}`,
+    `--no-browser`,
+    ...args,
+  ])
 
   // Catch main promise, show error only if server is not up yet (if it fails later there are already try/catchs for that)
   let isLoaded = false

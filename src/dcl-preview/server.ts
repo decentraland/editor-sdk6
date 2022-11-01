@@ -1,10 +1,10 @@
-import { ChildProcess } from 'child_process'
-import crossSpawn from 'cross-spawn'
 import { npmInstall } from '../utils/npm'
-import { getCwd, getLocalBinPath, hasNodeModules } from '../utils/path'
+import { hasNodeModules } from '../utils/path'
 import { getPort, ServerName } from '../utils/port'
+import { bin } from '../utils/bin'
+import { SpanwedChild } from '../utils/spawn'
 
-let child: ChildProcess | null = null
+let child: SpanwedChild | null = null
 
 export async function startServer() {
   if (child) {
@@ -15,26 +15,18 @@ export async function startServer() {
       await npmInstall()
     }
 
-    const path = getLocalBinPath('dcl')
-    const cwd = getCwd()
     const port = await getPort(ServerName.DCLPreview)
 
     console.log(`DCLPreview: preview server started on port ${port}`)
 
-    child = crossSpawn(
-      path,
-      ['start', `-p ${port}`, '--no-browser', '--skip-install'],
-      {
-        shell: true,
-        cwd,
-        env: { ...process.env },
-      }
-    )
+    child = bin('decentraland', 'dcl', [
+      'start',
+      `-p ${port}`,
+      '--no-browser',
+      '--skip-install',
+    ])
 
-    child.stdout!.pipe(process.stdout)
-    child.stderr!.pipe(process.stderr)
-
-    child.on('close', (code) => {
+    child.process.on('close', (code) => {
       console.log(`DCLDeploy: closing server with status code ${code}`)
       child = null
     })
@@ -44,9 +36,9 @@ export async function startServer() {
 }
 
 export async function stopServer() {
-  if (child && !child.killed) {
+  if (child && !child.process.killed) {
     console.log('DCLPreview: killing process')
-    child.kill()
+    child.process.kill()
   }
   child = null
 }
