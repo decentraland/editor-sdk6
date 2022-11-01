@@ -1,6 +1,14 @@
 import * as vscode from 'vscode'
 import { sleep } from './sleep'
 
+/**
+ * Display a notification with a progressbar for an async function
+ * @param title The title of the notification
+ * @param waitFor The async function
+ * @param location The position of the notification
+ * @param cancellable Whether or not is cancellable
+ * @returns
+ */
 export async function loader(
   title: string,
   waitFor: (

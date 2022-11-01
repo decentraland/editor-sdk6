@@ -27,7 +27,7 @@ type Matcher = {
 }
 
 /**
- * Runs any command in a spanwed child process, provides helpers wait for the process to finish, listen for outputs, send reponses, etc
+ * Runs any command in a spanwed child process, provides helpers to wait for the process to finish, listen for outputs, send reponses, etc
  * @param command The command
  * @param args The arguments for the command
  * @param options Options for the child process spawned
