@@ -36,11 +36,22 @@ export function getExtensionPath() {
  * @param moduleName The name of the module
  * @returns The path to the binary
  */
-export function getLocalBinPath(moduleName: string) {
+export function getLocalBinPath(moduleName: string, command: string) {
+  const packageJson = getPackageJson(moduleName)
+  if (!packageJson.bin) {
+    throw new Error(`the module "${moduleName}" does not have a binary`)
+  }
+  const isValid = command in packageJson.bin
+  if (!isValid) {
+    throw new Error(
+      `the module "${moduleName}" does not have a command called "${command}"`
+    )
+  }
   return path.join(
     getExtensionPath(),
-    './node_modules/.bin/',
-    /^win/.test(process.platform) ? `${moduleName}.cmd` : moduleName
+    './node_modules',
+    moduleName,
+    packageJson.bin[command]
   )
 }
 
@@ -84,5 +95,27 @@ export function hasNodeModules() {
     }
   } catch (error) {
     return false
+  }
+}
+/**
+ * Return the package json of a given module
+ * @param moduleName The name of the module
+ * @returns The package json object
+ */
+export function getPackageJson(moduleName: string): {
+  bin?: { [command: string]: string }
+} {
+  const packageJsonPath = path.join(
+    getExtensionPath(),
+    './node_modules',
+    moduleName,
+    'package.json'
+  )
+  try {
+    return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+  } catch (error: any) {
+    throw new Error(
+      `Could not get package.json for module "${moduleName}": ${error.message}`
+    )
   }
 }

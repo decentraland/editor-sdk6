@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { loader } from './loader'
-import { exec } from './run'
+import { bin } from './bin'
 import { sleep } from './sleep'
 
 /**
@@ -14,7 +14,7 @@ export async function npmInstall(...dependencies: string[]) {
       dependencies.length > 0
         ? `Installing ${dependencies.join(', ')}...`
         : `Installing dependencies...`,
-      () => exec('npm', ['install', ...dependencies]).wait(),
+      () => bin('npm', 'npm', ['install', ...dependencies]).wait(),
       dependencies.length > 0
         ? vscode.ProgressLocation.Window
         : vscode.ProgressLocation.Notification
@@ -36,7 +36,7 @@ export async function npmInstall(...dependencies: string[]) {
 export async function npmUninstall(...dependencies: string[]) {
   if (dependencies.length > 0) {
     return loader(`Uninstalling ${dependencies.join(', ')}...`, () =>
-      exec('npm', ['uninstall', ...dependencies]).wait()
+      bin('npm', 'npm', ['uninstall', ...dependencies]).wait()
     )
   }
 }

@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { loader } from '../utils/loader'
 import { npmInstall } from '../utils/npm'
 import { getTypeOptions, ProjectType } from '../utils/project'
-import { exec } from '../utils/run'
+import { bin } from '../utils/bin'
 
 export async function init(type?: ProjectType) {
   const options = getTypeOptions()
@@ -30,7 +30,7 @@ export async function init(type?: ProjectType) {
     option = options.find((option) => option.name === selected)!
   }
 
-  const child = exec('dcl', [
+  const child = bin('decentraland', 'dcl', [
     'init',
     `--project ${option.type}`,
     `--skip-install`,
