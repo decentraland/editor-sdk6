@@ -14,7 +14,11 @@ export async function npmInstall(...dependencies: string[]) {
       dependencies.length > 0
         ? `Installing ${dependencies.join(', ')}...`
         : `Installing dependencies...`,
-      () => bin('npm', 'npm', ['install', ...dependencies]).wait(),
+      () =>
+        bin('npm', 'npm', [
+          dependencies.length === 0 ? 'install' : 'install --save-bundle',
+          ...dependencies,
+        ]).wait(),
       dependencies.length > 0
         ? vscode.ProgressLocation.Window
         : vscode.ProgressLocation.Notification
