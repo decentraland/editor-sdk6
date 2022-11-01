@@ -64,8 +64,13 @@
       },
       {
         "view": "decentraland",
-        "contents": "The current folder does not contain a Decentraland project, go ahead and create one:\n[Create Project](command:decentraland.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
-        "when": "workbenchState != empty && !decentraland.isDCL"
+        "contents": "The current folder is empty, go ahead and create a new Decentraland project:\n[Create Project](command:decentraland.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
+        "when": "workbenchState != empty && !decentraland.isDCL && decentraland.isEmpty"
+      },
+      {
+        "view": "decentraland",
+        "contents": "The current folder does not contain a Decentraland project. Open a folder with an existing project, or an empty folder to scaffold a new project:\n[Open Folder](command:vscode.openFolder)\nTo learn more [read our docs](https://docs.decentraland.org/).",
+        "when": "workbenchState != empty && !decentraland.isDCL && !decentraland.isEmpty"
       },
       {
         "view": "decentraland",
