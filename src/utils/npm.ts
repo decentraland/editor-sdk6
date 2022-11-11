@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import { loader } from './loader'
 import { bin } from './bin'
-import { sleep } from './sleep'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -25,8 +24,7 @@ export async function npmInstall(...dependencies: string[]) {
     )
   } catch (error) {
     vscode.window.showErrorMessage(
-      `Error installing ${
-        dependencies.length > 0 ? dependencies.join(', ') : 'dependencies'
+      `Error installing ${dependencies.length > 0 ? dependencies.join(', ') : 'dependencies'
       }`
     )
   }
@@ -39,7 +37,7 @@ export async function npmInstall(...dependencies: string[]) {
  */
 export async function npmUninstall(...dependencies: string[]) {
   if (dependencies.length > 0) {
-    return loader(`Uninstalling ${dependencies.join(', ')}...`, () =>
+    return loader(`Uninstalling ${dependencies.join(', ')}...`, async () =>
       bin('npm', 'npm', ['uninstall', ...dependencies]).wait()
     )
   }
