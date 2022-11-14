@@ -8,7 +8,7 @@ import {
   startServer as startDCLPreview,
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
-import { getCwd, getNodeBinPath, isDCL, isEmpty, setExtensionPath, setGlobalStoragePath } from './utils/path'
+import { getCwd, isDCL, isEmpty, setExtensionPath, setGlobalStoragePath } from './utils/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
 import { browser } from './commands/browser'
@@ -20,12 +20,15 @@ import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
 import { ServerName } from './utils/port'
 import { ProjectType } from './utils/project'
-import { download } from './utils/node'
+import { download, resolveVersion, setVersion } from './utils/node'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set paths
   setExtensionPath(context.extensionUri.fsPath)
   setGlobalStoragePath(context.globalStorageUri.fsPath)
+
+  // Set node binary version
+  setVersion(await resolveVersion())
 
   // Dependency tree (UI)
   let dependencies: DependenciesProvider | null = null

@@ -12,6 +12,7 @@
     "url": "https://github.com/decentraland/editor"
   },
   "engines": {
+    "node": "^16.0.0",
     "vscode": "^1.65.0"
   },
   "categories": [
@@ -308,6 +309,7 @@
     "@types/gunzip-maybe": "^1.4.0",
     "@types/node": "^16.11.7",
     "@types/npm": "^7.19.0",
+    "@types/rimraf": "^3.0.2",
     "@types/tar-fs": "^2.0.1",
     "@types/vscode": "^1.65.0",
     "eslint": "^8.13.0",
@@ -323,6 +325,7 @@
   "dependencies": {
     "@dcl/schemas": "^5.18.1",
     "@dcl/wearable-preview": "^1.14.0",
+    "@types/semver": "^7.3.13",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.14.0-20221025200823.commit-2e3f738",
     "decentraland-ecs": "^6.11.9",
@@ -333,6 +336,7 @@
     "npm": "^8.19.2",
     "open": "^8.4.0",
     "rimraf": "^3.0.2",
+    "semver": "^7.3.8",
     "tar-fs": "^2.1.1"
   }
 }

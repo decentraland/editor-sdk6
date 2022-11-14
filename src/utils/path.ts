@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import path from 'path'
 import fs from 'fs'
 import { getDistribution, } from './node'
+import { getPackageJson } from './pkg'
 
 // Stores path to the extension's directory in the filesystem
 let extensionPath: string | null = null
@@ -139,28 +140,7 @@ export function hasNodeModules() {
     return false
   }
 }
-/**
- * Return the package json of a given module
- * @param moduleName The name of the module
- * @returns The package json object
- */
-export function getPackageJson(moduleName: string): {
-  bin?: { [command: string]: string }
-} {
-  const packageJsonPath = path.join(
-    getExtensionPath(),
-    './node_modules',
-    moduleName,
-    'package.json'
-  )
-  try {
-    return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-  } catch (error: any) {
-    throw new Error(
-      `Could not get package.json for module "${moduleName}": ${error.message}`
-    )
-  }
-}
+
 
 /**
  * Helper to get the absolute path to the node binary used by VSCode
