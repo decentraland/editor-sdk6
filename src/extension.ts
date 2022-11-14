@@ -20,7 +20,7 @@ import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
 import { ServerName } from './utils/port'
 import { ProjectType } from './utils/project'
-import { download, resolveVersion, setVersion } from './utils/node'
+import { checkBinaries, resolveVersion, setVersion } from './utils/node'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set paths
@@ -109,8 +109,8 @@ export async function activate(context: vscode.ExtensionContext) {
   // Validate the project folder
   await validate()
 
-  // Download node
-  await download()
+  // Check node binaries, download them if necessary
+  await checkBinaries()
 }
 
 export async function deactivate() {

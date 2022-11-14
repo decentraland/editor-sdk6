@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import tar from 'tar-fs'
 import gunzip from 'gunzip-maybe';
 import future from 'fp-future';
-import { getGlobalStoragePath, getNodeBinPath } from './path'
+import { getGlobalBinPath, getNodeBinPath } from './path'
 import { log } from './log';
 import { getPackageJson } from './pkg';
 
@@ -79,7 +79,7 @@ async function getLatestFromInstalled(major: number) {
  */
 async function getInstalledDistributions() {
   const versions = future<string[]>()
-  fs.readdir(getGlobalStoragePath(), (error, result) => error ? versions.reject(error) : versions.resolve(result))
+  fs.readdir(getGlobalBinPath(), (error, result) => error ? versions.resolve([]) : versions.resolve(result))
   return versions
 }
 
@@ -168,32 +168,34 @@ export function getDistribution() {
 }
 
 
-export async function download() {
-  const version = getVersion()
-  const binPath = getNodeBinPath()
-  const isNodeInstalled = fs.existsSync(binPath)
+export async function checkBinaries() {
+  const nodeBinPath = getNodeBinPath()
+  const isNodeInstalled = fs.existsSync(nodeBinPath)
   if (isNodeInstalled) {
     return
   }
-  const dist = getDistribution()
   log(`Node binaries not installed`)
-  const globalStoragePath = getGlobalStoragePath()
-  const distributions = await getInstalledDistributions()
-  if (distributions.length > 0) {
-    log(`Clearing up binaries directory...`)
-    for (const distribution of distributions) {
-      const directory = path.join(globalStoragePath, distribution)
-      const clear = future<void>()
-      rimraf(directory, error => error ? clear.reject(error) : clear.resolve())
-      await clear
-    }
-    log(`Done!`)
+  const globalBinPath = getGlobalBinPath()
+  const hasBinDir = fs.existsSync(globalBinPath)
+  if (!hasBinDir) {
+    fs.mkdirSync(globalBinPath, { recursive: true })
   }
-  log(`Installing ${dist}...`)
-  const url = `https://nodejs.org/dist/v${version}/${dist}.tar.gz`
+  // Uninstall older distributions
+  const distributions = await getInstalledDistributions()
+  for (const distribution of distributions) {
+    await uninstall(distribution)
+  }
+  // Install the current distribution
+  const distribution = getDistribution()
+  await install(distribution)
+}
+
+async function install(distribution: string) {
+  log(`Installing ${distribution}...`)
+  const url = `https://nodejs.org/dist/v${extractVersion(distribution)}/${distribution}.tar.gz`
   const resp = await fetch(url)
   if (!resp.ok) {
-    let error = `Could not download "${dist}"`
+    let error = `Could not download "${distribution}"`
     try {
       error += `: ${await resp.text()}`
     } catch (error) {
@@ -202,10 +204,19 @@ export async function download() {
     throw new Error(error)
   }
   const save = future()
-  const stream = tar.extract(getGlobalStoragePath(), {})
+  const stream = tar.extract(getGlobalBinPath(), {})
   resp.body.pipe(gunzip()).pipe(stream)
   resp.body.on('end', save.resolve)
   stream.on('error', save.reject)
   await save
   log('Done!')
+}
+
+async function uninstall(distribution: string) {
+  log(`Uninstalling ${distribution}...`)
+  const directory = path.join(getGlobalBinPath(), distribution)
+  const clear = future<void>()
+  rimraf(directory, error => error ? clear.reject(error) : clear.resolve())
+  await clear
+  log(`Done!`)
 }

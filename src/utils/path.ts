@@ -141,11 +141,19 @@ export function hasNodeModules() {
   }
 }
 
+/**
+ * Helper to get the absolute path to the directory where the extension stores binaries
+ * @returns The path to the node bin
+ */
+export function getGlobalBinPath() {
+  return `${getGlobalStoragePath()}/bin`
+}
+
 
 /**
- * Helper to get the absolute path to the node binary used by VSCode
+ * Helper to get the absolute path to the node binaries installed
  * @returns The path to the node bin
  */
 export function getNodeBinPath() {
-  return `${getGlobalStoragePath()}/${getDistribution()}/bin/node`
+  return `${getGlobalBinPath()}/${getDistribution()}/bin/node`
 }

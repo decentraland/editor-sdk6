@@ -37,7 +37,7 @@ export async function npmInstall(...dependencies: string[]) {
  */
 export async function npmUninstall(...dependencies: string[]) {
   if (dependencies.length > 0) {
-    return loader(`Uninstalling ${dependencies.join(', ')}...`, async () =>
+    return loader(`Uninstalling ${dependencies.join(', ')}...`, () =>
       bin('npm', 'npm', ['uninstall', ...dependencies]).wait()
     )
   }
