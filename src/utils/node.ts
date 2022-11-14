@@ -83,6 +83,12 @@ async function getInstalledDistributions() {
   return versions
 }
 
+/**
+ * Returns the latest version for a given major, fetching data from GitHub
+ * @param major 
+ * @param page 
+ * @returns 
+ */
 async function getLatestFromGithub(major: number, page = 1): Promise<string | null> {
   try {
     const versions = await getAvailableVersions(page)
@@ -109,6 +115,11 @@ async function getLatestFromGithub(major: number, page = 1): Promise<string | nu
   }
 }
 
+/**
+ * Returns available Node versions using the GitHub API to fetch releases
+ * @param page 
+ * @returns 
+ */
 async function getAvailableVersions(page: number) {
   const resp = await fetch(`https://api.github.com/repos/nodejs/node/tags?per_page=10&page=${page}`)
   if (!resp.ok) {
@@ -167,29 +178,10 @@ export function getDistribution() {
   return `node-v${getVersion()}-${getPlatform()}`
 }
 
-
-export async function checkBinaries() {
-  const nodeBinPath = getNodeBinPath()
-  const isNodeInstalled = fs.existsSync(nodeBinPath)
-  if (isNodeInstalled) {
-    return
-  }
-  log(`Node binaries not installed`)
-  const globalBinPath = getGlobalBinPath()
-  const hasBinDir = fs.existsSync(globalBinPath)
-  if (!hasBinDir) {
-    fs.mkdirSync(globalBinPath, { recursive: true })
-  }
-  // Uninstall older distributions
-  const distributions = await getInstalledDistributions()
-  for (const distribution of distributions) {
-    await uninstall(distribution)
-  }
-  // Install the current distribution
-  const distribution = getDistribution()
-  await install(distribution)
-}
-
+/**
+ * Installs a given distribution
+ * @param distribution 
+ */
 async function install(distribution: string) {
   log(`Installing ${distribution}...`)
   const url = `https://nodejs.org/dist/v${extractVersion(distribution)}/${distribution}.tar.gz`
@@ -212,6 +204,10 @@ async function install(distribution: string) {
   log('Done!')
 }
 
+/**
+ * Uninstalls a given distribution
+ * @param distribution 
+ */
 async function uninstall(distribution: string) {
   log(`Uninstalling ${distribution}...`)
   const directory = path.join(getGlobalBinPath(), distribution)
@@ -219,4 +215,33 @@ async function uninstall(distribution: string) {
   rimraf(directory, error => error ? clear.reject(error) : clear.resolve())
   await clear
   log(`Done!`)
+}
+
+/**
+ * This checks if the necessary binaries are installed. If not, then it proceeds to uninstall older distributions and installed the expected one.
+ * @returns 
+ */
+export async function checkBinaries() {
+  const nodeBinPath = getNodeBinPath()
+  const isNodeInstalled = fs.existsSync(nodeBinPath)
+  if (!isNodeInstalled) {
+    log(`The required node binaries are not installed`)
+
+    // Check if global /bin dir exists, if not, creates it
+    const globalBinPath = getGlobalBinPath()
+    const hasBinDir = fs.existsSync(globalBinPath)
+    if (!hasBinDir) {
+      fs.mkdirSync(globalBinPath, { recursive: true })
+    }
+
+    // Uninstall older distributions
+    const distributions = await getInstalledDistributions()
+    for (const distribution of distributions) {
+      await uninstall(distribution)
+    }
+
+    // Install the current distribution
+    const distribution = getDistribution()
+    await install(distribution)
+  }
 }
