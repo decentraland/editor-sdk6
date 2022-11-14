@@ -218,7 +218,7 @@ async function uninstall(distribution: string) {
 }
 
 /**
- * This checks if the necessary binaries are installed. If not, then it proceeds to uninstall older distributions and installed the expected one.
+ * This checks if the necessary binaries are installed. If not, it proceeds to uninstall older distributions and install the expected one.
  * @returns 
  */
 export async function checkBinaries() {
