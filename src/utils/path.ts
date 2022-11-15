@@ -3,6 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import { getDistribution, } from './node'
 import { getPackageJson } from './pkg'
+import { log } from './log'
 
 // Stores path to the extension's directory in the filesystem
 let extensionPath: string | null = null
@@ -15,7 +16,7 @@ let globalStoragePath: string | null = null
  * @param path Path to the extension
  */
 export function setExtensionPath(path: string | null) {
-  console.log(
+  log(
     path == null
       ? 'Extension path has been unset'
       : `Extension path has been set to "${path}".`
@@ -41,7 +42,7 @@ export function getExtensionPath() {
  * @param path Path to the extension
  */
 export function setGlobalStoragePath(path: string | null) {
-  console.log(
+  log(
     path == null
       ? 'Global storage path has been unset'
       : `Global storage has been set to "${path}".`

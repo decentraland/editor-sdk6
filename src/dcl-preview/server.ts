@@ -3,21 +3,29 @@ import { hasNodeModules } from '../utils/path'
 import { getPort, ServerName } from '../utils/port'
 import { bin } from '../utils/bin'
 import { SpanwedChild } from '../utils/spawn'
+import { log } from '../utils/log'
 
 let child: SpanwedChild | null = null
+let isStarting = false
 
 export async function startServer() {
-  if (child) {
-    stopServer()
+  if (isStarting) {
+    return
   }
+  isStarting = true
+
   try {
+    if (child) {
+      stopServer()
+    }
+
     if (!hasNodeModules()) {
       await npmInstall()
     }
 
     const port = await getPort(ServerName.DCLPreview)
 
-    console.log(`DCLPreview: preview server started on port ${port}`)
+    log(`DCLPreview: preview server started on port ${port}`)
 
     child = bin('decentraland', 'dcl', [
       'start',
@@ -35,17 +43,23 @@ export async function startServer() {
     })
 
     child.process.on('close', (code) => {
-      console.log(`DCLDeploy: closing server with status code ${code}`)
+      log(`DCLPreview: closing server with status code ${code}`)
       child = null
     })
+
+    // catch promise so it doesn't throw 
+    child.wait().catch()
   } catch (error) {
-    console.error('Could not initialize DCLPreview server')
+    log('Could not initialize DCLPreview server')
   }
+
+  // unset
+  isStarting = false
 }
 
 export async function stopServer() {
   if (child && !child.process.killed) {
-    console.log('DCLPreview: killing process')
+    log('DCLPreview: killing process')
     child.process.kill()
   }
   child = null

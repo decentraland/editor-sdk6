@@ -12,10 +12,10 @@ import { spawn, SpawnOptions } from './spawn'
 export function bin(
   moduleName: string,
   command: string,
-  args: string[] = [],
+  args: (string | undefined)[] = [],
   options: SpawnOptions = {}
 ) {
   const node = getNodeBinPath().replace(/\s/g, "\\ ") // fix whitespaces 
   const bin = getModuleBinPath(moduleName, command)
-  return spawn(node, [bin, ...args], options)
+  return spawn(node, [bin, ...args.filter((arg: string | undefined) => !!arg) as string[]], options)
 }

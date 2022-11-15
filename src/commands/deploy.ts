@@ -6,13 +6,14 @@ import { loader } from '../utils/loader'
 import { getPort, getServerUrl, ServerName, waitForServer } from '../utils/port'
 import { bin } from '../utils/bin'
 import { SpanwedChild } from '../utils/spawn'
+import { log } from '../utils/log'
 
 let child: SpanwedChild | null = null
 let panel: vscode.WebviewPanel | null = null
 
 function kill() {
   if (child && !child.process.killed) {
-    console.log('DCLDeploy: killing child process')
+    log('DCLDeploy: killing child process')
     child.process.kill()
     child = null
   }
@@ -67,7 +68,7 @@ export async function deploy(...args: string[]) {
       kill()
       return
     } else {
-      console.log('DCLDeploy: main promise failed, but server was already up')
+      log('DCLDeploy: main promise failed, but server was already up')
     }
   })
 

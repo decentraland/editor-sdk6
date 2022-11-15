@@ -122,6 +122,10 @@ export function refreshTree() {
   dependencies?.refresh()
 }
 
-export function registerTree() {
-  return dependencies ? vscode.window.registerTreeDataProvider('dependencies', dependencies) : null
+export function registerTree(disposables: vscode.Disposable[]) {
+  const disposable = dependencies ? vscode.window.registerTreeDataProvider('dependencies', dependencies) : null
+  if (disposable) {
+    disposables.push(disposable)
+  }
+  return disposable
 }

@@ -14,13 +14,16 @@ import { start } from './commands/start'
 import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
-import { createTree, refreshTree, registerTree } from './dependencies/tree'
+import { createTree, registerTree } from './dependencies/tree'
 import { init } from './commands/init'
+import { restart } from './commands/restart'
 import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
 import { ServerName } from './utils/port'
 import { ProjectType } from './utils/project'
 import { checkBinaries, resolveVersion, setVersion } from './utils/node'
+import { unwatch, watch } from './utils/watch'
+import { log } from './utils/log'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set paths
@@ -33,64 +36,47 @@ export async function activate(context: vscode.ExtensionContext) {
   // create dependency tree
   createTree()
 
-  const disposables = [
-    // Register GLTF preview custom editor
-    GLTFPreviewEditorProvider.register(context),
-    // Decentraland Commands
-    vscode.commands.registerCommand('decentraland.commands.init', () =>
-      init().then(validate)
-    ),
-    vscode.commands.registerCommand('decentraland.commands.update', () =>
-      npmInstall().then(() => refreshTree())
-    ),
-    vscode.commands.registerCommand('decentraland.commands.install', () =>
-      install().then(() => refreshTree())
-    ),
-    vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
-      uninstall().then(() => refreshTree())
-    ),
-    vscode.commands.registerCommand('decentraland.commands.start', () =>
-      start()
-    ),
-    vscode.commands.registerCommand('decentraland.commands.deploy', () =>
-      deploy()
-    ),
-    vscode.commands.registerCommand(
-      'decentraland.commands.deployCustom',
-      async () =>
-        deploy(
-          `--target ${await vscode.window.showInputBox({
-            title: 'Deploy to custom Catalyst',
-            prompt: 'Enter the URL of the Catalyst',
-            placeHolder: 'peer-testing.decentraland.org',
-          })}`
-        )
-    ),
-    vscode.commands.registerCommand('decentraland.commands.browser.run', () =>
-      browser(ServerName.DCLPreview)
-    ),
-    vscode.commands.registerCommand(
-      'decentraland.commands.browser.deploy',
-      () => browser(ServerName.DCLDeploy)
-    ),
-    // Dependencies
-    registerTree(),
-    vscode.commands.registerCommand(
-      'dependencies.commands.delete',
-      (node: Dependency) =>
-        npmUninstall(node.label).then(() => refreshTree())
-    ),
-    // Walkthrough
-    vscode.commands.registerCommand('walkthrough.createProject', () =>
-      init(ProjectType.SCENE).then(validate)
-    ),
-    vscode.commands.registerCommand('walkthrough.viewCode', () => {
-      vscode.commands.executeCommand(
-        'vscode.openFolder',
-        vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
+  // helper a command
+  const disposables: vscode.Disposable[] = []
+  const register = (command: string, callback: (...args: any[]) => any) => disposables.push(vscode.commands.registerCommand(command, callback))
+
+  // Register GLTF preview custom editor
+  GLTFPreviewEditorProvider.register(context, disposables)
+
+  // Decentraland Commands
+  register('decentraland.commands.init', () => init().then(validate))
+  register('decentraland.commands.update', () => npmInstall())
+  register('decentraland.commands.install', () => install())
+  register('decentraland.commands.uninstall', () => uninstall())
+  register('decentraland.commands.start', () => start())
+  register('decentraland.commands.restart', () => restart())
+  register('decentraland.commands.deploy', () => deploy())
+  register('decentraland.commands.deployCustom',
+    async () =>
+      deploy(
+        `--target ${await vscode.window.showInputBox({
+          title: 'Deploy to custom Catalyst',
+          prompt: 'Enter the URL of the Catalyst',
+          placeHolder: 'peer-testing.decentraland.org',
+        })}`
       )
-    }),
-  ]
+  )
+  register('decentraland.commands.browser.run', () => browser(ServerName.DCLPreview))
+  register('decentraland.commands.browser.deploy', () => browser(ServerName.DCLDeploy))
+
+  // Dependencies
+  registerTree(disposables)
+  register('dependencies.commands.delete', (node: Dependency) => npmUninstall(node.label))
+  register('dependencies.commands.update', (node: Dependency) => npmInstall(`${node.label}@latest`))
+
+  // Walkthrough
+  register('walkthrough.createProject', () => init(ProjectType.SCENE).then(validate))
+  register('walkthrough.viewCode', () => {
+    vscode.commands.executeCommand(
+      'vscode.openFolder',
+      vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
+    )
+  })
 
   // push all disposables into subscriptions
   for (const disposable of disposables) {
@@ -104,9 +90,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Check node binaries, download them if necessary
   await checkBinaries()
+
+  // watch for changes in node_modules
+  watch()
 }
 
 export async function deactivate() {
+  // Stop watching changes in node_modules
+  unwatch()
   // Stop  webservers
   await Promise.all([stopGLTFPreview(), stopDCLPreview()])
 }
@@ -126,7 +117,11 @@ export async function validate() {
   )
 
   // Start webservers
-  await (isValid
-    ? Promise.all([startGLTFPreview(), startDCLPreview()])
-    : startGLTFPreview())
+  try {
+    await (isValid
+      ? Promise.all([startGLTFPreview(), startDCLPreview()])
+      : startGLTFPreview())
+  } catch (error: any) {
+    log(`Something went wrong initializing servers:`, error.message)
+  }
 }

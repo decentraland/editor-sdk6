@@ -29,7 +29,7 @@
     "onCommand:decentraland.commands.deploy",
     "onCommand:decentraland.commands.deployCustom",
     "onCommand:dependencies.commands.delete",
-    "onCommand:dependencies.commands.delete",
+    "onCommand:dependencies.commands.update",
     "onCommand:walkthrough.createProject",
     "onCommand:walkthrough.viewCode"
   ],
@@ -122,6 +122,12 @@
         "category": "Decentraland"
       },
       {
+        "command": "dependencies.commands.update",
+        "title": "Update",
+        "icon": "$(arrow-up)",
+        "category": "Dependencies"
+      },
+      {
         "command": "dependencies.commands.delete",
         "title": "Delete",
         "icon": "$(trash)",
@@ -154,6 +160,12 @@
         "title": "Run Scene",
         "icon": "$(play)",
         "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.restart",
+        "title": "Restart Server",
+        "icon": "$(debug-restart)",
+        "category": "Decentraland"
       }
     ],
     "keybindings": [
@@ -177,6 +189,10 @@
         {
           "command": "dependencies.commands.delete",
           "when": "false"
+        },
+        {
+          "command": "dependencies.commands.update",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -198,6 +214,11 @@
           "group": "1_actions"
         },
         {
+          "command": "decentraland.commands.restart",
+          "when": "view == decentraland && decentraland.isDCL",
+          "group": "navigation"
+        },
+        {
           "command": "decentraland.commands.install",
           "when": "view == dependencies",
           "group": "navigation@1"
@@ -215,9 +236,14 @@
       ],
       "view/item/context": [
         {
+          "command": "dependencies.commands.update",
+          "when": "view == dependencies && viewItem == dependency",
+          "group": "inline@1"
+        },
+        {
           "command": "dependencies.commands.delete",
           "when": "view == dependencies && viewItem == dependency",
-          "group": "inline"
+          "group": "inline@2"
         }
       ]
     },
@@ -326,6 +352,7 @@
     "@dcl/schemas": "^5.18.1",
     "@dcl/wearable-preview": "^1.14.0",
     "@types/semver": "^7.3.13",
+    "chokidar": "^3.5.3",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.14.0-20221025200823.commit-2e3f738",
     "decentraland-ecs": "^6.11.9",

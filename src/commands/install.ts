@@ -7,7 +7,20 @@ export async function install() {
     placeHolder: '@dcl/ecs-scene-utils',
     prompt: 'Enter the name of the package',
   })
-  if (dependency) {
-    return npmInstall(dependency)
+  if (!dependency) {
+    return
   }
+
+  const YES = 'Yes'
+  const NO = 'No'
+
+  const isLibrary = await vscode.window.showQuickPick(
+    [YES, NO],
+    {
+      ignoreFocusOut: true,
+      title: 'Is this a Decentraland library?',
+    }
+  )
+
+  return npmInstall(dependency, isLibrary === YES)
 }
