@@ -2,6 +2,7 @@ import { ChildProcess } from 'child_process'
 import crossSpawn from 'cross-spawn'
 import future from 'fp-future'
 import { Readable } from 'stream'
+import { bind } from './log'
 import { getCwd } from './path'
 
 export type SpanwedChild = {
@@ -93,6 +94,9 @@ export function spawn(
         }
       }),
   }
+
+  // bind logs to output channel
+  bind(spawned)
 
   return spawned
 }

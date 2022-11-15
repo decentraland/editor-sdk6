@@ -14,7 +14,7 @@ import { start } from './commands/start'
 import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
-import { DependenciesProvider } from './dependencies/tree'
+import { createTree, refreshTree, registerTree } from './dependencies/tree'
 import { init } from './commands/init'
 import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './utils/npm'
@@ -30,13 +30,8 @@ export async function activate(context: vscode.ExtensionContext) {
   // Set node binary version
   setVersion(await resolveVersion())
 
-  // Dependency tree (UI)
-  let dependencies: DependenciesProvider | null = null
-  try {
-    dependencies = new DependenciesProvider(getCwd())
-  } catch (error) {
-    // This will fail if the workbench is in empty state, we just ignore it
-  }
+  // create dependency tree
+  createTree()
 
   const disposables = [
     // Register GLTF preview custom editor
@@ -46,13 +41,13 @@ export async function activate(context: vscode.ExtensionContext) {
       init().then(validate)
     ),
     vscode.commands.registerCommand('decentraland.commands.update', () =>
-      npmInstall().then(() => dependencies?.refresh())
+      npmInstall().then(() => refreshTree())
     ),
     vscode.commands.registerCommand('decentraland.commands.install', () =>
-      install().then(() => dependencies?.refresh())
+      install().then(() => refreshTree())
     ),
     vscode.commands.registerCommand('decentraland.commands.uninstall', () =>
-      uninstall().then(() => dependencies?.refresh())
+      uninstall().then(() => refreshTree())
     ),
     vscode.commands.registerCommand('decentraland.commands.start', () =>
       start()
@@ -79,13 +74,11 @@ export async function activate(context: vscode.ExtensionContext) {
       () => browser(ServerName.DCLDeploy)
     ),
     // Dependencies
-    dependencies
-      ? vscode.window.registerTreeDataProvider('dependencies', dependencies)
-      : null,
+    registerTree(),
     vscode.commands.registerCommand(
       'dependencies.commands.delete',
       (node: Dependency) =>
-        npmUninstall(node.label).then(() => dependencies?.refresh())
+        npmUninstall(node.label).then(() => refreshTree())
     ),
     // Walkthrough
     vscode.commands.registerCommand('walkthrough.createProject', () =>

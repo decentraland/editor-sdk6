@@ -1,4 +1,4 @@
-import { npmInstall } from '../utils/npm'
+import { npmInstall, warnOutdatedDependency } from '../utils/npm'
 import { hasNodeModules } from '../utils/path'
 import { getPort, ServerName } from '../utils/port'
 import { bin } from '../utils/bin'
@@ -25,6 +25,14 @@ export async function startServer() {
       '--no-browser',
       '--skip-install',
     ])
+
+    child.on(/package is outdated/gi, (data) => {
+      const match = /npm install ((\d|\w|\_|\-)+)@latest/gi.exec(data!)
+      if (match && match.length > 0) {
+        const dependency = match[1]
+        warnOutdatedDependency(dependency)
+      }
+    })
 
     child.process.on('close', (code) => {
       console.log(`DCLDeploy: closing server with status code ${code}`)

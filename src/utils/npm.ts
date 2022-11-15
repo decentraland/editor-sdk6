@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { loader } from './loader'
 import { bin } from './bin'
+import { refreshTree } from '../dependencies/tree'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -40,5 +41,15 @@ export async function npmUninstall(...dependencies: string[]) {
     return loader(`Uninstalling ${dependencies.join(', ')}...`, () =>
       bin('npm', 'npm', ['uninstall', ...dependencies]).wait()
     )
+  }
+}
+
+export async function warnOutdatedDependency(dependency: string) {
+  const update = "Update"
+  const ignore = "Ignore"
+  const action = await vscode.window.showWarningMessage(`The dependency "${dependency}" is outdated`, update, ignore)
+  if (action === update) {
+    await npmInstall(`${dependency}@latest`)
+    refreshTree()
   }
 }
