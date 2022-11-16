@@ -103,7 +103,7 @@ export function spawn(
         }
       }),
     kill: async () => {
-      log(`${id}: killing process...`)
+      log(`Killing process "${id}"...`)
       // if child already killed, return
       if (killed) return
       killed = true
@@ -128,7 +128,7 @@ export function spawn(
       // interval to check if child still running and flag it as dead when is not running anymore
       const interval = setInterval(() => {
         if (!child.pid || !isRunning(child.pid)) {
-          log(`${id}: gracefully killed`)
+          log(`Process "${id}" gracefully killed`)
           die()
         }
       }, 100)
@@ -136,7 +136,7 @@ export function spawn(
       // timeout to stop checking if child still running, kil it with fire
       const timeout = setTimeout(() => {
         if (alive) {
-          log(`${id}: forcefully killed`)
+          log(`Process "${id}" forcefully killed`)
           die()
         }
       }, 5000)

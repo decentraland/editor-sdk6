@@ -19,7 +19,7 @@ export function setExtensionPath(path: string | null) {
   log(
     path == null
       ? 'Extension path has been unset'
-      : `Extension path has been set to ${path}.`
+      : `Extension path has been set to "${path}"`
   )
   extensionPath = path
 }
@@ -45,7 +45,7 @@ export function setGlobalStoragePath(path: string | null) {
   log(
     path == null
       ? 'Global storage path has been unset'
-      : `Global storage has been set to ${path}.`
+      : `Global storage has been set to "${path}"`
   )
   globalStoragePath = path
 }
@@ -157,4 +157,13 @@ export function getGlobalBinPath() {
  */
 export function getNodeBinPath() {
   return `${getGlobalBinPath()}/${getDistribution()}/bin/node`
+}
+
+/**
+ * Replace white spaces with "\ "
+ * @param p path to fix
+ * @returns fixed path
+ */
+export function escapeWhiteSpaces(p: string) {
+  return p.replace(/\s/g, "\\ ")
 }

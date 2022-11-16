@@ -11,8 +11,8 @@ export async function init(type?: ProjectType) {
     type: ProjectType
     name: string
   } | null = type
-    ? options.find((option) => option.type === type) || null
-    : null
+      ? options.find((option) => option.type === type) || null
+      : null
 
   if (!option) {
     const selected = await vscode.window.showQuickPick(

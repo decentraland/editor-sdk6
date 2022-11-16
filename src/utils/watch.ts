@@ -1,6 +1,5 @@
 import chokidar from 'chokidar'
 import path from 'path'
-import { startServer } from '../dcl-preview/server'
 import { refreshTree } from '../dependencies/tree'
 import { debounce } from './debounce'
 import { log } from './log'
