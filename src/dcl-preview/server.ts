@@ -27,7 +27,7 @@ export async function startServer() {
 
     const port = await getPort(ServerName.DCLPreview)
 
-    log(`DCLPreview: http server listening on port ${port}`)
+    log(`DCLPreview: http server assigned port is ${port}`)
 
     child = bin('decentraland', 'dcl', [
       'start',

@@ -5,6 +5,7 @@ import rimraf from 'rimraf'
 import fetch from 'node-fetch';
 import Progress from 'node-fetch-progress';
 import tar from 'tar-fs'
+import zip from 'unzip-stream'
 import gunzip from 'gunzip-maybe';
 import future from 'fp-future';
 import { getGlobalBinPath, getNodeBinPath } from './path'
@@ -82,7 +83,7 @@ async function getLatestFromInstalled(major: number) {
 async function getInstalledDistributions() {
   const versions = future<string[]>()
   fs.readdir(getGlobalBinPath(), (error, result) => error ? versions.resolve([]) : versions.resolve(result))
-  return versions
+  return versions.then(versions => versions.filter(version => version.startsWith('node-v')))
 }
 
 /**
@@ -176,8 +177,34 @@ export function getPlatform() {
   return platform
 }
 
+/**
+ * Returns the distribution name
+ * @returns 
+ */
 export function getDistribution() {
   return `node-v${getVersion()}-${getPlatform()}`
+}
+
+/**
+ * Returns the extension for a given distribution
+ * @param distribution 
+ * @returns 
+ */
+export function getExtension(distribution: string) {
+  if (isWindows(distribution)) {
+    return '.zip'
+  }
+  return '.tar.gz'
+}
+
+/**
+ * Util to detect if a distribution is for Windows
+ * @param distribution 
+ * @returns 
+ */
+export function isWindows(distribution: string) {
+  const [_node, _version, platform, _arch] = distribution.split('-')
+  return platform === 'win'
 }
 
 /**
@@ -186,9 +213,11 @@ export function getDistribution() {
  */
 async function install(distribution: string) {
   const binPath = getGlobalBinPath()
+  const extension = getExtension(distribution)
   log(`Distribution: ${distribution}`)
-  log(`Path: ${binPath}`)
-  const url = `https://nodejs.org/dist/v${extractVersion(distribution)}/${distribution}.tar.gz`
+  const url = `https://nodejs.org/dist/v${extractVersion(distribution)}/${distribution}${extension}`
+  log(`Downloading from: ${url}`)
+  log(`Installation directory: ${binPath}`)
   const resp = await fetch(url)
   if (!resp.ok) {
     let error = `Could not download "${distribution}"`
@@ -212,7 +241,7 @@ async function install(distribution: string) {
     }
   })
   const save = future()
-  const stream = tar.extract(binPath)
+  const stream = extension === '.tar.gz' ? tar.extract(binPath) : zip.Extract({ path: binPath })
   resp.body.pipe(gunzip()).pipe(stream)
   resp.body.on('end', save.resolve)
   stream.on('error', save.reject)
@@ -220,6 +249,7 @@ async function install(distribution: string) {
   log('Installing... 100%')
   await sleep(1000)
   log('Done!')
+  log(`Node binaries installed: ${getNodeBinPath()}`)
 }
 
 /**

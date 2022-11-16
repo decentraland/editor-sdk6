@@ -90,9 +90,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Validate the project folder
   await validate()
-
-  // watch for changes in node_modules
-  watch()
 }
 
 export async function deactivate() {
@@ -123,5 +120,10 @@ export async function validate() {
       : startGLTFPreview())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)
+  }
+
+  // Watch chagnes in node_modules
+  if (isValid) {
+    watch()
   }
 }
