@@ -4,6 +4,8 @@ import { getPort, ServerName } from '../utils/port'
 import { bin } from '../utils/bin'
 import { SpanwedChild } from '../utils/spawn'
 import { log } from '../utils/log'
+import { loader } from '../utils/loader'
+import { ProgressLocation } from 'vscode'
 
 let child: SpanwedChild | null = null
 let isStarting = false
@@ -49,8 +51,8 @@ export async function startServer() {
       child = null
     })
 
-    // catch promise so it doesn't throw 
-    child.wait().catch()
+    // Show loader while server is starting
+    loader('Starting server...', async () => child?.waitFor(/server is now running/gi, /error/gi), ProgressLocation.Window)
   } catch (error) {
     log('Could not initialize DCLPreview server')
   }
