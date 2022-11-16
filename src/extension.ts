@@ -85,11 +85,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  // Validate the project folder
-  await validate()
-
   // Check node binaries, download them if necessary
   await checkBinaries()
+
+  // Validate the project folder
+  await validate()
 
   // watch for changes in node_modules
   watch()
