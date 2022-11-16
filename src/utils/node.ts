@@ -3,12 +3,14 @@ import path from 'path';
 import semver from 'semver'
 import rimraf from 'rimraf'
 import fetch from 'node-fetch';
+import Progress from 'node-fetch-progress';
 import tar from 'tar-fs'
 import gunzip from 'gunzip-maybe';
 import future from 'fp-future';
 import { getGlobalBinPath, getNodeBinPath } from './path'
 import { log } from './log';
 import { getPackageJson } from './pkg';
+import { sleep } from './sleep';
 
 /**
  * Returns the node version that will be used to run binaries
@@ -183,7 +185,9 @@ export function getDistribution() {
  * @param distribution 
  */
 async function install(distribution: string) {
-  log(`Installing ${distribution}...`)
+  const binPath = getGlobalBinPath()
+  log(`Distribution: ${distribution}`)
+  log(`Path: ${binPath}`)
   const url = `https://nodejs.org/dist/v${extractVersion(distribution)}/${distribution}.tar.gz`
   const resp = await fetch(url)
   if (!resp.ok) {
@@ -193,14 +197,28 @@ async function install(distribution: string) {
     } catch (error) {
       console.warn(`Could not parse response body as text`)
     }
+    log(error)
     throw new Error(error)
   }
+  const progress = new Progress(resp)
+  let lastPercentage = 0
+  progress.on('progress', data => {
+    const percentage = (data.done / data.total * 100)
+    // Report progress every 5% or more
+    if (!lastPercentage || percentage > lastPercentage + 5) {
+      const line = `Installing... ${percentage.toFixed(0)}%`
+      log(line)
+      lastPercentage = percentage
+    }
+  })
   const save = future()
-  const stream = tar.extract(getGlobalBinPath(), {})
+  const stream = tar.extract(binPath)
   resp.body.pipe(gunzip()).pipe(stream)
   resp.body.on('end', save.resolve)
   stream.on('error', save.reject)
   await save
+  log('Installing... 100%')
+  await sleep(1000)
   log('Done!')
 }
 

@@ -27,7 +27,7 @@ export async function startServer() {
 
     const port = await getPort(ServerName.DCLPreview)
 
-    log(`DCLPreview: preview server started on port ${port}`)
+    log(`DCLPreview: http server listening on port ${port}`)
 
     child = bin('decentraland', 'dcl', [
       'start',
@@ -46,7 +46,7 @@ export async function startServer() {
 
     child.process.on('close', (code) => {
       if (code !== null) {
-        log(`DCLPreview: closing server with status code ${code}`)
+        log(`DCLPreview: http server closed with status code ${code}`)
       }
       child = null
     })
