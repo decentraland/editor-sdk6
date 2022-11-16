@@ -1,5 +1,4 @@
-import { log } from './log'
-import { getLocalBinPath } from './path'
+import { getModuleBinPath, getNodeBinPath } from './path'
 import { spawn, SpawnOptions } from './spawn'
 
 /**
@@ -16,6 +15,7 @@ export function bin(
   args: string[] = [],
   options: SpawnOptions = {}
 ) {
-  const path = getLocalBinPath(moduleName, command)
-  return spawn(path, args, options)
+  const node = getNodeBinPath().replace(/\s/g, "\\ ") // fix whitespaces 
+  const bin = getModuleBinPath(moduleName, command)
+  return spawn(node, [bin, ...args], options)
 }

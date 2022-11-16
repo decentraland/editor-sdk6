@@ -1,9 +1,14 @@
 import * as vscode from 'vscode'
 import path from 'path'
 import fs from 'fs'
+import { getDistribution, } from './node'
+import { getPackageJson } from './pkg'
 
 // Stores path to the extension's directory in the filesystem
 let extensionPath: string | null = null
+
+// Stores path to the extension's global storage in the filesystem
+let globalStoragePath: string | null = null
 
 /**
  * Set the path to the extension's directory in the filesystem
@@ -32,11 +37,37 @@ export function getExtensionPath() {
 }
 
 /**
+ * Set the path to the extension's directory in the filesystem
+ * @param path Path to the extension
+ */
+export function setGlobalStoragePath(path: string | null) {
+  console.log(
+    path == null
+      ? 'Global storage path has been unset'
+      : `Global storage has been set to "${path}".`
+  )
+  globalStoragePath = path
+}
+
+/**
+ * Returns the path to the global storage in the filesystem
+ * @returns Path to the global storage
+ */
+export function getGlobalStoragePath() {
+  if (globalStoragePath == null) {
+    throw new Error(
+      'Global storage path has not been set, probably because the extension has not been activated yet.'
+    )
+  }
+  return globalStoragePath
+}
+
+/**
  * Return the path to an extension's dependency binary in the filesystem
  * @param moduleName The name of the module
  * @returns The path to the binary
  */
-export function getLocalBinPath(moduleName: string, command: string) {
+export function getModuleBinPath(moduleName: string, command: string) {
   const packageJson = getPackageJson(moduleName)
   if (!packageJson.bin) {
     throw new Error(`the module "${moduleName}" does not have a binary`)
@@ -109,25 +140,20 @@ export function hasNodeModules() {
     return false
   }
 }
+
 /**
- * Return the package json of a given module
- * @param moduleName The name of the module
- * @returns The package json object
+ * Helper to get the absolute path to the directory where the extension stores binaries
+ * @returns The path to the node bin
  */
-export function getPackageJson(moduleName: string): {
-  bin?: { [command: string]: string }
-} {
-  const packageJsonPath = path.join(
-    getExtensionPath(),
-    './node_modules',
-    moduleName,
-    'package.json'
-  )
-  try {
-    return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-  } catch (error: any) {
-    throw new Error(
-      `Could not get package.json for module "${moduleName}": ${error.message}`
-    )
-  }
+export function getGlobalBinPath() {
+  return `${getGlobalStoragePath()}/bin`
+}
+
+
+/**
+ * Helper to get the absolute path to the node binaries installed
+ * @returns The path to the node bin
+ */
+export function getNodeBinPath() {
+  return `${getGlobalBinPath()}/${getDistribution()}/bin/node`
 }
