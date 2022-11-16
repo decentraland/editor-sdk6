@@ -11,10 +11,9 @@ import { log } from '../utils/log'
 let child: SpanwedChild | null = null
 let panel: vscode.WebviewPanel | null = null
 
-function kill() {
-  if (child && !child.process.killed) {
-    log('DCLDeploy: killing child process')
-    child.process.kill()
+async function kill() {
+  if (child && child.alive()) {
+    await child.kill()
     child = null
   }
   if (panel) {

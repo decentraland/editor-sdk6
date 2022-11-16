@@ -4,7 +4,7 @@ import { sleep } from '../utils/sleep'
 
 export async function restart() {
   log(`Restarting DCLPreview server...`)
-  stopServer()
+  await stopServer()
   await sleep(1000)
   await startServer()
 }

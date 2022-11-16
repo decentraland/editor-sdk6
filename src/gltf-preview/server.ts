@@ -16,7 +16,7 @@ let server: Server | null = null
 
 export async function startServer() {
   if (server) {
-    stopServer()
+    await stopServer()
   }
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()

@@ -16,7 +16,7 @@ export async function startServer() {
 
   try {
     if (child) {
-      stopServer()
+      await stopServer()
     }
 
     if (!hasNodeModules()) {
@@ -43,7 +43,9 @@ export async function startServer() {
     })
 
     child.process.on('close', (code) => {
-      log(`DCLPreview: closing server with status code ${code}`)
+      if (code !== null) {
+        log(`DCLPreview: closing server with status code ${code}`)
+      }
       child = null
     })
 
@@ -58,9 +60,8 @@ export async function startServer() {
 }
 
 export async function stopServer() {
-  if (child && !child.process.killed) {
-    log('DCLPreview: killing process')
-    child.process.kill()
+  if (child && child.alive()) {
+    await child.kill()
   }
   child = null
 }

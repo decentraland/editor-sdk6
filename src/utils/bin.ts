@@ -17,5 +17,5 @@ export function bin(
 ) {
   const node = getNodeBinPath().replace(/\s/g, "\\ ") // fix whitespaces 
   const bin = getModuleBinPath(moduleName, command)
-  return spawn(node, [bin, ...args.filter((arg: string | undefined) => !!arg) as string[]], options)
+  return spawn(`${command}:${args[0]}`, node, [bin, ...args.filter((arg: string | undefined) => !!arg) as string[]], options)
 }
