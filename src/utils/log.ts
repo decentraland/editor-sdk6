@@ -1,4 +1,6 @@
 import * as vscode from 'vscode'
+import { SpanwedChild } from './spawn'
+
 const output = vscode.window.createOutputChannel(`Decentraland`)
 
 /**
@@ -7,4 +9,26 @@ const output = vscode.window.createOutputChannel(`Decentraland`)
  */
 export function log(...messages: string[]) {
   output.appendLine(messages.join(' '))
+}
+
+/**
+ * Utils to bind a spawned process to the output channel
+ */
+export function bind(child: SpanwedChild) {
+  child.on(/.*/, (data) => {
+    if (data) {
+      output.append(data)
+      // focus on errors, but not the ones about outdated packages
+      if (/err/gi.test(data) && !/outdated/gi.test(data)) {
+        focus()
+      }
+    }
+  })
+}
+
+/**
+ * Util to focus the 
+ */
+export function focus() {
+  output.show()
 }

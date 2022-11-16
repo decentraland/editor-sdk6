@@ -2,15 +2,20 @@ import { ChildProcess } from 'child_process'
 import crossSpawn from 'cross-spawn'
 import future from 'fp-future'
 import { Readable } from 'stream'
+import isRunning from 'is-running'
+import { bind, log } from './log'
 import { getCwd } from './path'
 
 export type SpanwedChild = {
+  id: string
   process: ChildProcess
   on: (pattern: RegExp, handler: (data?: string) => ChildReponse) => number
   once: (pattern: RegExp, handler: (data?: string) => ChildReponse) => number
   off: (index: number) => void
   wait: () => Promise<void>
   waitFor: (resolvePattern: RegExp, rejectPattern?: RegExp) => Promise<void>
+  kill: () => Promise<void>
+  alive: () => boolean
 }
 
 export type SpawnOptions = {
@@ -34,6 +39,7 @@ type Matcher = {
  * @returns SpanwedChild
  */
 export function spawn(
+  id: string,
   command: string,
   args: string[],
   options: SpawnOptions = {}
@@ -68,7 +74,11 @@ export function spawn(
   handleStream(child.stdout!)
   handleStream(child.stderr!)
 
+  let killed = false
+  let alive = true
+
   const spawned: SpanwedChild = {
+    id,
     process: child,
     on: (pattern, handler) =>
       matchers.push({ pattern, handler, enabled: true }),
@@ -92,7 +102,53 @@ export function spawn(
           spawned.once(rejectPattern, (data) => reject(new Error(data)))
         }
       }),
+    kill: async () => {
+      log(`${id}: killing process...`)
+      // if child already killed, return
+      if (killed) return
+      killed = true
+
+      // create promise to kill child
+      const promise = future<void>()
+
+      // kill child gracefully
+      child.kill(9)
+
+      // child succesfully killed
+      const die = () => {
+        alive = false
+        clearInterval(interval)
+        clearTimeout(timeout)
+        if (!child.killed) {
+          child.kill()
+        }
+        promise.resolve()
+      }
+
+      // interval to check if child still running and flag it as dead when is not running anymore
+      const interval = setInterval(() => {
+        if (!child.pid || !isRunning(child.pid)) {
+          log(`${id}: gracefully killed`)
+          die()
+        }
+      }, 100)
+
+      // timeout to stop checking if child still running, kil it with fire
+      const timeout = setTimeout(() => {
+        if (alive) {
+          log(`${id}: forcefully killed`)
+          die()
+        }
+      }, 5000)
+
+      // return promise
+      return promise
+    },
+    alive: () => alive
   }
+
+  // bind logs to output channel
+  bind(spawned)
 
   return spawned
 }

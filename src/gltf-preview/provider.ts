@@ -16,14 +16,16 @@ import { getPort, ServerName } from '../utils/port'
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>
 {
-  public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    return vscode.window.registerCustomEditorProvider(
+  public static register(context: vscode.ExtensionContext, disposables: vscode.Disposable[]): vscode.Disposable {
+    const disposable = vscode.window.registerCustomEditorProvider(
       GLTFPreviewEditorProvider.viewType,
       new GLTFPreviewEditorProvider(context),
       {
         supportsMultipleEditorsPerDocument: false,
       }
     )
+    disposables.push(disposable)
+    return disposable
   }
 
   private static readonly viewType = 'decentraland.GLTFPreview'
@@ -33,7 +35,7 @@ export class GLTFPreviewEditorProvider
    */
   private readonly webviews = new WebviewCollection()
 
-  constructor(private readonly _context: vscode.ExtensionContext) {}
+  constructor(private readonly _context: vscode.ExtensionContext) { }
 
   //#region CustomEditorProvider
 

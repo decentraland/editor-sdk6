@@ -2,11 +2,15 @@ import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
 import { Dependency } from './types'
+import { getCwd } from '../utils/path'
 
-export class DependenciesProvider
+// Dependency tree (UI)
+let dependencies: DependenciesProvider | null = null
+
+class DependenciesProvider
   implements vscode.TreeDataProvider<Dependency>
 {
-  constructor(private workspaceRoot: string) {}
+  constructor(private workspaceRoot: string) { }
 
   getTreeItem(element: Dependency): vscode.TreeItem {
     return element
@@ -60,7 +64,7 @@ export class DependenciesProvider
               fs.readFileSync(modulePackageJsonPath, 'utf-8')
             )
             version = pkg.version
-          } catch (error) {}
+          } catch (error) { }
         }
         return new Dependency(
           moduleName,
@@ -71,13 +75,13 @@ export class DependenciesProvider
 
       const deps = packageJson.dependencies
         ? Object.keys(packageJson.dependencies).map((dep) =>
-            toDep(dep, packageJson.dependencies[dep])
-          )
+          toDep(dep, packageJson.dependencies[dep])
+        )
         : []
       const devDeps = packageJson.devDependencies
         ? Object.keys(packageJson.devDependencies).map((dep) =>
-            toDep(dep, packageJson.devDependencies[dep])
-          )
+          toDep(dep, packageJson.devDependencies[dep])
+        )
         : []
       return deps.concat(devDeps)
     } else {
@@ -104,4 +108,24 @@ export class DependenciesProvider
   refresh(): void {
     this._onDidChangeTreeData.fire()
   }
+}
+
+export function createTree() {
+  try {
+    dependencies = new DependenciesProvider(getCwd())
+  } catch (error) {
+    // This will fail if the workbench is in empty state, we just ignore it
+  }
+}
+
+export function refreshTree() {
+  dependencies?.refresh()
+}
+
+export function registerTree(disposables: vscode.Disposable[]) {
+  const disposable = dependencies ? vscode.window.registerTreeDataProvider('dependencies', dependencies) : null
+  if (disposable) {
+    disposables.push(disposable)
+  }
+  return disposable
 }
