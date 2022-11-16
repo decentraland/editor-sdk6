@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { loader } from './loader'
 import { bin } from './bin'
 import { restart } from '../commands/restart'
+import { stopServer } from '../dcl-preview/server'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -14,16 +15,16 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
       dependency
         ? `Installing ${dependency}...`
         : `Installing dependencies...`,
-      () =>
-        bin('npm', 'npm', [
+      async () => {
+        await stopServer()
+        await bin('npm', 'npm', [
           dependency && isLibrary
             ? 'install --save-bundle'
             : 'install',
           dependency,
-        ])
-          .wait()
-          .then(restart) // restart server after installing packages
-      ,
+        ]).wait()
+        await restart() // restart server after installing packages
+      },
       dependency
         ? vscode.ProgressLocation.Window
         : vscode.ProgressLocation.Notification
@@ -41,11 +42,12 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
  * @returns Promise that resolves when the uninstall finishes
  */
 export async function npmUninstall(dependency: string) {
-  return loader(`Uninstalling ${dependency}...`, () =>
-    bin('npm', 'npm', ['uninstall', dependency])
+  return loader(`Uninstalling ${dependency}...`, async () => {
+    await stopServer()
+    await bin('npm', 'npm', ['uninstall', dependency])
       .wait()
-      .then(restart) // restart server after uninstalling packages
-  )
+    await restart() // restart server after uninstalling packages
+  })
 }
 
 export async function warnOutdatedDependency(dependency: string) {

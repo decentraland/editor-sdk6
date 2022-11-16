@@ -18,7 +18,8 @@ export function bind(child: SpanwedChild) {
   child.on(/.*/, (data) => {
     if (data) {
       output.append(data)
-      if (/err/gi.test(data)) {
+      // focus on errors, but not the ones about outdated packages
+      if (/err/gi.test(data) && !/outdated/gi.test(data)) {
         focus()
       }
     }
