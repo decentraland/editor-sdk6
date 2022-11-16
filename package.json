@@ -353,6 +353,7 @@
     "@dcl/schemas": "^5.18.1",
     "@dcl/wearable-preview": "^1.14.0",
     "@types/semver": "^7.3.13",
+    "@types/unzip-stream": "^0.3.1",
     "chokidar": "^3.5.3",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.14.0-20221025200823.commit-2e3f738",
@@ -367,6 +368,7 @@
     "open": "^8.4.0",
     "rimraf": "^3.0.2",
     "semver": "^7.3.8",
-    "tar-fs": "^2.1.1"
+    "tar-fs": "^2.1.1",
+    "unzip-stream": "^0.3.1"
   }
 }

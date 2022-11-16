@@ -21,7 +21,7 @@ export async function startServer() {
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()
   server = app.listen(port, () => {
-    console.info(`GLTFPreview: http server listening on port ${port}`)
+    console.info(`GLTFPreview: http server assigned port is ${port}`)
     promise.resolve()
   })
 

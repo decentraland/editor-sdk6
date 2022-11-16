@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import path from 'path'
 import fs from 'fs'
-import { getDistribution, } from './node'
+import { getDistribution, isWindows, } from './node'
 import { getPackageJson } from './pkg'
 import { log } from './log'
 
@@ -156,7 +156,10 @@ export function getGlobalBinPath() {
  * @returns The path to the node bin
  */
 export function getNodeBinPath() {
-  return `${getGlobalBinPath()}/${getDistribution()}/bin/node`
+  const distribution = getDistribution()
+  const globalBinPath = getGlobalBinPath()
+  let pathToBin = isWindows(distribution) ? `node.exe` : `bin/node`
+  return `${globalBinPath}/${distribution}/${pathToBin}`
 }
 
 /**
