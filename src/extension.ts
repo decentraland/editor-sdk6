@@ -24,14 +24,19 @@ import { ProjectType } from './utils/project'
 import { checkBinaries, resolveVersion, setVersion } from './utils/node'
 import { unwatch, watch } from './utils/watch'
 import { log } from './utils/log'
+import { setContext } from './utils/context'
 
 export async function activate(context: vscode.ExtensionContext) {
+  // Set context
+  setContext(context)
+
   // Set paths
   setExtensionPath(context.extensionUri.fsPath)
   setGlobalStoragePath(context.globalStorageUri.fsPath)
 
   // Set node binary version
   setVersion(await resolveVersion())
+
 
   // create dependency tree
   createTree()

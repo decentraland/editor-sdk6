@@ -3,6 +3,7 @@ import { loader } from './loader'
 import { bin } from './bin'
 import { restart } from '../commands/restart'
 import { stopServer } from '../dcl-preview/server'
+import { getContext } from './context'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -51,10 +52,18 @@ export async function npmUninstall(dependency: string) {
 }
 
 export async function warnOutdatedDependency(dependency: string) {
+  const context = getContext()
+  const storageKey = `ignore:${dependency}`
+  const isIgnored = context.workspaceState.get<boolean>(storageKey)
+  if (isIgnored) {
+    return
+  }
   const update = "Update"
   const ignore = "Ignore"
   const action = await vscode.window.showWarningMessage(`The dependency "${dependency}" is outdated`, update, ignore)
   if (action === update) {
     await npmInstall(`${dependency}@latest`)
+  } else if (action === ignore) {
+    context.workspaceState.update(storageKey, true)
   }
 }
