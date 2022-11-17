@@ -1,4 +1,4 @@
-import { npmInstall, warnOutdatedDependency } from '../utils/npm'
+import { npmInstall, warnDecentralandLibrary, warnOutdatedDependency } from '../utils/npm'
 import { hasNodeModules } from '../utils/path'
 import { getPort, ServerName } from '../utils/port'
 import { bin } from '../utils/bin'
@@ -44,6 +44,14 @@ export async function startServer() {
       }
     })
 
+    child.on(/field \"decentralandLibrary\" is missing/gi, (data) => {
+      const match = /Error in library ((\d|\w|\_|\-)+): field/gi.exec(data!)
+      if (match && match.length > 0) {
+        const dependency = match[1]
+        warnDecentralandLibrary(dependency)
+      }
+    })
+
     child.process.on('close', (code) => {
       if (code !== null) {
         log(`DCLPreview: http server closed with status code ${code}`)
@@ -52,7 +60,14 @@ export async function startServer() {
     })
 
     // Show loader while server is starting
-    loader('Starting server...', async () => child?.waitFor(/server is now running/gi, /error/gi), ProgressLocation.Window)
+    loader(
+      'Starting server...',
+      async () => Promise.race([
+        child?.waitFor(/server is now running/gi, /error/gi),
+        child?.wait()
+      ]),
+      ProgressLocation.Window
+    )
   } catch (error) {
     log('Could not initialize DCLPreview server')
   }
