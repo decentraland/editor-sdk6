@@ -3,6 +3,7 @@ import { loader } from './loader'
 import { bin } from './bin'
 import { restart } from '../commands/restart'
 import { stopServer } from '../dcl-preview/server'
+import { getValue, setValue } from './storage'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -51,10 +52,28 @@ export async function npmUninstall(dependency: string) {
 }
 
 export async function warnOutdatedDependency(dependency: string) {
+
+  const storageKey = `ignore:${dependency}`
+  const isIgnored = getValue<boolean>(storageKey)
+  if (isIgnored) {
+    return
+  }
   const update = "Update"
   const ignore = "Ignore"
   const action = await vscode.window.showWarningMessage(`The dependency "${dependency}" is outdated`, update, ignore)
   if (action === update) {
     await npmInstall(`${dependency}@latest`)
+  } else if (action === ignore) {
+    setValue(storageKey, true)
+  }
+}
+
+export async function warnDecentralandLibrary(dependency: string) {
+  const reinstall = "Re-install"
+  const remove = "Remove"
+  const action = await vscode.window.showErrorMessage(`The dependency "${dependency}" is not a valid Decentraland library. You can re-install it as non-library, or remove it.`, reinstall, remove)
+  await npmUninstall(dependency)
+  if (action === reinstall) {
+    await npmInstall(dependency)
   }
 }

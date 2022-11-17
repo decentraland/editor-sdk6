@@ -24,19 +24,26 @@ import { ProjectType } from './utils/project'
 import { checkBinaries, resolveVersion, setVersion } from './utils/node'
 import { unwatch, watch } from './utils/watch'
 import { log } from './utils/log'
+import { setContext } from './utils/context'
 
 export async function activate(context: vscode.ExtensionContext) {
+  // Set context
+  setContext(context)
+
   // Set paths
   setExtensionPath(context.extensionUri.fsPath)
   setGlobalStoragePath(context.globalStorageUri.fsPath)
 
+  // Validate the project folder is a valid DCL project
+  await validate()
+
   // Set node binary version
   setVersion(await resolveVersion())
 
-  // create dependency tree
+  // Create dependency tree
   createTree()
 
-  // helper a command
+  // Helper ro register a command
   const disposables: vscode.Disposable[] = []
   const register = (command: string, callback: (...args: any[]) => any) => disposables.push(vscode.commands.registerCommand(command, callback))
 
@@ -88,8 +95,8 @@ export async function activate(context: vscode.ExtensionContext) {
   // Check node binaries, download them if necessary
   await checkBinaries()
 
-  // Validate the project folder
-  await validate()
+  // Start servers and watchers
+  await boot()
 }
 
 export async function deactivate() {
@@ -100,11 +107,8 @@ export async function deactivate() {
 }
 
 export async function validate() {
-  // Check if it's a valid project
-  const isValid = isDCL()
-
   // Set in context if it is valid project
-  vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isValid)
+  vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
 
   // Set in context if it is an empty folder
   vscode.commands.executeCommand(
@@ -112,7 +116,10 @@ export async function validate() {
     'decentraland.isEmpty',
     isEmpty()
   )
+}
 
+async function boot() {
+  const isValid = isDCL()
   // Start webservers
   try {
     await (isValid

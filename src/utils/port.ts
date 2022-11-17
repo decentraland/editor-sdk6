@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import future from 'fp-future'
 import net, { AddressInfo } from 'net'
 import { sleep } from './sleep'
+import { getScene } from './path'
 
 /**
  * List of all the servers
@@ -66,6 +67,17 @@ export async function getServerUrl(server: ServerName) {
   )
   return url.toString()
 }
+
+/**
+ * Return the params for a given server
+ * @param server The name of the server
+ * @returns The url of that server
+ */
+export function getServerParams(server: ServerName) {
+  const params = server === ServerName.DCLPreview ? `?position=${encodeURI(getScene().scene.base)}` : ''
+  return params
+}
+
 /**
  * Waits for a server to be ready
  * @param server The name of the server

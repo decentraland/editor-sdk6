@@ -3,7 +3,7 @@ import path from 'path'
 import { getExtensionPath } from '../utils/path'
 import { getNonce } from '../utils/webviews'
 import { loader } from '../utils/loader'
-import { getServerUrl, ServerName, waitForServer } from '../utils/port'
+import { getServerParams, getServerUrl, ServerName, waitForServer } from '../utils/port'
 
 export async function start() {
   const url = await getServerUrl(ServerName.DCLPreview)
@@ -36,7 +36,7 @@ export async function start() {
     url,
     `<iframe
       id="dcl-preview"
-      src="${url}"
+      src="${url}${getServerParams(ServerName.DCLPreview)}"
       width="100%"
       height="100%"
       frameBorder="0"
