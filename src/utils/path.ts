@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import path from 'path'
 import fs from 'fs'
+import { Scene } from '@dcl/schemas'
 import { getDistribution, isWindows, } from './node'
 import { getPackageJson } from './pkg'
 import { log } from './log'
@@ -101,13 +102,20 @@ export function getCwd() {
 }
 
 /**
+ * Get scene json
+ */
+export function getScene() {
+  const sceneJsonPath = path.join(getCwd(), 'scene.json')
+  const scene = fs.readFileSync(sceneJsonPath, 'utf8')
+  return JSON.parse(scene) as Scene
+}
+
+/**
  * Returns whether or not the workspace's current working directory is a decentraland project or not
  */
 export function isDCL() {
   try {
-    const sceneJsonPath = path.join(getCwd(), 'scene.json')
-    const scene = fs.readFileSync(sceneJsonPath, 'utf8')
-    JSON.parse(scene)
+    getScene()
     return true
   } catch (error) {
     return false
