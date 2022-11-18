@@ -1,17 +1,18 @@
 import fs from 'fs'
-import path from 'path';
+import path from 'path'
 import semver from 'semver'
 import rimraf from 'rimraf'
-import fetch from 'node-fetch';
-import Progress from 'node-fetch-progress';
+import cmdShim from 'cmd-shim'
+import fetch from 'node-fetch'
+import Progress from 'node-fetch-progress'
 import tar from 'tar-fs'
 import zip from 'unzip-stream'
-import gunzip from 'gunzip-maybe';
+import gunzip from 'gunzip-maybe'
 import future from 'fp-future';
-import { getGlobalBinPath, getNodeBinPath } from './path'
-import { log } from './log';
-import { getPackageJson } from './pkg';
-import { sleep } from './sleep';
+import { getGlobalBinPath, getNodeBinPath, getNodeCmdPath } from './path'
+import { log } from './log'
+import { getPackageJson } from './pkg'
+import { sleep } from './sleep'
 
 /**
  * Returns the node version that will be used to run binaries
@@ -282,14 +283,49 @@ export async function checkBinaries() {
       fs.mkdirSync(globalBinPath, { recursive: true })
     }
 
-    // Uninstall older distributions
+    // Uninstall and unlink older distributions
     const distributions = await getInstalledDistributions()
     for (const distribution of distributions) {
       await uninstall(distribution)
+    }
+    if (distributions.length > 0) {
+      await unlink()
     }
 
     // Install the current distribution
     const distribution = getDistribution()
     await install(distribution)
   }
+
+  if (!isLinked()) {
+    await link()
+  }
+}
+
+async function link() {
+  const cmdPath = getNodeCmdPath()
+  const binPath = getNodeBinPath()
+  if (process.platform === "win32") {
+    log("Linking distribution using cmd-shim (win)...")
+    cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
+  } else {
+    log("Linking distribution using symlink (unix)...")
+    fs.symlinkSync(binPath, cmdPath)
+  }
+  log("Link from:", binPath)
+  log("Link to:", cmdPath)
+  log("Done!")
+}
+
+async function unlink() {
+  const promise = future<void>()
+  const cmdPath = getNodeCmdPath()
+  log(`Unlinking ${cmdPath}`)
+  rimraf(cmdPath, error => error ? promise.reject(error) : promise.resolve())
+  await promise
+  log(`Done!`)
+}
+
+function isLinked() {
+  return fs.existsSync(getNodeCmdPath())
 }

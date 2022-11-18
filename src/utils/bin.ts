@@ -1,4 +1,4 @@
-import { escapeWhiteSpaces, getModuleBinPath, getNodeBinPath } from './path'
+import { escapeWhiteSpaces, getModuleBinPath, getNodeCmdPath } from './path'
 import { spawn, SpawnOptions } from './spawn'
 
 /**
@@ -15,7 +15,7 @@ export function bin(
   args: (string | undefined)[] = [],
   options: SpawnOptions = {}
 ) {
-  const node = escapeWhiteSpaces(getNodeBinPath())
+  const node = escapeWhiteSpaces(getNodeCmdPath())
   const bin = getModuleBinPath(moduleName, command)
   return spawn(`${command} ${args[0]}`, node, [bin, ...args.filter((arg: string | undefined) => !!arg) as string[]], options)
 }

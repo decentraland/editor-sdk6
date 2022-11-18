@@ -353,9 +353,11 @@
   "dependencies": {
     "@dcl/schemas": "^5.18.1",
     "@dcl/wearable-preview": "^1.14.0",
+    "@types/cmd-shim": "^5.0.0",
     "@types/semver": "^7.3.13",
     "@types/unzip-stream": "^0.3.1",
     "chokidar": "^3.5.3",
+    "cmd-shim": "^6.0.0",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.13.0",
     "decentraland-ecs": "^6.11.11",

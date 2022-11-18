@@ -160,14 +160,23 @@ export function getGlobalBinPath() {
 
 
 /**
- * Helper to get the absolute path to the node binaries installed
+ * Helper to get the absolute path to the installed node binaries
  * @returns The path to the node bin
  */
 export function getNodeBinPath() {
   const distribution = getDistribution()
   const globalBinPath = getGlobalBinPath()
-  let pathToBin = isWindows(distribution) ? `node.exe` : `bin/node`
+  const pathToBin = isWindows(distribution) ? `node.exe` : `bin/node`
   return `${globalBinPath}/${distribution}/${pathToBin}`
+}
+
+/**
+ * Helper to get the absolute path to the node binaries installed
+ * @returns The path to the node bin
+ */
+export function getNodeCmdPath() {
+  const cmd = process.platform === "win32" ? `node.cmd` : `node`
+  return `${getGlobalStoragePath()}/${cmd}`
 }
 
 /**
