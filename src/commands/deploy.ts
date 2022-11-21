@@ -61,11 +61,8 @@ export async function deploy(...args: string[]) {
   let isLoaded = false
   child.wait().catch((error) => {
     if (!isLoaded) {
-      vscode.window.showErrorMessage(
-        error instanceof Error ? error.message : error.toString()
-      )
       kill()
-      return
+      throw new Error(error instanceof Error ? error.message : error.toString())
     } else {
       log('DCLDeploy: main promise failed, but server was already up')
     }
@@ -96,9 +93,7 @@ export async function deploy(...args: string[]) {
   } catch (error) {
     kill()
     if (!didDispose) {
-      vscode.window.showErrorMessage(
-        'Something went wrong opening publish screen'
-      )
+      throw new Error('Something went wrong opening publish screen')
     }
     return
   }
@@ -154,12 +149,12 @@ function getHtml(webview: vscode.Webview, url: string, content: string) {
 }
 
 function handleDeploymentError(error: string) {
+  kill()
   if (/address does not have access/gi.test(error)) {
-    vscode.window.showErrorMessage(
+    throw new Error(
       "You don't have permission to publish on the parcels selected"
     )
   } else {
-    vscode.window.showErrorMessage(error)
+    throw new Error(error)
   }
-  kill()
 }
