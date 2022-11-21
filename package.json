@@ -19,6 +19,7 @@
     "Extension Packs"
   ],
   "activationEvents": [
+    "onDebug",
     "onView:decentraland",
     "onView:dependencies",
     "onCustomEditor:decentraland.GLTFPreview",
@@ -163,6 +164,11 @@
         "category": "Decentraland"
       },
       {
+        "command": "decentraland.commands.getDebugURL",
+        "title": "Get Debug URL",
+        "category": "Decentraland"
+      },
+      {
         "command": "decentraland.commands.restart",
         "title": "Restart Server",
         "icon": "$(debug-restart)",
@@ -193,6 +199,10 @@
         },
         {
           "command": "dependencies.commands.update",
+          "when": "false"
+        },
+        {
+          "command": "decentraland.commands.getDebugURL",
           "when": "false"
         }
       ],
@@ -318,6 +328,29 @@
               "onLink:https://docs.decentraland.org"
             ],
             "when": "workbenchState != empty"
+          }
+        ]
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "typescript"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "decentraland",
+        "languages": [
+          "typescript"
+        ],
+        "label": "Decentraland",
+        "initialConfigurations": [
+          {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Run",
+            "url": "${command:decentraland.commands.getDebugURL}",
+            "webRoot": "${workspaceFolder}/src"
           }
         ]
       }
