@@ -3,7 +3,7 @@ import { loader } from './loader'
 import { bin } from './bin'
 import { restart } from '../commands/restart'
 import { stopServer } from '../dcl-preview/server'
-import { getValue, setValue } from './storage'
+import { getLocalValue, setLocalValue } from './storage'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -13,15 +13,11 @@ import { getValue, setValue } from './storage'
 export async function npmInstall(dependency?: string, isLibrary = false) {
   try {
     return loader(
-      dependency
-        ? `Installing ${dependency}...`
-        : `Installing dependencies...`,
+      dependency ? `Installing ${dependency}...` : `Installing dependencies...`,
       async () => {
         await stopServer()
         await bin('npm', 'npm', [
-          dependency && isLibrary
-            ? 'install --save-bundle'
-            : 'install',
+          dependency && isLibrary ? 'install --save-bundle' : 'install',
           dependency,
         ]).wait()
         await restart() // restart server after installing packages
@@ -31,9 +27,7 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
         : vscode.ProgressLocation.Notification
     )
   } catch (error) {
-    vscode.window.showErrorMessage(
-      `Error installing ${dependency || 'dependencies'}`
-    )
+    throw new Error(`Error installing ${dependency || 'dependencies'}`)
   }
 }
 
@@ -45,33 +39,39 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
 export async function npmUninstall(dependency: string) {
   return loader(`Uninstalling ${dependency}...`, async () => {
     await stopServer()
-    await bin('npm', 'npm', ['uninstall', dependency])
-      .wait()
+    await bin('npm', 'npm', ['uninstall', dependency]).wait()
     await restart() // restart server after uninstalling packages
   })
 }
 
 export async function warnOutdatedDependency(dependency: string) {
-
   const storageKey = `ignore:${dependency}`
-  const isIgnored = getValue<boolean>(storageKey)
+  const isIgnored = getLocalValue<boolean>(storageKey)
   if (isIgnored) {
     return
   }
-  const update = "Update"
-  const ignore = "Ignore"
-  const action = await vscode.window.showWarningMessage(`The dependency "${dependency}" is outdated`, update, ignore)
+  const update = 'Update'
+  const ignore = 'Ignore'
+  const action = await vscode.window.showWarningMessage(
+    `The dependency "${dependency}" is outdated`,
+    update,
+    ignore
+  )
   if (action === update) {
     await npmInstall(`${dependency}@latest`)
   } else if (action === ignore) {
-    setValue(storageKey, true)
+    setLocalValue(storageKey, true)
   }
 }
 
 export async function warnDecentralandLibrary(dependency: string) {
-  const reinstall = "Re-install"
-  const remove = "Remove"
-  const action = await vscode.window.showErrorMessage(`The dependency "${dependency}" is not a valid Decentraland library. You can re-install it as non-library, or remove it.`, reinstall, remove)
+  const reinstall = 'Re-install'
+  const remove = 'Remove'
+  const action = await vscode.window.showErrorMessage(
+    `The dependency "${dependency}" is not a valid Decentraland library. You can re-install it as non-library, or remove it.`,
+    reinstall,
+    remove
+  )
   await npmUninstall(dependency)
   if (action === reinstall) {
     await npmInstall(dependency)

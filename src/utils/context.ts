@@ -1,11 +1,11 @@
-import { ExtensionContext } from "vscode";
-import { log } from "./log";
+import { ExtensionContext } from 'vscode'
+import { log } from './log'
 
 let context: ExtensionContext | null = null
 
 export function setContext(_context: ExtensionContext) {
   context = _context
-  log("Extension context has been set")
+  log('Extension context has been set')
 }
 
 export function getContext() {

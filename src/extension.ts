@@ -31,6 +31,8 @@ import { checkBinaries, resolveVersion, setVersion } from './utils/node'
 import { unwatch, watch } from './utils/watch'
 import { log } from './utils/log'
 import { setContext } from './utils/context'
+import { isError } from './utils/error'
+import { initAnalytics, track } from './utils/analytics'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set context
@@ -43,6 +45,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // Validate the project folder is a valid DCL project
   await validate()
 
+  // Initialize analytics
+  initAnalytics(context.extensionMode)
+
   // Set node binary version
   setVersion(await resolveVersion())
 
@@ -51,8 +56,29 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Helper ro register a command
   const disposables: vscode.Disposable[] = []
-  const register = (command: string, callback: (...args: any[]) => any) =>
-    disposables.push(vscode.commands.registerCommand(command, callback))
+  const registerCommand = (
+    command: string,
+    callback: (...args: any[]) => any
+  ) => {
+    const wrapper = async (...args: any[]) => {
+      track(`${command}:request`)
+      try {
+        await callback(...args)
+        track(`${command}:success`)
+      } catch (error) {
+        if (isError(error)) {
+          vscode.window.showErrorMessage(error.message)
+          track(`${command}:error`, { message: error.message })
+        } else {
+          vscode.window.showErrorMessage(
+            `Something went wrong running command "${command}"`
+          )
+          track(`${command}:error`)
+        }
+      }
+    }
+    disposables.push(vscode.commands.registerCommand(command, wrapper))
+  }
 
   // Register GLTF preview custom editor
   GLTFPreviewEditorProvider.register(context, disposables)
@@ -72,15 +98,21 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   // Decentraland Commands
-  register('decentraland.commands.init', () => init().then(validate))
-  register('decentraland.commands.update', () => npmInstall())
-  register('decentraland.commands.install', () => install())
-  register('decentraland.commands.uninstall', () => uninstall())
-  register('decentraland.commands.start', () => start())
-  register('decentraland.commands.getDebugURL', async () => `${await getServerUrl(ServerName.DCLPreview)}${await getServerParams(ServerName.DCLPreview)}`)
-  register('decentraland.commands.restart', () => restart())
-  register('decentraland.commands.deploy', () => deploy())
-  register('decentraland.commands.deployCustom', async () =>
+  registerCommand('decentraland.commands.init', () => init().then(validate))
+  registerCommand('decentraland.commands.update', () => npmInstall())
+  registerCommand('decentraland.commands.install', () => install())
+  registerCommand('decentraland.commands.uninstall', () => uninstall())
+  registerCommand('decentraland.commands.start', () => start())
+  registerCommand(
+    'decentraland.commands.getDebugURL',
+    async () =>
+      `${await getServerUrl(ServerName.DCLPreview)}${await getServerParams(
+        ServerName.DCLPreview
+      )}`
+  )
+  registerCommand('decentraland.commands.restart', () => restart())
+  registerCommand('decentraland.commands.deploy', () => deploy())
+  registerCommand('decentraland.commands.deployCustom', async () =>
     deploy(
       `--target ${await vscode.window.showInputBox({
         title: 'Deploy to custom Catalyst',
@@ -89,27 +121,27 @@ export async function activate(context: vscode.ExtensionContext) {
       })}`
     )
   )
-  register('decentraland.commands.browser.run', () =>
+  registerCommand('decentraland.commands.browser.run', () =>
     browser(ServerName.DCLPreview)
   )
-  register('decentraland.commands.browser.deploy', () =>
+  registerCommand('decentraland.commands.browser.deploy', () =>
     browser(ServerName.DCLDeploy)
   )
 
   // Dependencies
   registerTree(disposables)
-  register('dependencies.commands.delete', (node: Dependency) =>
+  registerCommand('dependencies.commands.delete', (node: Dependency) =>
     npmUninstall(node.label)
   )
-  register('dependencies.commands.update', (node: Dependency) =>
+  registerCommand('dependencies.commands.update', (node: Dependency) =>
     npmInstall(`${node.label}@latest`)
   )
 
   // Walkthrough
-  register('walkthrough.createProject', () =>
+  registerCommand('walkthrough.createProject', () =>
     init(ProjectType.SCENE).then(validate)
   )
-  register('walkthrough.viewCode', () => {
+  registerCommand('walkthrough.viewCode', () => {
     vscode.commands.executeCommand(
       'vscode.openFolder',
       vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')

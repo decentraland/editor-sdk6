@@ -11,8 +11,8 @@ export async function init(type?: ProjectType) {
     type: ProjectType
     name: string
   } | null = type
-      ? options.find((option) => option.type === type) || null
-      : null
+    ? options.find((option) => option.type === type) || null
+    : null
 
   if (!option) {
     const selected = await vscode.window.showQuickPick(
@@ -57,13 +57,13 @@ export async function init(type?: ProjectType) {
         )
         const didSelect = selected === option
         if (didSelect) {
-          vscode.commands.executeCommand('vscode.openFolder')
+          await vscode.commands.executeCommand('vscode.openFolder')
         }
       } else {
-        vscode.window.showErrorMessage(error.message)
+        throw new Error(error.message)
       }
     } else {
-      vscode.window.showErrorMessage('Could not create project')
+      throw new Error('Could not create project')
     }
     return
   }
