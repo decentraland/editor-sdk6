@@ -312,8 +312,8 @@ async function link() {
     log("Linking distribution using symlink (unix)...")
     fs.symlinkSync(binPath, cmdPath)
   }
-  log("Link from:", binPath)
-  log("Link to:", cmdPath)
+  log("Link from:", cmdPath)
+  log("Link to:", binPath)
   log("Done!")
 }
 
