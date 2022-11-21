@@ -12,10 +12,12 @@ export function initAnalytics(mode: vscode.ExtensionMode) {
     case vscode.ExtensionMode.Production: {
       log(`Extension mode: prd`)
       analytics = new Analytics('KGh0HDHgMmWljxg72wARAUPlG2rjhr5h')
+      break
     }
     case vscode.ExtensionMode.Development: {
       log(`Extension mode: dev`)
       analytics = new Analytics('8CZJcrF0pIBWikj3IEpZqxO60Z5WtPvH')
+      break
     }
     default:
     // Ignore others like testing env
