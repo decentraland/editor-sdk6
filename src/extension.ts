@@ -57,10 +57,14 @@ export async function activate(context: vscode.ExtensionContext) {
   // Register GLTF preview custom editor
   GLTFPreviewEditorProvider.register(context, disposables)
 
+  // Setup debugger
   vscode.debug.registerDebugConfigurationProvider(
     'decentraland',
     {
       resolveDebugConfiguration() {
+        if (!isDCL()) {
+          throw new Error(`The current workspace is not a Decentraland project`)
+        }
         return null
       },
     },
