@@ -12,11 +12,15 @@ import {
 } from './types/webview-message'
 import { WebviewCollection, getNonce } from '../utils/webviews'
 import { getPort, ServerName } from '../utils/port'
+import { track } from '../utils/analytics'
 
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>
 {
-  public static register(context: vscode.ExtensionContext, disposables: vscode.Disposable[]): vscode.Disposable {
+  public static register(
+    context: vscode.ExtensionContext,
+    disposables: vscode.Disposable[]
+  ): vscode.Disposable {
     const disposable = vscode.window.registerCustomEditorProvider(
       GLTFPreviewEditorProvider.viewType,
       new GLTFPreviewEditorProvider(context),
@@ -35,7 +39,7 @@ export class GLTFPreviewEditorProvider
    */
   private readonly webviews = new WebviewCollection()
 
-  constructor(private readonly _context: vscode.ExtensionContext) { }
+  constructor(private readonly _context: vscode.ExtensionContext) {}
 
   //#region CustomEditorProvider
 
@@ -45,7 +49,7 @@ export class GLTFPreviewEditorProvider
     _token: vscode.CancellationToken
   ): Promise<GLTFPreviewDocument> {
     const document: GLTFPreviewDocument = await GLTFPreviewDocument.create(uri)
-
+    track(`gltf_preview.open`)
     return document
   }
 
