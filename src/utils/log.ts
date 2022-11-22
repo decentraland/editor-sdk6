@@ -63,7 +63,7 @@ export function bind(child: SpanwedChild) {
 }
 
 /**
- * Util to focus the 
+ * Util to focus the
  */
 export function focus() {
   output.show()

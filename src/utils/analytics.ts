@@ -1,8 +1,8 @@
 import * as vscode from 'vscode'
+import { uuid } from 'uuidv4'
 import Analytics from 'analytics-node'
 import { log } from './log'
 import { getGlobalValue, setGlobalValue } from './storage'
-import { uuid } from 'uuidv4'
 
 let analytics: Analytics | null
 const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics-user-id'
@@ -24,8 +24,10 @@ export function initAnalytics(mode: vscode.ExtensionMode) {
   }
   getAnalytics().identify({
     userId: getUserId(),
-    platform: process.platform,
-    arch: process.arch,
+    traits: {
+      platform: process.platform,
+      arch: process.arch,
+    },
   })
 }
 
