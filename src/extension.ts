@@ -63,8 +63,9 @@ export async function activate(context: vscode.ExtensionContext) {
     const wrapper = async (...args: any[]) => {
       track(`${command}:request`)
       try {
-        await callback(...args)
+        const result = await callback(...args)
         track(`${command}:success`)
+        return result
       } catch (error) {
         if (isError(error)) {
           vscode.window.showErrorMessage(error.message)
