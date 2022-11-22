@@ -348,7 +348,7 @@
           {
             "type": "chrome",
             "request": "launch",
-            "name": "Run",
+            "name": "Debug",
             "url": "${command:decentraland.commands.getDebugURL}",
             "webRoot": "${workspaceFolder}/src"
           }
