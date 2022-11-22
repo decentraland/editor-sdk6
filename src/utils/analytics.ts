@@ -22,7 +22,11 @@ export function initAnalytics(mode: vscode.ExtensionMode) {
     default:
     // Ignore others like testing env
   }
-  getAnalytics().identify({ userId: getUserId() })
+  getAnalytics().identify({
+    userId: getUserId(),
+    platform: process.platform,
+    arch: process.arch,
+  })
 }
 
 export function getUserId() {
@@ -46,7 +50,7 @@ export function getAnalytics() {
 
 export function track(
   event: string,
-  properties?: Record<string, string | number | boolean>
+  properties?: Record<string, string | number | boolean | null | undefined>
 ) {
   getAnalytics().track(
     { event, properties, userId: getUserId() },

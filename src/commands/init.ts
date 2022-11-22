@@ -3,6 +3,7 @@ import { loader } from '../utils/loader'
 import { npmInstall } from '../utils/npm'
 import { getTypeOptions, ProjectType } from '../utils/project'
 import { bin } from '../utils/bin'
+import { track } from '../utils/analytics'
 
 export async function init(type?: ProjectType) {
   const options = getTypeOptions()
@@ -29,6 +30,8 @@ export async function init(type?: ProjectType) {
 
     option = options.find((option) => option.name === selected)!
   }
+
+  track(`decentraland.commands.init:select_project_type`, { type: option.type })
 
   const child = bin('decentraland', 'dcl', [
     'init',
