@@ -4,6 +4,7 @@ import { bin } from './bin'
 import { restart } from '../commands/restart'
 import { stopServer } from '../dcl-preview/server'
 import { getLocalValue, setLocalValue } from './storage'
+import { track } from './analytics'
 
 /**
  * Installs a list of npm packages, or install all dependencies if no list is provided
@@ -16,6 +17,7 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
       dependency ? `Installing ${dependency}...` : `Installing dependencies...`,
       async () => {
         await stopServer()
+        track(`npm.install`, { dependency: dependency || null })
         await bin('npm', 'npm', [
           dependency && isLibrary ? 'install --save-bundle' : 'install',
           dependency,
@@ -39,6 +41,7 @@ export async function npmInstall(dependency?: string, isLibrary = false) {
 export async function npmUninstall(dependency: string) {
   return loader(`Uninstalling ${dependency}...`, async () => {
     await stopServer()
+    track(`npm.uninstall`, { dependency })
     await bin('npm', 'npm', ['uninstall', dependency]).wait()
     await restart() // restart server after uninstalling packages
   })
@@ -52,6 +55,7 @@ export async function warnOutdatedDependency(dependency: string) {
   }
   const update = 'Update'
   const ignore = 'Ignore'
+  track(`npm.warn_outdated_dependency:show`)
   const action = await vscode.window.showWarningMessage(
     `The dependency "${dependency}" is outdated`,
     update,
@@ -59,14 +63,17 @@ export async function warnOutdatedDependency(dependency: string) {
   )
   if (action === update) {
     await npmInstall(`${dependency}@latest`)
+    track(`npm.warn_outdated_dependency:update`)
   } else if (action === ignore) {
     setLocalValue(storageKey, true)
+    track(`npm.warn_outdated_dependency:ignore`)
   }
 }
 
 export async function warnDecentralandLibrary(dependency: string) {
   const reinstall = 'Re-install'
   const remove = 'Remove'
+  track(`npm.warn_decentraland_library:show`)
   const action = await vscode.window.showErrorMessage(
     `The dependency "${dependency}" is not a valid Decentraland library. You can re-install it as non-library, or remove it.`,
     reinstall,
@@ -75,5 +82,8 @@ export async function warnDecentralandLibrary(dependency: string) {
   await npmUninstall(dependency)
   if (action === reinstall) {
     await npmInstall(dependency)
+    track(`npm.warn_decentraland_library:reinstall`)
+  } else {
+    track(`npm.warn_decentraland_library:remove`)
   }
 }

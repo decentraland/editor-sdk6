@@ -13,6 +13,8 @@ import { getGlobalBinPath, getNodeBinPath, getNodeCmdPath } from './path'
 import { log } from './log'
 import { getPackageJson } from './pkg'
 import { sleep } from './sleep'
+import { track } from './analytics'
+import { isError } from './error'
 
 /**
  * Returns the node version that will be used to run binaries
@@ -233,49 +235,58 @@ export function isWindows(distribution: string) {
  * @param distribution
  */
 async function install(distribution: string) {
-  const binPath = getGlobalBinPath()
-  const extension = getExtension(distribution)
-  log(`Distribution: ${distribution}`)
-  const url = `https://nodejs.org/dist/v${extractVersion(
-    distribution
-  )}/${distribution}${extension}`
-  log(`Downloading from: ${url}`)
-  log(`Installation directory: ${binPath}`)
-  const resp = await fetch(url)
-  if (!resp.ok) {
-    let error = `Could not download "${distribution}"`
-    try {
-      error += `: ${await resp.text()}`
-    } catch (error) {
-      console.warn(`Could not parse response body as text`)
+  try {
+    track(`node.install:request`, { distribution })
+    const binPath = getGlobalBinPath()
+    const extension = getExtension(distribution)
+    log(`Distribution: ${distribution}`)
+    const url = `https://nodejs.org/dist/v${extractVersion(
+      distribution
+    )}/${distribution}${extension}`
+    log(`Downloading from: ${url}`)
+    log(`Installation directory: ${binPath}`)
+    const resp = await fetch(url)
+    if (!resp.ok) {
+      let error = `Could not download "${distribution}"`
+      try {
+        error += `: ${await resp.text()}`
+      } catch (error) {
+        console.warn(`Could not parse response body as text`)
+      }
+      log(error)
+      throw new Error(error)
     }
-    log(error)
-    throw new Error(error)
+    const progress = new Progress(resp)
+    let lastPercentage = 0
+    progress.on('progress', (data) => {
+      const percentage = (data.done / data.total) * 100
+      // Report progress every 5% or more
+      if (!lastPercentage || percentage > lastPercentage + 5) {
+        const line = `Installing... ${percentage.toFixed(0)}%`
+        log(line)
+        lastPercentage = percentage
+      }
+    })
+    const save = future()
+    const stream =
+      extension === '.tar.gz'
+        ? tar.extract(binPath)
+        : zip.Extract({ path: binPath })
+    resp.body.pipe(gunzip()).pipe(stream)
+    resp.body.on('end', save.resolve)
+    stream.on('error', save.reject)
+    await save
+    log('Installing... 100%')
+    await sleep(1000)
+    log('Done!')
+    log(`Node binaries installed: ${getNodeBinPath()}`)
+    track(`node.install:success`, { distribution })
+  } catch (error) {
+    track(`node.install:error`, {
+      message: isError(error) ? error.message : 'unkown error',
+    })
+    throw error
   }
-  const progress = new Progress(resp)
-  let lastPercentage = 0
-  progress.on('progress', (data) => {
-    const percentage = (data.done / data.total) * 100
-    // Report progress every 5% or more
-    if (!lastPercentage || percentage > lastPercentage + 5) {
-      const line = `Installing... ${percentage.toFixed(0)}%`
-      log(line)
-      lastPercentage = percentage
-    }
-  })
-  const save = future()
-  const stream =
-    extension === '.tar.gz'
-      ? tar.extract(binPath)
-      : zip.Extract({ path: binPath })
-  resp.body.pipe(gunzip()).pipe(stream)
-  resp.body.on('end', save.resolve)
-  stream.on('error', save.reject)
-  await save
-  log('Installing... 100%')
-  await sleep(1000)
-  log('Done!')
-  log(`Node binaries installed: ${getNodeBinPath()}`)
 }
 
 /**
@@ -283,12 +294,23 @@ async function install(distribution: string) {
  * @param distribution
  */
 async function uninstall(distribution: string) {
-  log(`Uninstalling ${distribution}...`)
-  const directory = path.join(getGlobalBinPath(), distribution)
-  const clear = future<void>()
-  rimraf(directory, (error) => (error ? clear.reject(error) : clear.resolve()))
-  await clear
-  log(`Done!`)
+  try {
+    track(`node.uninstall:request`, { distribution })
+    log(`Uninstalling ${distribution}...`)
+    const directory = path.join(getGlobalBinPath(), distribution)
+    const clear = future<void>()
+    rimraf(directory, (error) =>
+      error ? clear.reject(error) : clear.resolve()
+    )
+    await clear
+    log(`Done!`)
+    track(`node.uninstall:success`, { distribution })
+  } catch (error) {
+    track(`node.uninstall:error`, {
+      message: isError(error) ? error.message : 'unkown error',
+    })
+    throw error
+  }
 }
 
 /**
@@ -296,61 +318,94 @@ async function uninstall(distribution: string) {
  * @returns
  */
 export async function checkBinaries() {
-  const nodeBinPath = getNodeBinPath()
-  const isNodeInstalled = fs.existsSync(nodeBinPath)
-  if (!isNodeInstalled) {
-    log(`The required node binaries are not installed`)
-
-    // Check if global /bin dir exists, if not, creates it
-    const globalBinPath = getGlobalBinPath()
-    const hasBinDir = fs.existsSync(globalBinPath)
-    if (!hasBinDir) {
-      fs.mkdirSync(globalBinPath, { recursive: true })
-    }
-
-    // Uninstall and unlink older distributions
-    const distributions = await getInstalledDistributions()
-    for (const distribution of distributions) {
-      await uninstall(distribution)
-    }
-    if (distributions.length > 0) {
-      await unlink()
-    }
-
-    // Install the current distribution
+  try {
     const distribution = getDistribution()
-    await install(distribution)
-  }
+    const nodeBinPath = getNodeBinPath()
+    const isNodeInstalled = fs.existsSync(nodeBinPath)
+    track(`node.check:request`, {
+      distribution,
+      installed: isNodeInstalled,
+    })
 
-  if (!isLinked()) {
-    await link()
+    if (!isNodeInstalled) {
+      log(`The required node binaries are not installed`)
+
+      // Check if global /bin dir exists, if not, creates it
+      const globalBinPath = getGlobalBinPath()
+      const hasBinDir = fs.existsSync(globalBinPath)
+      if (!hasBinDir) {
+        fs.mkdirSync(globalBinPath, { recursive: true })
+      }
+
+      // Uninstall and unlink older distributions
+      const distributions = await getInstalledDistributions()
+      for (const distribution of distributions) {
+        await uninstall(distribution)
+      }
+      if (distributions.length > 0) {
+        await unlink()
+      }
+
+      // Install the current distribution
+      const distribution = getDistribution()
+      await install(distribution)
+    }
+
+    if (!isLinked()) {
+      await link()
+    }
+
+    track(`node.check:success`, { distribution })
+  } catch (error) {
+    track(`node.check:error`, {
+      message: isError(error) ? error.message : 'unkown error',
+    })
+    throw error
   }
 }
 
 async function link() {
-  const cmdPath = getNodeCmdPath()
-  const binPath = getNodeBinPath()
-  if (process.platform === 'win32') {
-    log('Linking distribution using cmd-shim (win)...')
-    cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
-  } else {
-    log('Linking distribution using symlink (unix)...')
-    fs.symlinkSync(binPath, cmdPath)
+  track(`node.link:request`)
+  try {
+    const cmdPath = getNodeCmdPath()
+    const binPath = getNodeBinPath()
+    if (process.platform === 'win32') {
+      log('Linking distribution using cmd-shim (win)...')
+      cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
+    } else {
+      log('Linking distribution using symlink (unix)...')
+      fs.symlinkSync(binPath, cmdPath)
+    }
+    log('Link from:', cmdPath)
+    log('Link to:', binPath)
+    log('Done!')
+    track(`node.link:success`)
+  } catch (error) {
+    track(`node.link:error`, {
+      message: isError(error) ? error.message : 'unkown error',
+    })
+    throw error
   }
-  log('Link from:', cmdPath)
-  log('Link to:', binPath)
-  log('Done!')
 }
 
 async function unlink() {
-  const promise = future<void>()
-  const cmdPath = getNodeCmdPath()
-  log(`Unlinking ${cmdPath}`)
-  rimraf(cmdPath, (error) =>
-    error ? promise.reject(error) : promise.resolve()
-  )
-  await promise
-  log(`Done!`)
+  track(`node.unlink:request`)
+  try {
+    const promise = future<void>()
+    const cmdPath = getNodeCmdPath()
+    log(`Unlinking ${cmdPath}`)
+    rimraf(cmdPath, (error) =>
+      error ? promise.reject(error) : promise.resolve()
+    )
+    await promise
+    log(`Done!`)
+    track(`node.unlink:success`)
+  } catch (error) {
+    track(`node.unlink:error`, {
+      message: isError(error) ? error.message : 'unkown error',
+    })
+    throw error
+  }
 }
 
 function isLinked() {
