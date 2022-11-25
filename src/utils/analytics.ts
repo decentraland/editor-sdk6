@@ -7,7 +7,11 @@ import { getGlobalValue, setGlobalValue } from './storage'
 let analytics: Analytics | null
 const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics-user-id'
 
-export function initAnalytics(mode: vscode.ExtensionMode) {
+export function activateAnalytics(mode: vscode.ExtensionMode) {
+  if (analytics) {
+    console.warn(`Analytics already activated`)
+    return
+  }
   switch (mode) {
     case vscode.ExtensionMode.Production: {
       log(`Extension mode: prd`)
@@ -54,10 +58,20 @@ export function track(
   event: string,
   properties?: Record<string, string | number | boolean | null | undefined>
 ) {
-  getAnalytics().track(
-    { event, properties, userId: getUserId() },
-    (error) =>
-      error &&
-      console.warn(`Could not track event "${event}": ${error.message}`)
-  )
+  try {
+    getAnalytics().track(
+      { event, properties, userId: getUserId() },
+      (error) =>
+        error &&
+        console.warn(`Could not track event "${event}": ${error.message}`)
+    )
+  } catch (error) {
+    console.warn(`Could not track event "${event}": ${error}`)
+  }
+}
+
+export function deactivateAnalytics() {
+  if (analytics) {
+    analytics = null
+  }
 }

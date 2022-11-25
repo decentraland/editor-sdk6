@@ -32,8 +32,12 @@ import { unwatch, watch } from './utils/watch'
 import { log } from './utils/log'
 import { setContext } from './utils/context'
 import { isError } from './utils/error'
-import { initAnalytics, track } from './utils/analytics'
-import { initRollbar, report } from './utils/rollbar'
+import {
+  activateAnalytics,
+  deactivateAnalytics,
+  track,
+} from './utils/analytics'
+import { activateRollbar, deactivateRollbar, report } from './utils/rollbar'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set context
@@ -47,10 +51,10 @@ export async function activate(context: vscode.ExtensionContext) {
   await validate()
 
   // Initialize analytics
-  initAnalytics(context.extensionMode)
+  activateAnalytics(context.extensionMode)
 
   // Initialize error reporting
-  initRollbar(context.extensionMode)
+  activateRollbar(context.extensionMode)
 
   // Set node binary version
   setVersion(await resolveVersion())
@@ -173,6 +177,10 @@ export async function deactivate() {
   unwatch()
   // Stop  webservers
   await Promise.all([stopGLTFPreview(), stopDCLPreview()])
+  // Deactivate analytics
+  deactivateAnalytics()
+  // Deactivate rror reporting
+  deactivateRollbar()
 }
 
 export async function validate() {

@@ -3,9 +3,10 @@ import { ExtensionMode } from 'vscode'
 
 let rollbar: Rollbar | null = null
 
-export function initRollbar(mode: ExtensionMode) {
+export function activateRollbar(mode: ExtensionMode) {
   if (rollbar) {
-    throw new Error('Rollbar already initialized')
+    console.warn('Rollbar already initialized')
+    return
   }
   rollbar = new Rollbar({
     accessToken: 'd22616f4af5b4788bac515818ca785f4',
@@ -32,5 +33,11 @@ export function report(error: Error) {
     getRollbar().error(error)
   } catch (e) {
     console.warn('Could not report error', e)
+  }
+}
+
+export function deactivateRollbar() {
+  if (rollbar) {
+    rollbar = null
   }
 }
