@@ -1,3 +1,4 @@
 node_modules
 out
 decentraland-*.vsix
+.env

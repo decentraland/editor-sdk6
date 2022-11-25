@@ -7,21 +7,20 @@ import { getGlobalValue, setGlobalValue } from './storage'
 let analytics: Analytics | null
 const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics-user-id'
 
-export function initAnalytics(mode: vscode.ExtensionMode) {
-  switch (mode) {
-    case vscode.ExtensionMode.Production: {
-      log(`Extension mode: prd`)
-      analytics = new Analytics('KGh0HDHgMmWljxg72wARAUPlG2rjhr5h')
-      break
-    }
-    case vscode.ExtensionMode.Development: {
-      log(`Extension mode: dev`)
-      analytics = new Analytics('8CZJcrF0pIBWikj3IEpZqxO60Z5WtPvH')
-      break
-    }
-    default:
-    // Ignore others like testing env
+export function activateAnalytics() {
+  if (analytics) {
+    console.warn(`Analytics already activated`)
+    return
   }
+
+  const key = process.env.SEGMENT_KEY
+  if (!key) {
+    log('Analytics disabled')
+    return
+  }
+
+  analytics = new Analytics(key)
+
   getAnalytics().identify({
     userId: getUserId(),
     traits: {
@@ -54,10 +53,20 @@ export function track(
   event: string,
   properties?: Record<string, string | number | boolean | null | undefined>
 ) {
-  getAnalytics().track(
-    { event, properties, userId: getUserId() },
-    (error) =>
-      error &&
-      console.warn(`Could not track event "${event}": ${error.message}`)
-  )
+  try {
+    getAnalytics().track(
+      { event, properties, userId: getUserId() },
+      (error) =>
+        error &&
+        console.warn(`Could not track event "${event}": ${error.message}`)
+    )
+  } catch (error) {
+    // Anaytics disabled
+  }
+}
+
+export function deactivateAnalytics() {
+  if (analytics) {
+    analytics = null
+  }
 }

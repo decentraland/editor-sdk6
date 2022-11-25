@@ -57,6 +57,9 @@ export async function deploy(...args: string[]) {
     ...args,
   ])
 
+  // This promise resolves when everything is done, or fails on any error
+  const deploymentPromise = child.waitFor(/content uploaded/gi, /error/gi)
+
   // Catch main promise, show error only if server is not up yet (if it fails later there are already try/catchs for that)
   let isLoaded = false
   child.wait().catch((error) => {
@@ -73,7 +76,9 @@ export async function deploy(...args: string[]) {
   panel.onDidDispose(() => (didDispose = true))
 
   try {
-    await loader('Opening publish screen...', () => waitForServer(url))
+    await loader('Opening publish screen...', () =>
+      Promise.race([waitForServer(url), deploymentPromise])
+    )
     if (!child) return
     isLoaded = true
     // Show preview
@@ -100,7 +105,7 @@ export async function deploy(...args: string[]) {
 
   try {
     if (!child) return
-    await child.waitFor(/content uploaded/gi, /error/gi)
+    await deploymentPromise
     panel.dispose()
     vscode.window.showInformationMessage(`Scene published successfully!`)
   } catch (error) {
