@@ -54,9 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   // Load .env
-  if (context.extensionMode !== vscode.ExtensionMode.Production) {
-    env.config({ path: path.join(context.extensionUri.fsPath, '.env') })
-  }
+  env.config({ path: path.join(context.extensionUri.fsPath, '.env') })
 
   // Set context
   setContext(context)
