@@ -33,6 +33,7 @@ import { log } from './utils/log'
 import { setContext } from './utils/context'
 import { isError } from './utils/error'
 import { initAnalytics, track } from './utils/analytics'
+import { initRollbar, report } from './utils/rollbar'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Set context
@@ -47,6 +48,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Initialize analytics
   initAnalytics(context.extensionMode)
+
+  // Initialize error reporting
+  initRollbar(context.extensionMode)
 
   // Set node binary version
   setVersion(await resolveVersion())
@@ -70,11 +74,12 @@ export async function activate(context: vscode.ExtensionContext) {
         if (isError(error)) {
           vscode.window.showErrorMessage(error.message)
           track(`${command}:error`, { message: error.message })
+          report(error)
         } else {
-          vscode.window.showErrorMessage(
-            `Something went wrong running command "${command}"`
-          )
+          const msg = `Something went wrong running command "${command}"`
+          vscode.window.showErrorMessage(msg)
           track(`${command}:error`)
+          report(new Error(msg))
         }
       }
     }
