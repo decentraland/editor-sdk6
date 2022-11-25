@@ -11,7 +11,7 @@ export function activateRollbar(mode: ExtensionMode) {
   }
   const key = process.env.ROLLBAR_KEY
   if (!key) {
-    log(`Error reporting disabled`)
+    log(`Reporting disabled`)
   }
 
   rollbar = new Rollbar({
