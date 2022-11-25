@@ -1,5 +1,6 @@
 import Rollbar from 'rollbar'
 import { ExtensionMode } from 'vscode'
+import { log } from './log'
 
 let rollbar: Rollbar | null = null
 
@@ -8,8 +9,13 @@ export function activateRollbar(mode: ExtensionMode) {
     console.warn('Rollbar already initialized')
     return
   }
+  const key = process.env.ROLLBAR_KEY
+  if (!key) {
+    log(`Error reporting disabled`)
+  }
+
   rollbar = new Rollbar({
-    accessToken: 'd22616f4af5b4788bac515818ca785f4',
+    accessToken: key,
     captureUncaught: true,
     captureUnhandledRejections: true,
     environment:
@@ -32,7 +38,7 @@ export function report(error: Error) {
   try {
     getRollbar().error(error)
   } catch (e) {
-    console.warn('Could not report error', e)
+    // Error reporting disabled
   }
 }
 

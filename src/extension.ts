@@ -1,4 +1,6 @@
 import * as vscode from 'vscode'
+import env from 'dotenv'
+import path from 'path'
 import { GLTFPreviewEditorProvider } from './gltf-preview/provider'
 import {
   startServer as startGLTFPreview,
@@ -40,6 +42,22 @@ import {
 import { activateRollbar, deactivateRollbar, report } from './utils/rollbar'
 
 export async function activate(context: vscode.ExtensionContext) {
+  // Log extension mode
+  log(
+    `Extension mode: ${
+      context.extensionMode === vscode.ExtensionMode.Development
+        ? 'development'
+        : context.extensionMode === vscode.ExtensionMode.Production
+        ? 'production'
+        : 'test'
+    }`
+  )
+
+  // Load .env
+  if (context.extensionMode !== vscode.ExtensionMode.Production) {
+    env.config({ path: path.join(context.extensionUri.fsPath, '.env') })
+  }
+
   // Set context
   setContext(context)
 
@@ -51,7 +69,7 @@ export async function activate(context: vscode.ExtensionContext) {
   await validate()
 
   // Initialize analytics
-  activateAnalytics(context.extensionMode)
+  activateAnalytics()
 
   // Initialize error reporting
   activateRollbar(context.extensionMode)
