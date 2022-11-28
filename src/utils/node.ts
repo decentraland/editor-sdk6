@@ -355,7 +355,7 @@ export async function checkBinaries() {
       await link()
     }
 
-    track(`node.check:success`, { distribution })
+    track(`node.check:success`, { distribution, wasInstalled: isNodeInstalled })
   } catch (error) {
     track(`node.check:error`, {
       message: isError(error) ? error.message : 'unkown error',

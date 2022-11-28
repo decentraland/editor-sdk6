@@ -40,6 +40,7 @@ import {
   track,
 } from './utils/analytics'
 import { activateRollbar, deactivateRollbar, report } from './utils/rollbar'
+import { getPackageJson } from './utils/pkg'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Log extension mode
@@ -62,6 +63,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // Set paths
   setExtensionPath(context.extensionUri.fsPath)
   setGlobalStoragePath(context.globalStorageUri.fsPath)
+
+  // Log extension version
+  log(`Extension version: ${getPackageJson().version}`)
 
   // Validate the project folder is a valid DCL project
   await validate()

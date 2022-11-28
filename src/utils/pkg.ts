@@ -8,20 +8,21 @@ import { getExtensionPath } from './path'
  * @returns The package json object
  */
 export function getPackageJson(moduleName?: string): {
+  version: string
   engines: {
     node: string
   }
   bin?: { [command: string]: string }
 } {
-  const packageJsonPath = typeof moduleName === 'string' ? path.join(
-    getExtensionPath(),
-    './node_modules',
-    moduleName,
-    'package.json'
-  ) : path.join(
-    getExtensionPath(),
-    'package.json'
-  )
+  const packageJsonPath =
+    typeof moduleName === 'string'
+      ? path.join(
+          getExtensionPath(),
+          './node_modules',
+          moduleName,
+          'package.json'
+        )
+      : path.join(getExtensionPath(), 'package.json')
   try {
     return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
   } catch (error: any) {
