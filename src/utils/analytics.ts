@@ -13,7 +13,7 @@ export function activateAnalytics() {
     return
   }
 
-  const key = process.env.SEGMENT_KEY
+  const key = process.env.DCL_EDITOR_SEGMENT_KEY
   if (!key) {
     log('Analytics disabled')
     return
