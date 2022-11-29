@@ -187,6 +187,9 @@ export function getPlatform() {
     case 'x64':
       platform += 'x64'
       break
+    case 'ia32':
+      platform += 'x86'
+      break
     case 'ppc64':
       platform += 'ppc64le'
       break
