@@ -30,6 +30,6 @@ export function getTypeOptions() {
   return options
 }
 
-export function getSamples() {
+export function getTemplates() {
   return repos.scenes
 }

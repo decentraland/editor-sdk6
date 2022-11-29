@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { loader } from '../utils/loader'
 import { npmInstall } from '../utils/npm'
-import { getTypeOptions, ProjectType } from '../utils/project'
+import { getTemplates, getTypeOptions, ProjectType } from '../utils/project'
 import { bin } from '../utils/bin'
 import { track } from '../utils/analytics'
 
@@ -14,6 +14,7 @@ export async function init(type?: ProjectType) {
   } | null = type
     ? options.find((option) => option.type === type) || null
     : null
+  let template = ''
 
   if (!option) {
     const selected = await vscode.window.showQuickPick(
@@ -29,14 +30,39 @@ export async function init(type?: ProjectType) {
     }
 
     option = options.find((option) => option.name === selected)!
-  }
 
-  track(`decentraland.commands.init:select_project_type`, { type: option.type })
+    track(`decentraland.commands.init:select_project_type`, {
+      type: option.type,
+    })
+
+    if (option.type === ProjectType.SCENE) {
+      const templates = getTemplates()
+      const selectedTitle = await vscode.window.showQuickPick(
+        templates.map((option) => option.title),
+        {
+          ignoreFocusOut: true,
+          title: 'Select Template',
+          placeHolder: 'Select the project template',
+        }
+      )
+      const selectedTemplate = templates.find(
+        (template) => template.title === selectedTitle
+      )
+      if (selectedTemplate) {
+        template = `--template ${selectedTemplate.url}`
+        track(`decentraland.commands.init:select_template`, {
+          title: selectedTemplate.title,
+          url: selectedTemplate.url,
+        })
+      }
+    }
+  }
 
   const child = bin('decentraland', 'dcl', [
     'init',
     `--project ${option.type}`,
     `--skip-install`,
+    template,
   ])
 
   try {
