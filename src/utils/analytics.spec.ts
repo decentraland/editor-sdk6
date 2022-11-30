@@ -4,7 +4,10 @@ import {
   getAnalytics,
   track,
 } from './analytics'
-jest.mock('vscode')
+
+/********************************************************
+                          Mocks
+*********************************************************/
 
 import { log } from './log'
 jest.mock('./log')
@@ -32,6 +35,10 @@ const AnalyticsMock = Analytics as jest.MockedFunction<any>
 import { uuid } from 'uuidv4'
 jest.mock('uuidv4')
 const uuidMock = uuid as jest.MockedFunction<typeof uuid>
+
+/********************************************************
+                          Tests
+*********************************************************/
 
 describe('analytics', () => {
   describe('When calling activateAnalytics', () => {
@@ -66,12 +73,10 @@ describe('analytics', () => {
         beforeEach(() => {
           getGlobalValueMock.mockReturnValueOnce(null)
           uuidMock.mockReturnValue('user-id')
-          AnalyticsMock.mockImplementation(() => {
-            return {
-              identify: jest.fn(),
-              track: jest.fn(),
-            }
-          })
+          AnalyticsMock.mockImplementationOnce(() => ({
+            identify: jest.fn(),
+            track: jest.fn(),
+          }))
         })
         afterEach(() => {
           getGlobalValueMock.mockReset()
@@ -143,6 +148,30 @@ describe('analytics', () => {
             }),
             expect.any(Function)
           )
+        })
+        describe('and it has an error', () => {
+          const realConsoleWarn = console.warn
+          beforeEach(() => {
+            console.warn = jest.fn()
+            AnalyticsMock.mockImplementationOnce(() => ({
+              identify: jest.fn(),
+              track: jest.fn().mockImplementationOnce((_payload, onError) => {
+                onError(new Error('Oopsie daisy'))
+              }),
+            }))
+          })
+          afterEach(() => {
+            console.warn = realConsoleWarn
+            AnalyticsMock.mockReset()
+          })
+          it('should warn the error', () => {
+            activateAnalytics()
+            getGlobalValueMock.mockReturnValueOnce('user-id')
+            track('event-name', { some: 'value' })
+            expect(console.warn).toHaveBeenCalledWith(
+              'Could not track event "event-name": Oopsie daisy'
+            )
+          })
         })
       })
       describe('and calling activateAnalytics again afterwads', () => {

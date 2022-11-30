@@ -17,5 +17,10 @@ export function bin(
 ) {
   const node = escapeWhiteSpaces(getNodeCmdPath())
   const bin = getModuleBinPath(moduleName, command)
-  return spawn(`${command} ${args[0]}`, node, [bin, ...args.filter((arg: string | undefined) => !!arg) as string[]], options)
+  return spawn(
+    args[0] ? `${command} ${args[0]}` : command,
+    node,
+    [bin, ...(args.filter((arg: string | undefined) => !!arg) as string[])],
+    options
+  )
 }

@@ -4,6 +4,9 @@ export function debounce(callback: (...args: any[]) => any, ms: number) {
     if (timeout) {
       clearTimeout(timeout)
     }
-    timeout = setTimeout(callback, ms, ...args)
+    timeout = setTimeout(() => {
+      timeout = null
+      callback(...args)
+    }, ms)
   }
 }
