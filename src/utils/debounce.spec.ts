@@ -25,42 +25,47 @@ describe('debounce', () => {
     clearTimeoutMock.mockReset()
   })
   describe('When creating a debounced function', () => {
-    it('should call setTimeout', () => {
-      const fn = () => {}
-      const debounced = debounce(fn, 100)
-      debounced()
-      expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function), 100)
+    it('should return a new function', () => {
+      expect(debounce(() => {}, 100)).toEqual(expect.any(Function))
     })
-    it('should call clearTimeout if there was already one pending debounced function call', () => {
-      const debounced = debounce(() => {}, 100)
-      debounced()
-      jest.advanceTimersByTime(50)
-      debounced()
-      expect(clearTimeoutMock).toHaveBeenCalled()
-    })
-    it('should call the debounced function with the same parameters as the debounced function if enough times has passed', () => {
-      const fn = jest.fn()
-      const debounced = debounce(fn, 100)
-      debounced('abc', 123)
-      jest.advanceTimersByTime(200)
-      expect(fn).toHaveBeenCalledTimes(1)
-      expect(fn).toHaveBeenCalledWith('abc', 123)
-    })
-    it('should not clearTimeout if enough time passes between calls', () => {
-      const fn = jest.fn()
-      const debounced = debounce(fn, 100)
-      debounced()
-      jest.advanceTimersByTime(200)
-      debounced()
-      expect(clearTimeoutMock).not.toHaveBeenCalled()
-    })
-    it('should throw if the base function throws when called', () => {
-      const fn = jest.fn().mockImplementationOnce(() => {
-        throw new Error('Some error')
+    describe('and calling the debounced function', () => {
+      it('should call setTimeout', () => {
+        const fn = () => {}
+        const debounced = debounce(fn, 100)
+        debounced()
+        expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function), 100)
       })
-      const debounced = debounce(fn, 100)
-      debounced()
-      expect(() => jest.advanceTimersByTime(200)).toThrow('Some error')
+      it('should call clearTimeout if there was already one pending debounced function call', () => {
+        const debounced = debounce(() => {}, 100)
+        debounced()
+        jest.advanceTimersByTime(50)
+        debounced()
+        expect(clearTimeoutMock).toHaveBeenCalled()
+      })
+      it('should call the debounced function with the same parameters as the debounced function if enough times has passed', () => {
+        const fn = jest.fn()
+        const debounced = debounce(fn, 100)
+        debounced('abc', 123)
+        jest.advanceTimersByTime(200)
+        expect(fn).toHaveBeenCalledTimes(1)
+        expect(fn).toHaveBeenCalledWith('abc', 123)
+      })
+      it('should not clearTimeout if enough time passes between calls', () => {
+        const fn = jest.fn()
+        const debounced = debounce(fn, 100)
+        debounced()
+        jest.advanceTimersByTime(200)
+        debounced()
+        expect(clearTimeoutMock).not.toHaveBeenCalled()
+      })
+      it('should throw if the base function throws when called', () => {
+        const fn = jest.fn().mockImplementationOnce(() => {
+          throw new Error('Some error')
+        })
+        const debounced = debounce(fn, 100)
+        debounced()
+        expect(() => jest.advanceTimersByTime(200)).toThrow('Some error')
+      })
     })
   })
 })
