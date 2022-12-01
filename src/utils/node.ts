@@ -20,7 +20,7 @@ import { isError } from './error'
  * Returns the node version that will be used to run binaries
  * @returns node version
  */
-let version: string | null
+let version: string | null = null
 export function getVersion() {
   if (version === null) {
     throw new Error(`Node version not set`)
@@ -28,7 +28,7 @@ export function getVersion() {
   return version
 }
 
-export function setVersion(_version: string) {
+export function setVersion(_version: string | null) {
   version = _version
 }
 

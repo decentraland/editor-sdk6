@@ -1,6 +1,9 @@
 export const window = {
   createOutputChannel: jest.fn().mockImplementation(() => ({
     append: jest.fn(),
+    replace: jest.fn(),
+    clear: jest.fn(),
+    show: jest.fn(),
   })),
   withProgress: jest
     .fn()
