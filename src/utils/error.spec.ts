@@ -1,5 +1,9 @@
 import { isError } from './error'
 
+/********************************************************
+                          Tests
+*********************************************************/
+
 describe('error', () => {
   describe('When checking if an unknown is an Error', () => {
     it('should return false if the value is undefined', () => {
