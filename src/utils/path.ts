@@ -188,7 +188,7 @@ export function escapeWhiteSpaces(p: string) {
 }
 
 /**
- *
+ * Combines different paths as a single env PATH using the right separator given the user's platform
  */
 
 export function joinEnvPaths(...paths: (undefined | string)[]) {
