@@ -1,6 +1,11 @@
 import fs from 'fs'
-import { getVersion, resolveVersion, setVersion } from './node'
-import { getGlobalBinPath, setGlobalStoragePath } from './path'
+import { checkBinaries, getVersion, resolveVersion, setVersion } from './node'
+import {
+  getGlobalBinPath,
+  setGlobalStoragePath,
+  getNodeBinPath,
+  getNodeCmdPath,
+} from './path'
 
 import { getPackageJson } from './pkg'
 jest.mock('./pkg')
@@ -11,6 +16,10 @@ const getPackageJsonMock = getPackageJson as jest.MockedFunction<
 import { log } from './log'
 jest.mock('./log')
 const logMock = log as jest.MockedFunction<typeof log>
+
+import { track } from './analytics'
+jest.mock('./analytics')
+const trackMock = track as jest.MockedFunction<typeof track>
 
 import fetch from 'node-fetch'
 jest.mock('node-fetch')
@@ -24,9 +33,21 @@ const fsReaddirMock = fs.readdir as unknown as jest.MockedFunction<
   ) => void
 >
 
+jest.spyOn(fs, 'existsSync')
+const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
+  typeof fs.existsSync
+>
+jest.spyOn(fs, 'symlinkSync')
+const fsSymlinkSyncMock = fs.symlinkSync as jest.MockedFunction<
+  typeof fs.symlinkSync
+>
+
 describe('node', () => {
   beforeAll(() => {
     setGlobalStoragePath('/globalStorage')
+  })
+  afterEach(() => {
+    logMock.mockReset()
   })
   describe('When getting the node version', () => {
     it('should throw if was not set already', () => {
@@ -286,6 +307,102 @@ describe('node', () => {
           it('should use the newest version installed', async () => {
             await expect(resolveVersion()).resolves.toBe('16.1.0')
           })
+        })
+      })
+    })
+  })
+  describe('When checking the node binaries', () => {
+    describe('and the platform is darwin', () => {
+      const realProcessPlatform = process.platform
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'darwin',
+        })
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+      })
+      describe('and distribution is already installed and linked', () => {
+        beforeEach(() => {
+          fsExistsSyncMock.mockImplementation((path) => {
+            const nodeBinPath = getNodeBinPath()
+            const nodeCmdPath = getNodeCmdPath()
+            switch (path) {
+              case nodeBinPath: {
+                return true
+              }
+              case nodeCmdPath: {
+                return true
+              }
+              default:
+                return false
+            }
+          })
+        })
+        afterEach(() => {
+          fsExistsSyncMock.mockReset()
+          fsSymlinkSyncMock.mockReset()
+        })
+        it('should skip both install and link steps', async () => {
+          await checkBinaries()
+          expect(fsSymlinkSyncMock).not.toHaveBeenCalled()
+          expect(trackMock).toHaveBeenCalledTimes(2)
+          expect(trackMock).toHaveBeenCalledWith(
+            `node.check:request`,
+            expect.objectContaining({
+              distribution: expect.any(String),
+              installed: true,
+            })
+          )
+          expect(trackMock).toHaveBeenCalledWith(
+            `node.check:success`,
+            expect.objectContaining({
+              distribution: expect.any(String),
+              wasInstalled: true,
+            })
+          )
+        })
+      })
+      describe('and distribution is already installed but not linked', () => {
+        beforeEach(() => {
+          fsExistsSyncMock.mockImplementation((path) => {
+            const nodeBinPath = getNodeBinPath()
+            switch (path) {
+              case nodeBinPath: {
+                return true
+              }
+              default:
+                return false
+            }
+          })
+          fsSymlinkSyncMock.mockReturnValue()
+        })
+        afterEach(() => {
+          fsExistsSyncMock.mockReset()
+          fsSymlinkSyncMock.mockReset()
+        })
+        it('should link the node binaries', async () => {
+          await checkBinaries()
+          expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
+            '/globalStorage/bin/node-v0.0.0-test-darwin-arm64/bin/node',
+            '/globalStorage/node'
+          )
+        })
+        it('should log the linked binaries', async () => {
+          await checkBinaries()
+          expect(logMock).toHaveBeenCalledWith(
+            'Linking distribution using symlink (unix)...'
+          )
+          expect(logMock).toHaveBeenCalledWith(
+            'Link from:',
+            '/globalStorage/node'
+          )
+          expect(logMock).toHaveBeenCalledWith(
+            'Link to:',
+            '/globalStorage/bin/node-v0.0.0-test-darwin-arm64/bin/node'
+          )
         })
       })
     })
