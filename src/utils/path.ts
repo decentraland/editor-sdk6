@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import path from 'path'
 import fs from 'fs'
 import { Scene } from '@dcl/schemas'
-import { getDistribution, isWindows, } from './node'
+import { getDistribution, isWindows } from './node'
 import { getPackageJson } from './pkg'
 import { log } from './log'
 
@@ -158,7 +158,6 @@ export function getGlobalBinPath() {
   return `${getGlobalStoragePath()}/bin`
 }
 
-
 /**
  * Helper to get the absolute path to the installed node binaries
  * @returns The path to the node bin
@@ -175,7 +174,7 @@ export function getNodeBinPath() {
  * @returns The path to the node bin
  */
 export function getNodeCmdPath() {
-  const cmd = process.platform === "win32" ? `node.cmd` : `node`
+  const cmd = process.platform === 'win32' ? `node.cmd` : `node`
   return `${getGlobalStoragePath()}/${cmd}`
 }
 
@@ -185,5 +184,14 @@ export function getNodeCmdPath() {
  * @returns fixed path
  */
 export function escapeWhiteSpaces(p: string) {
-  return p.replace(/\s/g, "\\ ")
+  return p.replace(/\s/g, '\\ ')
+}
+
+/**
+ *
+ */
+
+export function joinEnvPaths(...paths: (undefined | string)[]) {
+  const separator = process.platform === 'win32' ? ';' : ':'
+  return paths.filter((path): path is string => !!path).join(separator)
 }

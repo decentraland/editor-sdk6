@@ -1,10 +1,11 @@
 import { ChildProcess } from 'child_process'
+import path from 'path'
 import crossSpawn from 'cross-spawn'
 import future from 'fp-future'
 import { Readable } from 'stream'
 import isRunning from 'is-running'
 import { bind, log } from './log'
-import { getCwd } from './path'
+import { getCwd, getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
 
 export type SpanwedChild = {
   id: string
@@ -50,10 +51,17 @@ export function spawn(
 
   const matchers: Matcher[] = []
 
+  const nodePath = path.dirname(getNodeBinPath())
+  const npmPath = path.dirname(getModuleBinPath('npm', 'npm'))
+  const newEnv = {
+    ...env,
+    PATH: joinEnvPaths(env.PATH, nodePath, npmPath),
+  }
+
   const child = crossSpawn(command, args, {
     shell: true,
     cwd,
-    env,
+    env: newEnv,
   })
 
   child.stdout!.pipe(process.stdout)
@@ -144,7 +152,7 @@ export function spawn(
       // return promise
       return promise
     },
-    alive: () => alive
+    alive: () => alive,
   }
 
   // bind logs to output channel
