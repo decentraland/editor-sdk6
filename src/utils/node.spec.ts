@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { Readable } from 'stream'
 import {
   checkBinaries,
   getPlatform,
@@ -8,7 +9,9 @@ import {
 } from './node'
 import { getGlobalBinPath, setGlobalStoragePath } from './path'
 
-import { Readable } from 'stream'
+/********************************************************
+                          Mocks
+*********************************************************/
 
 class DummyBody extends Readable {
   done = false
@@ -73,6 +76,10 @@ const fsSymlinkSyncMock = fs.symlinkSync as jest.MockedFunction<
 >
 jest.spyOn(fs, 'mkdirSync')
 const fsMkdirSyncMock = fs.mkdirSync as jest.MockedFunction<typeof fs.mkdirSync>
+
+/********************************************************
+                          Tests
+*********************************************************/
 
 describe('node', () => {
   beforeAll(() => {

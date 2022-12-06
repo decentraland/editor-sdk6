@@ -47,6 +47,11 @@ export async function npmUninstall(dependency: string) {
   })
 }
 
+/**
+ * Warns the user that a dependency is outdated, allows them to upgrade it
+ * @param dependency
+ * @returns
+ */
 export async function warnOutdatedDependency(dependency: string) {
   const storageKey = `ignore:${dependency}`
   const isIgnored = getLocalValue<boolean>(storageKey)
@@ -70,6 +75,10 @@ export async function warnOutdatedDependency(dependency: string) {
   }
 }
 
+/**
+ * Warns the user that a dependency that is installed as a library is not, allows them to reinstall it
+ * @param dependency
+ */
 export async function warnDecentralandLibrary(dependency: string) {
   const reinstall = 'Re-install'
   const remove = 'Remove'
