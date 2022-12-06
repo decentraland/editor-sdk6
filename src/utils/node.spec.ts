@@ -1,5 +1,11 @@
 import fs from 'fs'
-import { checkBinaries, getVersion, resolveVersion, setVersion } from './node'
+import {
+  checkBinaries,
+  getPlatform,
+  getVersion,
+  resolveVersion,
+  setVersion,
+} from './node'
 import { getGlobalBinPath, setGlobalStoragePath } from './path'
 
 import { Readable } from 'stream'
@@ -37,9 +43,13 @@ import { track } from './analytics'
 jest.mock('./analytics')
 const trackMock = track as jest.MockedFunction<typeof track>
 
-import fetch, { Headers, Response } from 'node-fetch'
+import fetch from 'node-fetch'
 jest.mock('node-fetch')
 const fetchMock = fetch as jest.MockedFunction<typeof fetch>
+
+import cmdShim from 'cmd-shim'
+jest.mock('cmd-shim')
+const cmdShimMock = cmdShim as jest.MockedFunction<typeof cmdShim>
 
 import rimraf from 'rimraf'
 jest.mock('rimraf')
@@ -85,6 +95,24 @@ describe('node', () => {
     })
   })
   describe('When resolving the node version', () => {
+    describe('and the engine version is undefined', () => {
+      beforeEach(() => {
+        getPackageJsonMock.mockReturnValueOnce({
+          version: '0.0.0-test',
+          engines: {
+            node: undefined as any,
+          },
+        })
+      })
+      afterEach(() => {
+        getPackageJsonMock.mockReset()
+      })
+      it('should throw', async () => {
+        await expect(resolveVersion()).rejects.toThrow(
+          'Node engine is not defined'
+        )
+      })
+    })
     describe('and the engine version is invalid', () => {
       beforeEach(() => {
         getPackageJsonMock.mockReturnValueOnce({
@@ -98,7 +126,9 @@ describe('node', () => {
         getPackageJsonMock.mockReset()
       })
       it('should throw', async () => {
-        await expect(resolveVersion()).rejects.toThrow()
+        await expect(resolveVersion()).rejects.toThrow(
+          'Node engine is not valid'
+        )
       })
     })
     describe('and the engine node version is valid', () => {
@@ -338,16 +368,23 @@ describe('node', () => {
     })
   })
   describe('When checking the node binaries', () => {
-    describe('and the platform is darwin', () => {
+    describe('and the platform is MacOS', () => {
       const realProcessPlatform = process.platform
+      const realProcessArch = process.arch
       beforeEach(() => {
         Object.defineProperty(process, 'platform', {
           value: 'darwin',
+        })
+        Object.defineProperty(process, 'arch', {
+          value: 'arm64',
         })
       })
       afterEach(() => {
         Object.defineProperty(process, 'platform', {
           value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
         })
       })
       describe('and distribution is already installed and linked', () => {
@@ -387,18 +424,37 @@ describe('node', () => {
           fsExistsSyncMock.mockReturnValueOnce(true)
           // check if distribution is linked
           fsExistsSyncMock.mockReturnValueOnce(false)
-          fsSymlinkSyncMock.mockReturnValueOnce()
         })
         afterEach(() => {
           fsExistsSyncMock.mockReset()
-          fsSymlinkSyncMock.mockReset()
         })
-        it('should link the node binaries', async () => {
-          await checkBinaries()
-          expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
-            '/globalStorage/bin/node-v0.0.0-test-darwin-arm64/bin/node',
-            '/globalStorage/node'
-          )
+        describe('and the link is successful', () => {
+          beforeEach(() => {
+            fsSymlinkSyncMock.mockReturnValueOnce()
+          })
+          afterEach(() => {
+            fsSymlinkSyncMock.mockReset()
+          })
+          it('should link the node binaries', async () => {
+            await checkBinaries()
+            expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
+              '/globalStorage/bin/node-v0.0.0-test-darwin-arm64/bin/node',
+              '/globalStorage/node'
+            )
+          })
+        })
+        describe('and the link fails', () => {
+          beforeEach(() => {
+            fsSymlinkSyncMock.mockImplementationOnce(() => {
+              throw new Error('Link error')
+            })
+          })
+          afterEach(() => {
+            fsSymlinkSyncMock.mockReset()
+          })
+          it('should throw a Link error', async () => {
+            await expect(checkBinaries()).rejects.toThrow()
+          })
         })
       })
       describe('and distribution is neither installed nor linked', () => {
@@ -410,24 +466,16 @@ describe('node', () => {
           fsExistsSyncMock.mockReturnValue(false)
           // check if distribution is linked
           fsExistsSyncMock.mockReturnValueOnce(false)
-          fsSymlinkSyncMock.mockReturnValueOnce()
-          fsMkdirSyncMock.mockReturnValueOnce('')
-          sleepMock.mockResolvedValueOnce(0)
-          // mock and older distribution installed so it uninstalls it
+          // mock installed distributions
           fsReaddirMock.mockImplementationOnce((_path, callback) => {
             callback(null, ['node-v16.1.0-win-x64'])
           })
-          fetchMock.mockResolvedValueOnce({
-            ok: true,
-            body: new DummyBody(),
-            headers: {
-              get: jest.fn().mockReturnValueOnce(4), // "content-length" of 4 bytes (string "test")
-            },
-          } as any)
-          // mock removal of old installed distribution
-          rimrafMock.mockImplementationOnce((_path, cb) => cb(null))
-          // mock removal of old linked distribution
-          rimrafMock.mockImplementationOnce((_path, cb) => cb(null))
+          // mock distribution link on unix
+          fsSymlinkSyncMock.mockReturnValueOnce()
+          // mock create bin directory
+          fsMkdirSyncMock.mockReturnValueOnce('')
+          // mock sleep
+          sleepMock.mockResolvedValueOnce(0)
         })
         afterEach(() => {
           setVersion(null)
@@ -435,37 +483,346 @@ describe('node', () => {
           fsSymlinkSyncMock.mockReset()
           fsMkdirSyncMock.mockReset()
           fsReaddirMock.mockReset()
-          fetchMock.mockReset()
-          rimrafMock.mockReset()
           sleepMock.mockReset()
         })
-        it('should create the bin directory', async () => {
-          await checkBinaries()
-          expect(fsMkdirSyncMock).toHaveBeenCalledWith('/globalStorage/bin', {
-            recursive: true,
+        describe('and uninstall of old distribution is successful', () => {
+          beforeEach(() => {
+            // mock removal of old installed distribution
+            rimrafMock.mockImplementationOnce((_path, cb) => cb(null))
+          })
+          afterEach(() => {
+            rimrafMock.mockReset()
+          })
+          describe('and unlink of old distribution is successful', () => {
+            beforeEach(() => {
+              // mock removal of old linked distribution
+              rimrafMock.mockImplementationOnce((_path, cb) => cb(null))
+            })
+            afterEach(() => {
+              rimrafMock.mockReset()
+            })
+            describe('and installation of new distribution is successful', () => {
+              beforeEach(() => {
+                fetchMock.mockResolvedValueOnce({
+                  ok: true,
+                  body: new DummyBody(),
+                  headers: {
+                    get: jest.fn().mockReturnValueOnce(4), // "content-length" of 4 bytes (string "test")
+                  },
+                } as any)
+              })
+              afterEach(() => {
+                fetchMock.mockReset()
+              })
+              it('should create the bin directory', async () => {
+                await checkBinaries()
+                expect(fsMkdirSyncMock).toHaveBeenCalledWith(
+                  '/globalStorage/bin',
+                  {
+                    recursive: true,
+                  }
+                )
+              })
+              it('should uninstall the old distribution', async () => {
+                await checkBinaries()
+                expect(rimrafMock).toHaveBeenCalledWith(
+                  '/globalStorage/bin/node-v16.1.0-win-x64',
+                  expect.any(Function)
+                )
+              })
+              it('should unlink the old distribution', async () => {
+                await checkBinaries()
+                expect(rimrafMock).toHaveBeenCalledWith(
+                  '/globalStorage/node',
+                  expect.any(Function)
+                )
+              })
+              it('should link the node binaries', async () => {
+                await checkBinaries()
+                expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
+                  '/globalStorage/bin/node-v16.2.0-darwin-arm64/bin/node',
+                  '/globalStorage/node'
+                )
+              })
+            })
+            describe('and installation of new distribution fails', () => {
+              beforeEach(() => {
+                fetchMock.mockResolvedValueOnce({
+                  ok: false,
+                  text: jest.fn().mockResolvedValueOnce('Some message'),
+                } as any)
+              })
+              afterEach(() => {
+                fetchMock.mockReset()
+              })
+              it('throw an error with the message from the response', async () => {
+                await expect(checkBinaries()).rejects.toThrow(
+                  'Could not download "node-v16.2.0-darwin-arm64": Some message'
+                )
+              })
+              describe('and the error is not parseable', () => {
+                beforeEach(() => {
+                  fetchMock.mockResolvedValueOnce({
+                    ok: false,
+                    text: () => {
+                      throw new Error('Some error')
+                    },
+                  } as any)
+                })
+                afterEach(() => {
+                  fetchMock.mockReset()
+                })
+                it('throw an error', async () => {
+                  await expect(checkBinaries()).rejects.toThrow(
+                    'Could not download "node-v16.2.0-darwin-arm64"'
+                  )
+                })
+              })
+            })
+          })
+          describe('and unlink of old distribution fails', () => {
+            beforeEach(() => {
+              // mock removal of old linked distribution
+              rimrafMock.mockImplementationOnce((_path, cb) =>
+                cb(new Error('Unlink error'))
+              )
+            })
+            afterEach(() => {
+              rimrafMock.mockReset()
+            })
+
+            it('should throw an unlink error', async () => {
+              await expect(checkBinaries()).rejects.toThrow('Unlink error')
+            })
           })
         })
-        it('should uninstall the old distribution', async () => {
-          await checkBinaries()
-          expect(rimrafMock).toHaveBeenCalledWith(
-            '/globalStorage/bin/node-v16.1.0-win-x64',
-            expect.any(Function)
-          )
+        describe('and uninstall of old distribution is successful', () => {
+          beforeEach(() => {
+            // mock removal of old installed distribution
+            rimrafMock.mockImplementationOnce((_path, cb) =>
+              cb(new Error('Uninstall error'))
+            )
+          })
+          afterEach(() => {
+            rimrafMock.mockReset()
+          })
+          it('should throw an uninstall error', async () => {
+            await expect(checkBinaries()).rejects.toThrow('Uninstall error')
+          })
         })
-        it('should unlink the old distribution', async () => {
-          await checkBinaries()
-          expect(rimrafMock).toHaveBeenCalledWith(
-            '/globalStorage/node',
-            expect.any(Function)
-          )
+      })
+    })
+    describe('and the platform is Windows', () => {
+      const realProcessPlatform = process.platform
+      const realProcessArch = process.arch
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
         })
-        it('should link the node binaries', async () => {
-          await checkBinaries()
-          expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
-            '/globalStorage/bin/node-v16.2.0-darwin-arm64/bin/node',
-            '/globalStorage/node'
-          )
+        Object.defineProperty(process, 'arch', {
+          value: 'x64',
         })
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
+        })
+      })
+      describe('and distribution is neither installed nor linked', () => {
+        beforeEach(() => {
+          setVersion('16.2.0')
+          // check if distribution is installed
+          fsExistsSyncMock.mockReturnValue(false)
+          // check if has bin dir
+          fsExistsSyncMock.mockReturnValue(false)
+          // check if distribution is linked
+          fsExistsSyncMock.mockReturnValueOnce(false)
+          // no installed distributions
+          fsReaddirMock.mockImplementationOnce((_path, callback) => {
+            callback(null, [])
+          })
+          // mock create bin directory
+          fsMkdirSyncMock.mockReturnValueOnce('')
+          // mock distribution link on windows
+          cmdShimMock.mockResolvedValueOnce()
+          // mock sleep
+          sleepMock.mockResolvedValueOnce(0)
+        })
+        afterEach(() => {
+          setVersion(null)
+          fsExistsSyncMock.mockReset()
+          cmdShimMock.mockReset()
+          fsReaddirMock.mockReset()
+          fsMkdirSyncMock.mockReset()
+          sleepMock.mockReset()
+        })
+        describe('and installation of new distribution is successful', () => {
+          beforeEach(() => {
+            fetchMock.mockResolvedValueOnce({
+              ok: true,
+              body: new DummyBody(),
+              headers: {
+                get: jest.fn().mockReturnValueOnce(4), // "content-length" of 4 bytes (string "test")
+              },
+            } as any)
+          })
+          afterEach(() => {
+            fetchMock.mockReset()
+          })
+          it('should link the binaries using cmd-shim', async () => {
+            await checkBinaries()
+            expect(cmdShimMock).toHaveBeenCalledWith(
+              '/globalStorage/bin/node-v16.2.0-win-x64/node.exe',
+              '/globalStorage/node'
+            )
+          })
+        })
+      })
+    })
+  })
+  describe('When getting the platform', () => {
+    const realProcessPlatform = process.platform
+    const realProcessArch = process.arch
+    afterEach(() => {
+      Object.defineProperty(process, 'platform', {
+        value: realProcessPlatform,
+      })
+      Object.defineProperty(process, 'arch', {
+        value: realProcessArch,
+      })
+    })
+    describe('and the platform is MacOS', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'darwin',
+        })
+      })
+      describe('and the architecture is ARM', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'arm64',
+          })
+        })
+        it('should return "darwin-arm64"', () => {
+          expect(getPlatform()).toBe('darwin-arm64')
+        })
+      })
+      describe('and the architecture is 64bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'x64',
+          })
+        })
+        it('should return "darwin-x64"', () => {
+          expect(getPlatform()).toBe('darwin-x64')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an Unsupported architecture error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
+      })
+    })
+    describe('and the platform is Windows', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        })
+      })
+      describe('and the architecture is 64bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'x64',
+          })
+        })
+        it('should return "win-x64"', () => {
+          expect(getPlatform()).toBe('win-x64')
+        })
+      })
+      describe('and the architecture is 32bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'ia32',
+          })
+        })
+        it('should return "win-x86"', () => {
+          expect(getPlatform()).toBe('win-x86')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an Unsupported architecture error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
+      })
+    })
+    describe('and the platform is Linux', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'linux',
+        })
+      })
+      describe('and the architecture is ARM', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'arm',
+          })
+        })
+        it('should return "linux-armv71"', () => {
+          expect(getPlatform()).toBe('linux-armv71')
+        })
+      })
+      describe('and the architecture is ppc64', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'ppc64',
+          })
+        })
+        it('should return "linux-ppc64le"', () => {
+          expect(getPlatform()).toBe('linux-ppc64le')
+        })
+      })
+      describe('and the architecture is s390x', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 's390x',
+          })
+        })
+        it('should return "linux-s390x"', () => {
+          expect(getPlatform()).toBe('linux-s390x')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an Unsupported architecture error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
+      })
+    })
+    describe('and the platform is not supported', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'unknown',
+        })
+      })
+      it('should throw an Unsupported platform error', () => {
+        expect(getPlatform).toThrow('Unsupported platform')
       })
     })
   })

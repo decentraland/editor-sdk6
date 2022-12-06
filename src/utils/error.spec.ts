@@ -1,4 +1,4 @@
-import { isError } from './error'
+import { getMessage, isError } from './error'
 
 /********************************************************
                           Tests
@@ -23,6 +23,14 @@ describe('error', () => {
     })
     it('should return true if the is an instance of Error', () => {
       expect(isError(new Error('error'))).toBe(true)
+    })
+  })
+  describe('When getting a message from an unknown error value', () => {
+    it('return the error message if it is an instance of Error', () => {
+      expect(getMessage(new Error('Some error'))).toBe('Some error')
+    })
+    it('should return "Unknown Error" if the value is not an instance of Error', () => {
+      expect(getMessage({})).toBe('Unknown Error')
     })
   })
 })
