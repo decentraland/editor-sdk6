@@ -9,5 +9,10 @@
     "rootDir": "src",
     "esModuleInterop": true
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": [
+    "node_modules",
+    ".vscode-test",
+    "src/**/*.spec.ts",
+    "jest.config.ts"
+  ]
 }

@@ -3,11 +3,23 @@ import { log } from './log'
 
 let context: ExtensionContext | null = null
 
-export function setContext(_context: ExtensionContext) {
+/**
+ * Sets the extension's context
+ * @param _context
+ */
+export function setContext(_context: ExtensionContext | null) {
   context = _context
-  log('Extension context has been set')
+  log(
+    context
+      ? 'Extension context has been set'
+      : 'Extension context has been unset'
+  )
 }
 
+/**
+ * Returns the extension's context
+ * @param _context
+ */
 export function getContext() {
   if (!context) {
     throw Error(`Context has not been set yet`)

@@ -1,15 +1,12 @@
 import * as vscode from 'vscode'
 import { SpanwedChild } from './spawn'
 
-const output = vscode.window.createOutputChannel(`Decentraland`)
-
-let outputData = ''
+export const output = vscode.window.createOutputChannel(`Decentraland`)
 
 /**
  * Append a message to the output
  */
 export function append(message: string) {
-  outputData += message
   output.append(message)
 }
 
@@ -18,7 +15,6 @@ export function append(message: string) {
  */
 export function appendLine(message: string) {
   const line = message + '\n'
-  outputData += line
   output.append(line)
 }
 
@@ -26,7 +22,6 @@ export function appendLine(message: string) {
  * Replace the whole output channel
  */
 export function replace(message: string) {
-  outputData = message
   output.replace(message)
 }
 
@@ -34,7 +29,6 @@ export function replace(message: string) {
  * Clear output channel
  */
 export function clear() {
-  outputData = ''
   output.clear()
 }
 

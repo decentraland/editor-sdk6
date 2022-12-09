@@ -38,7 +38,7 @@ export abstract class Disposable {
     return value
   }
 
-  protected get isDisposed(): boolean {
+  public get isDisposed(): boolean {
     return this._isDisposed
   }
 }

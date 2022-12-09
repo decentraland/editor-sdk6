@@ -74,7 +74,10 @@ export async function getServerUrl(server: ServerName) {
  * @returns The url of that server
  */
 export function getServerParams(server: ServerName) {
-  const params = server === ServerName.DCLPreview ? `?position=${encodeURI(getScene().scene.base)}` : ''
+  const params =
+    server === ServerName.DCLPreview
+      ? `?position=${encodeURI(getScene().scene.base)}`
+      : ''
   return params
 }
 

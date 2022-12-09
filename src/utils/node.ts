@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import semver from 'semver'
+import semver, { SemVer } from 'semver'
 import rimraf from 'rimraf'
 import cmdShim from 'cmd-shim'
 import fetch from 'node-fetch'
@@ -14,13 +14,13 @@ import { log } from './log'
 import { getPackageJson } from './pkg'
 import { sleep } from './sleep'
 import { track } from './analytics'
-import { isError } from './error'
+import { getMessage } from './error'
 
 /**
  * Returns the node version that will be used to run binaries
  * @returns node version
  */
-let version: string | null
+let version: string | null = null
 export function getVersion() {
   if (version === null) {
     throw new Error(`Node version not set`)
@@ -28,7 +28,7 @@ export function getVersion() {
   return version
 }
 
-export function setVersion(_version: string) {
+export function setVersion(_version: string | null) {
   version = _version
 }
 
@@ -37,11 +37,15 @@ export function setVersion(_version: string) {
  */
 export async function resolveVersion() {
   const pkg = getPackageJson()
-  const min = semver.minVersion(pkg.engines.node)
-  if (!min) {
-    throw new Error(
-      `Could not resolve minimum node version. The value found in the package.json for engines.node is "${pkg.engines.node}".`
-    )
+  if (!pkg.engines.node) {
+    throw new Error(`Node engine is not defined`)
+  }
+
+  let min: SemVer
+  try {
+    min = semver.minVersion(pkg.engines.node)!
+  } catch (error) {
+    throw new Error('Node engine is not valid')
   }
   log(`Node engine required: ${pkg.engines.node}`)
 
@@ -253,9 +257,7 @@ async function install(distribution: string) {
       let error = `Could not download "${distribution}"`
       try {
         error += `: ${await resp.text()}`
-      } catch (error) {
-        console.warn(`Could not parse response body as text`)
-      }
+      } catch (error) {}
       log(error)
       throw new Error(error)
     }
@@ -286,7 +288,7 @@ async function install(distribution: string) {
     track(`node.install:success`, { distribution })
   } catch (error) {
     track(`node.install:error`, {
-      message: isError(error) ? error.message : 'unkown error',
+      message: getMessage(error),
     })
     throw error
   }
@@ -310,7 +312,7 @@ async function uninstall(distribution: string) {
     track(`node.uninstall:success`, { distribution })
   } catch (error) {
     track(`node.uninstall:error`, {
-      message: isError(error) ? error.message : 'unkown error',
+      message: getMessage(error),
     })
     throw error
   }
@@ -361,12 +363,16 @@ export async function checkBinaries() {
     track(`node.check:success`, { distribution, wasInstalled: isNodeInstalled })
   } catch (error) {
     track(`node.check:error`, {
-      message: isError(error) ? error.message : 'unkown error',
+      message: getMessage(error),
     })
     throw error
   }
 }
 
+/**
+ * Link the current distribution
+ * @returns
+ */
 async function link() {
   track(`node.link:request`)
   try {
@@ -374,7 +380,7 @@ async function link() {
     const binPath = getNodeBinPath()
     if (process.platform === 'win32') {
       log('Linking distribution using cmd-shim (win)...')
-      cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
+      await cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
     } else {
       log('Linking distribution using symlink (unix)...')
       fs.symlinkSync(binPath, cmdPath)
@@ -385,12 +391,16 @@ async function link() {
     track(`node.link:success`)
   } catch (error) {
     track(`node.link:error`, {
-      message: isError(error) ? error.message : 'unkown error',
+      message: getMessage(error),
     })
     throw error
   }
 }
 
+/**
+ * Unlink the current distribution
+ * @returns
+ */
 async function unlink() {
   track(`node.unlink:request`)
   try {
@@ -405,12 +415,16 @@ async function unlink() {
     track(`node.unlink:success`)
   } catch (error) {
     track(`node.unlink:error`, {
-      message: isError(error) ? error.message : 'unkown error',
+      message: getMessage(error),
     })
     throw error
   }
 }
 
+/**
+ * Utils to check if a distribution is linked or not
+ * @returns
+ */
 function isLinked() {
   return fs.existsSync(getNodeCmdPath())
 }

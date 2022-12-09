@@ -4,12 +4,12 @@ import { log } from './log'
 import { getGlobalValue, setGlobalValue } from './storage'
 import { getPackageJson } from './pkg'
 
-let analytics: Analytics | null
 const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics-user-id'
+
+let analytics: Analytics | null
 
 export function activateAnalytics() {
   if (analytics) {
-    console.warn(`Analytics already activated`)
     return
   }
 
