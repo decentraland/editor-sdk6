@@ -32,3 +32,11 @@ export const workspace = {
     },
   ],
 }
+
+export const env = {
+  asExternalUri: jest.fn().mockImplementation((value) => value),
+}
+
+export const Uri = {
+  parse: jest.fn().mockImplementation((value) => value),
+}
