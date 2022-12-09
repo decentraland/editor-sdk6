@@ -1,5 +1,9 @@
 import { getTemplates, getTypeOptions } from './project'
 
+/********************************************************
+                          Tests
+*********************************************************/
+
 describe('project', () => {
   describe('When getting the project type options', () => {
     it('should return the 4 options', () => {

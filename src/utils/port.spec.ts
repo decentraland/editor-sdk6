@@ -30,17 +30,6 @@ const createServerSpy = net.createServer as jest.MockedFunction<
   typeof net.createServer
 >
 
-// let serverMock: ReturnType<typeof mockServer>
-// function mockServer() {
-//   return {
-//     unref: jest.fn(),
-//     on: jest.fn(),
-//     address: jest.fn().mockReturnValue({ port: 1234 }),
-//     listen: jest.fn().mockImplementation((cb) => cb()),
-//     close: jest.fn().mockImplementation((cb) => cb()),
-//   }
-// }
-
 /********************************************************
                           Tests
 *********************************************************/

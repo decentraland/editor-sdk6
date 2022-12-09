@@ -5,10 +5,18 @@ import {
   report,
 } from './rollbar'
 
+/********************************************************
+                          Mocks
+*********************************************************/
+
 import Rollbar from 'rollbar'
 import { ExtensionMode } from 'vscode'
 jest.mock('rollbar')
 const RollbarMock = Rollbar as jest.MockedFunction<any>
+
+/********************************************************
+                          Tests
+*********************************************************/
 
 describe('rollbar', () => {
   const realProcessEnv = process.env
