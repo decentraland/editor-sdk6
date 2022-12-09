@@ -21,6 +21,8 @@ jobs:
           node-version: 16.x
       - name: Install
         run: npm install
+      - name: Test
+        run: npm run test:coverage
       - name: Compile
         run: npm run compile
       - name: Set env

@@ -2,19 +2,15 @@ import type { Config } from '@jest/types'
 
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
-  // collectCoverageFrom: [
-  //   'src/**/*.ts',
-  //   '!<rootDir>/node_modules/',
-  //   'src/untyped-modules.d.ts',
-  // ],
-  // coverageThreshold: {
-  //   global: {
-  //     lines: 90,
-  //     branches: 90,
-  //     statements: 90,
-  //     functions: 90,
-  //   },
-  // },
+  collectCoverageFrom: ['src/utils/**/*.ts', '!<rootDir>/node_modules/'],
+  coverageThreshold: {
+    global: {
+      lines: 100,
+      branches: 100,
+      statements: 100,
+      functions: 100,
+    },
+  },
 }
 
 export default config
