@@ -12,6 +12,7 @@ export function activateRollbar(mode: ExtensionMode) {
   const key = process.env.DCL_EDITOR_ROLLBAR_KEY
   if (!key) {
     log(`Reporting disabled`)
+    return
   }
 
   rollbar = new Rollbar({

@@ -6,12 +6,16 @@ import { sleep } from './sleep'
 
 describe('sleep', () => {
   describe('When using the sleep helper with 100 milliseconds', () => {
-    it('should wait for 100 milliseconds', async () => {
-      const ms = 100
-      const start = Date.now()
-      await sleep(ms)
-      const end = Date.now()
-      expect(end - start).toBeGreaterThanOrEqual(ms)
+    beforeAll(() => {
+      jest.useFakeTimers()
+    })
+    afterAll(() => {
+      jest.useRealTimers()
+    })
+    it('should resolve the promise after the time has passed', async () => {
+      const promise = sleep(100)
+      jest.advanceTimersByTime(100)
+      await expect(promise).resolves.toBe(void 0)
     })
   })
 })

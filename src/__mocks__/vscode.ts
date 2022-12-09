@@ -40,3 +40,9 @@ export const env = {
 export const Uri = {
   parse: jest.fn().mockImplementation((value) => value),
 }
+
+export const ExtensionMode = {
+  Production: 1,
+  Development: 2,
+  Test: 3,
+}
