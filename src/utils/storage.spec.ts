@@ -1,3 +1,4 @@
+import { ExtensionContext } from 'vscode'
 import {
   getGlobalValue,
   getLocalValue,
@@ -9,7 +10,6 @@ import {
                           Mocks
 *********************************************************/
 
-import { ExtensionContext } from 'vscode'
 import { getContext } from './context'
 jest.mock('./context')
 const getContextMock = getContext as jest.MockedFunction<typeof getContext>

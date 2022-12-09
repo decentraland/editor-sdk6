@@ -46,3 +46,5 @@ export const ExtensionMode = {
   Development: 2,
   Test: 3,
 }
+
+export class TreeItem {}
