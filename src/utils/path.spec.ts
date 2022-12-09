@@ -13,6 +13,10 @@ import {
   setGlobalStoragePath,
 } from './path'
 
+/********************************************************
+                          Mocks
+*********************************************************/
+
 import { log } from './log'
 jest.mock('./log')
 const logMock = log as jest.MockedFunction<typeof log>
@@ -34,6 +38,10 @@ const fsReaddirSyncMock = fs.readdirSync as jest.MockedFunction<
 const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
   typeof fs.existsSync
 >
+
+/********************************************************
+                          Tests
+*********************************************************/
 
 describe('path', () => {
   afterEach(() => {
