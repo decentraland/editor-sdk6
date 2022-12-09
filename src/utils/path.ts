@@ -46,7 +46,7 @@ export function setGlobalStoragePath(path: string | null) {
   log(
     path == null
       ? 'Global storage path has been unset'
-      : `Global storage has been set to "${path}"`
+      : `Global storage path has been set to "${path}"`
   )
   globalStoragePath = path
 }

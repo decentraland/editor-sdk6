@@ -1,8 +1,10 @@
+import { ChildReponse, SpanwedChild, spawn } from './spawn'
+import { ChildProcess } from 'child_process'
+
 /********************************************************
                           Mocks
 *********************************************************/
 
-import { ChildProcess } from 'child_process'
 import crossSpawn from 'cross-spawn'
 jest.mock('cross-spawn')
 const crossSpawnMock = crossSpawn as jest.MockedFunction<typeof crossSpawn>
@@ -20,7 +22,6 @@ jest.mock('./log')
 const bindMock = bind as jest.MockedFunction<typeof bind>
 
 import { getCwd, getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
-import { ChildReponse, SpanwedChild, spawn } from './spawn'
 jest.mock('./path')
 const getCwdMock = getCwd as jest.MockedFunction<typeof getCwd>
 const getModuleBinPathMock = getModuleBinPath as jest.MockedFunction<

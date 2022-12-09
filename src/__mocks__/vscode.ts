@@ -22,3 +22,13 @@ export const window = {
 export const ProgressLocation = {
   Notification: 15,
 }
+
+export const workspace = {
+  workspaceFolders: [
+    {
+      uri: {
+        fsPath: '/path/to/workspace',
+      },
+    },
+  ],
+}
