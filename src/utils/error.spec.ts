@@ -29,7 +29,10 @@ describe('error', () => {
     it('return the error message if it is an instance of Error', () => {
       expect(getMessage(new Error('Some error'))).toBe('Some error')
     })
-    it('should return "Unknown Error" if the value is not an instance of Error', () => {
+    it('return the error itself if it is of type string', () => {
+      expect(getMessage('Some error')).toBe('Some error')
+    })
+    it('should return "Unknown Error" if the value is neither an instance of Error nor a string', () => {
       expect(getMessage({})).toBe('Unknown Error')
     })
   })

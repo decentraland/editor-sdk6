@@ -15,6 +15,8 @@ export const window = {
         }) => Promise<any>
       ) => onProgress({ report: jest.fn() })
     ),
+  showWarningMessage: jest.fn(),
+  showErrorMessage: jest.fn(),
 }
 
 export const ProgressLocation = {

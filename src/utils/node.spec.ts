@@ -733,7 +733,7 @@ describe('node', () => {
             value: 'unknown',
           })
         })
-        it('should throw an Unsupported architecture error', () => {
+        it('should throw an "Unsupported architecture" error', () => {
           expect(getPlatform).toThrow('Unsupported architecture')
         })
       })
@@ -770,7 +770,7 @@ describe('node', () => {
             value: 'unknown',
           })
         })
-        it('should throw an Unsupported architecture error', () => {
+        it('should throw an "Unsupported architecture" error', () => {
           expect(getPlatform).toThrow('Unsupported architecture')
         })
       })
@@ -817,7 +817,7 @@ describe('node', () => {
             value: 'unknown',
           })
         })
-        it('should throw an Unsupported architecture error', () => {
+        it('should throw an "Unsupported architecture" error', () => {
           expect(getPlatform).toThrow('Unsupported architecture')
         })
       })
@@ -828,7 +828,7 @@ describe('node', () => {
           value: 'unknown',
         })
       })
-      it('should throw an Unsupported platform error', () => {
+      it('should throw an "Unsupported platform" error', () => {
         expect(getPlatform).toThrow('Unsupported platform')
       })
     })

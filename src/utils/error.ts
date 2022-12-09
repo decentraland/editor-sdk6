@@ -21,5 +21,9 @@ export function isError(error: unknown): error is Error {
  * @returns
  */
 export function getMessage(error: unknown): string {
-  return isError(error) ? error.message : 'Unknown Error'
+  return isError(error)
+    ? error.message
+    : typeof error === 'string'
+    ? error
+    : 'Unknown Error'
 }

@@ -14,7 +14,7 @@ export type SpanwedChild = {
   once: (pattern: RegExp, handler: (data?: string) => ChildReponse) => number
   off: (index: number) => void
   wait: () => Promise<void>
-  waitFor: (resolvePattern: RegExp, rejectPattern?: RegExp) => Promise<void>
+  waitFor: (resolvePattern: RegExp, rejectPattern?: RegExp) => Promise<string>
   kill: () => Promise<void>
   alive: () => boolean
 }
@@ -24,7 +24,7 @@ export type SpawnOptions = {
   env?: Record<string, string>
 }
 
-type ChildReponse = Thenable<string> | string[] | string | void
+export type ChildReponse = Thenable<string> | string[] | string | void
 
 type Matcher = {
   pattern: RegExp
@@ -42,7 +42,7 @@ type Matcher = {
 export function spawn(
   id: string,
   command: string,
-  args: string[],
+  args: string[] = [],
   options: SpawnOptions = {}
 ): SpanwedChild {
   const { cwd = getCwd(), env = { ...process.env } } = options
@@ -69,14 +69,16 @@ export function spawn(
 
   child.on('close', (code) => {
     if (code !== 0 && code !== null) {
-      promise.reject(new Error(`Error: npm exited with code "${code}".`))
+      promise.reject(
+        new Error(`Error: process "${command}" exited with code "${code}".`)
+      )
     } else {
       promise.resolve(void 0)
     }
   })
 
   function handleStream(stream: Readable) {
-    stream.on('data', (data) => handleData(data, matchers, child))
+    stream.on('data', (data: Buffer) => handleData(data, matchers, child))
   }
 
   handleStream(child.stdout!)
@@ -88,8 +90,12 @@ export function spawn(
   const spawned: SpanwedChild = {
     id,
     process: child,
-    on: (pattern, handler) =>
-      matchers.push({ pattern, handler, enabled: true }),
+    on: (pattern, handler) => {
+      if (alive) {
+        return matchers.push({ pattern, handler, enabled: true }) - 1
+      }
+      throw new Error('Process has been killed')
+    },
     once: (pattern, handler) => {
       const index = spawned.on(pattern, (data) => {
         handler(data)
@@ -105,7 +111,7 @@ export function spawn(
     wait: () => promise,
     waitFor: (resolvePattern, rejectPattern) =>
       new Promise((resolve, reject) => {
-        spawned.once(resolvePattern, () => resolve())
+        spawned.once(resolvePattern, (data) => resolve(data!))
         if (rejectPattern) {
           spawned.once(rejectPattern, (data) => reject(new Error(data)))
         }
@@ -130,6 +136,9 @@ export function spawn(
         if (!child.killed) {
           child.kill()
         }
+        for (const matcher of matchers) {
+          matcher.enabled = false
+        }
         promise.resolve()
       }
 
@@ -141,7 +150,7 @@ export function spawn(
         }
       }, 100)
 
-      // timeout to stop checking if child still running, kil it with fire
+      // timeout to stop checking if child still running, kill it with fire
       const timeout = setTimeout(() => {
         if (alive) {
           log(`Process "${id}" forcefully killed`)
@@ -169,6 +178,7 @@ async function handleData(
   const data = buffer.toString('utf8')
   for (const { pattern, handler, enabled } of matchers) {
     if (!enabled) continue
+    pattern.lastIndex = 0 // reset regexp
     if (pattern.test(data)) {
       const response = handler(data)
       switch (typeof response) {
@@ -177,12 +187,14 @@ async function handleData(
           break
         case 'object': {
           if ('then' in response) {
-            child.stdin!.write(await response)
+            const value = await response
+            child.stdin!.write(value)
           } else if (Array.isArray(response)) {
-            for (const res in response) {
+            for (const res of response) {
               child.stdin!.write(res)
             }
           }
+          break
         }
         default: {
           break
