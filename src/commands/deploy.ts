@@ -1,12 +1,17 @@
 import * as vscode from 'vscode'
 import path from 'path'
-import { getExtensionPath } from '../utils/path'
-import { getNonce } from '../utils/webviews'
-import { loader } from '../utils/loader'
-import { getPort, getServerUrl, ServerName, waitForServer } from '../utils/port'
-import { bin } from '../utils/bin'
-import { SpanwedChild } from '../utils/spawn'
-import { log } from '../utils/log'
+import { getExtensionPath } from '../modules/path'
+import { getNonce } from '../modules/webviews'
+import { loader } from '../modules/loader'
+import {
+  getPort,
+  getServerUrl,
+  ServerName,
+  waitForServer,
+} from '../modules/port'
+import { bin } from '../modules/bin'
+import { SpanwedChild } from '../modules/spawn'
+import { log } from '../modules/log'
 
 let child: SpanwedChild | null = null
 let panel: vscode.WebviewPanel | null = null

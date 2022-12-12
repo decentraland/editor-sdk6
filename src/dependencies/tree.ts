@@ -2,15 +2,13 @@ import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
 import { Dependency } from './types'
-import { getCwd } from '../utils/path'
+import { getCwd } from '../modules/path'
 
 // Dependency tree (UI)
 let dependencies: DependenciesProvider | null = null
 
-class DependenciesProvider
-  implements vscode.TreeDataProvider<Dependency>
-{
-  constructor(private workspaceRoot: string) { }
+class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
+  constructor(private workspaceRoot: string) {}
 
   getTreeItem(element: Dependency): vscode.TreeItem {
     return element
@@ -64,7 +62,7 @@ class DependenciesProvider
               fs.readFileSync(modulePackageJsonPath, 'utf-8')
             )
             version = pkg.version
-          } catch (error) { }
+          } catch (error) {}
         }
         return new Dependency(
           moduleName,
@@ -75,13 +73,13 @@ class DependenciesProvider
 
       const deps = packageJson.dependencies
         ? Object.keys(packageJson.dependencies).map((dep) =>
-          toDep(dep, packageJson.dependencies[dep])
-        )
+            toDep(dep, packageJson.dependencies[dep])
+          )
         : []
       const devDeps = packageJson.devDependencies
         ? Object.keys(packageJson.devDependencies).map((dep) =>
-          toDep(dep, packageJson.devDependencies[dep])
-        )
+            toDep(dep, packageJson.devDependencies[dep])
+          )
         : []
       return deps.concat(devDeps)
     } else {
@@ -123,7 +121,9 @@ export function refreshTree() {
 }
 
 export function registerTree(disposables: vscode.Disposable[]) {
-  const disposable = dependencies ? vscode.window.registerTreeDataProvider('dependencies', dependencies) : null
+  const disposable = dependencies
+    ? vscode.window.registerTreeDataProvider('dependencies', dependencies)
+    : null
   if (disposable) {
     disposables.push(disposable)
   }

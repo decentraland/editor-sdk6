@@ -1,9 +1,14 @@
 import * as vscode from 'vscode'
 import path from 'path'
-import { getExtensionPath } from '../utils/path'
-import { getNonce } from '../utils/webviews'
-import { loader } from '../utils/loader'
-import { getServerParams, getServerUrl, ServerName, waitForServer } from '../utils/port'
+import { getExtensionPath } from '../modules/path'
+import { getNonce } from '../modules/webviews'
+import { loader } from '../modules/loader'
+import {
+  getServerParams,
+  getServerUrl,
+  ServerName,
+  waitForServer,
+} from '../modules/port'
 
 export async function start() {
   const url = await getServerUrl(ServerName.DCLPreview)

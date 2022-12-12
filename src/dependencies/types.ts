@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
-import { getExtensionPath } from '../utils/path'
+import { getExtensionPath } from '../modules/path'
 
 export class Dependency extends vscode.TreeItem {
   constructor(

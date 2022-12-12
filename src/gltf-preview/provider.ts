@@ -10,9 +10,9 @@ import {
   GLFTPreviewWebviewMessage,
   GLFTPreviewWebviewMessageType,
 } from './types/webview-message'
-import { WebviewCollection, getNonce } from '../utils/webviews'
-import { getPort, ServerName } from '../utils/port'
-import { track } from '../utils/analytics'
+import { WebviewCollection, getNonce } from '../modules/webviews'
+import { getPort, ServerName } from '../modules/port'
+import { track } from '../modules/analytics'
 
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>

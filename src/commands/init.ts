@@ -1,9 +1,9 @@
 import * as vscode from 'vscode'
-import { loader } from '../utils/loader'
-import { npmInstall } from '../utils/npm'
-import { getTemplates, getTypeOptions, ProjectType } from '../utils/project'
-import { bin } from '../utils/bin'
-import { track } from '../utils/analytics'
+import { loader } from '../modules/loader'
+import { npmInstall } from '../modules/npm'
+import { getTemplates, getTypeOptions, ProjectType } from '../modules/project'
+import { bin } from '../modules/bin'
+import { track } from '../modules/analytics'
 
 export async function init(type?: ProjectType) {
   const options = getTypeOptions()

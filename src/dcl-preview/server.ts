@@ -1,10 +1,14 @@
-import { npmInstall, warnDecentralandLibrary, warnOutdatedDependency } from '../utils/npm'
-import { hasNodeModules } from '../utils/path'
-import { getPort, ServerName } from '../utils/port'
-import { bin } from '../utils/bin'
-import { SpanwedChild } from '../utils/spawn'
-import { log } from '../utils/log'
-import { loader } from '../utils/loader'
+import {
+  npmInstall,
+  warnDecentralandLibrary,
+  warnOutdatedDependency,
+} from '../modules/npm'
+import { hasNodeModules } from '../modules/path'
+import { getPort, ServerName } from '../modules/port'
+import { bin } from '../modules/bin'
+import { SpanwedChild } from '../modules/spawn'
+import { log } from '../modules/log'
+import { loader } from '../modules/loader'
 import { ProgressLocation } from 'vscode'
 
 let child: SpanwedChild | null = null
@@ -62,10 +66,11 @@ export async function startServer() {
     // Show loader while server is starting
     loader(
       'Starting server...',
-      async () => Promise.race([
-        child?.waitFor(/server is now running/gi, /error/gi),
-        child?.wait()
-      ]),
+      async () =>
+        Promise.race([
+          child?.waitFor(/server is now running/gi, /error/gi),
+          child?.wait(),
+        ]),
       ProgressLocation.Window
     )
   } catch (error) {
