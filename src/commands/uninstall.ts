@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { npmUninstall } from '../utils/npm'
+import { npmUninstall } from '../modules/npm'
 
 export async function uninstall() {
   const dependency = await vscode.window.showInputBox({

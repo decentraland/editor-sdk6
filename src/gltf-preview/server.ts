@@ -2,7 +2,7 @@ import path from 'path'
 import express from 'express'
 import { Server } from 'http'
 import future from 'fp-future'
-import { clearPort, getPort, ServerName } from '../utils/port'
+import { clearPort, getPort, ServerName } from '../modules/port'
 
 const app = express()
 const dir = path.join(

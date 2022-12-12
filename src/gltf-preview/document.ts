@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { Disposable } from '../utils/dispose'
+import { Disposable } from '../modules/dispose'
 
 /**
  * Define the document (the data model) used for paw draw files.

@@ -16,7 +16,7 @@ import {
   isEmpty,
   setExtensionPath,
   setGlobalStoragePath,
-} from './utils/path'
+} from './modules/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
 import { browser } from './commands/browser'
@@ -26,21 +26,21 @@ import { createTree, registerTree } from './dependencies/tree'
 import { init } from './commands/init'
 import { restart } from './commands/restart'
 import { Dependency } from './dependencies/types'
-import { npmInstall, npmUninstall } from './utils/npm'
-import { getServerParams, getServerUrl, ServerName } from './utils/port'
-import { ProjectType } from './utils/project'
-import { checkBinaries, resolveVersion, setVersion } from './utils/node'
-import { unwatch, watch } from './utils/watch'
-import { log } from './utils/log'
-import { setContext } from './utils/context'
-import { isError } from './utils/error'
+import { npmInstall, npmUninstall } from './modules/npm'
+import { getServerParams, getServerUrl, ServerName } from './modules/port'
+import { ProjectType } from './modules/project'
+import { checkBinaries, resolveVersion, setVersion } from './modules/node'
+import { unwatch, watch } from './modules/watch'
+import { log } from './modules/log'
+import { setContext } from './modules/context'
+import { isError } from './modules/error'
 import {
   activateAnalytics,
   deactivateAnalytics,
   track,
-} from './utils/analytics'
-import { activateRollbar, deactivateRollbar, report } from './utils/rollbar'
-import { getPackageJson } from './utils/pkg'
+} from './modules/analytics'
+import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
+import { getPackageJson } from './modules/pkg'
 
 export async function activate(context: vscode.ExtensionContext) {
   // Log extension mode
