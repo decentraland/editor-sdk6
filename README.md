@@ -1,6 +1,6 @@
-# Decentraland VSCode Extension
+# Decentraland Editor
 
-The Decentraland VSCode extension includes the following features:
+The Decentraland Editor is a VSCode extension that includes the following features:
 
 - **Create projects**: Scaffold a new project of various types: scene, library, portable experience, and smart item.
 - **Run scenes**: preview your scenes within VSCode, or launch in a browser.
