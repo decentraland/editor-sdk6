@@ -1,6 +1,6 @@
 {
   "name": "decentraland",
-  "displayName": "Decentraland",
+  "displayName": "Decentraland Editor",
   "description": "Visual Studio Code extension for Decentraland projects",
   "icon": "resources/logo128x128.png",
   "version": "0.0.0-development",
