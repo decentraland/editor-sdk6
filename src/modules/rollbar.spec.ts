@@ -78,6 +78,13 @@ describe('rollbar', () => {
       })
     })
     describe('and Rollbar was already activated, it should not activate it again', () => {
+      const realConsoleWarn = console.warn
+      beforeAll(() => {
+        console.warn = jest.fn()
+      })
+      afterAll(() => {
+        console.warn = realConsoleWarn
+      })
       it('should not activate Rollbar', () => {
         activateRollbar(ExtensionMode.Test)
         activateRollbar(ExtensionMode.Test)

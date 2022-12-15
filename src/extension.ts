@@ -33,163 +33,184 @@ import { checkBinaries, resolveVersion, setVersion } from './modules/node'
 import { unwatch, watch } from './modules/watch'
 import { log } from './modules/log'
 import { setContext } from './modules/context'
-import { isError } from './modules/error'
+import { getMessage, isError } from './modules/error'
 import {
   activateAnalytics,
   deactivateAnalytics,
   track,
 } from './modules/analytics'
 import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
-import { getPackageJson } from './modules/pkg'
+import { getPackageJson, getPackageVersion } from './modules/pkg'
 
 export async function activate(context: vscode.ExtensionContext) {
-  // Log extension mode
-  log(
-    `Extension mode: ${
+  track('activation:request')
+  try {
+    // Log extension mode
+    const mode =
       context.extensionMode === vscode.ExtensionMode.Development
         ? 'development'
         : context.extensionMode === vscode.ExtensionMode.Production
         ? 'production'
         : 'test'
-    }`
-  )
+    log(`Extension mode: ${mode}`)
 
-  // Load .env
-  env.config({ path: path.join(context.extensionUri.fsPath, '.env') })
+    // Load .env
+    env.config({ path: path.join(context.extensionUri.fsPath, '.env') })
 
-  // Set context
-  setContext(context)
+    // Set context
+    setContext(context)
 
-  // Set paths
-  setExtensionPath(context.extensionUri.fsPath)
-  setGlobalStoragePath(context.globalStorageUri.fsPath)
+    // Set paths
+    setExtensionPath(context.extensionUri.fsPath)
+    setGlobalStoragePath(context.globalStorageUri.fsPath)
 
-  // Log extension version
-  log(`Extension version: ${getPackageJson().version}`)
+    // Log extension version
+    log(`Extension version: ${getPackageJson().version}`)
 
-  // Validate the project folder is a valid DCL project
-  await validate()
+    // Validate the project folder is a valid DCL project
+    await validate()
 
-  // Initialize analytics
-  activateAnalytics()
+    // Initialize analytics
+    activateAnalytics()
 
-  // Initialize error reporting
-  activateRollbar(context.extensionMode)
+    // Initialize error reporting
+    activateRollbar(context.extensionMode)
 
-  // Set node binary version
-  setVersion(await resolveVersion())
+    // Set node binary version
+    setVersion(await resolveVersion())
 
-  // Create dependency tree
-  createTree()
+    // Create dependency tree
+    createTree()
 
-  // Helper ro register a command
-  const disposables: vscode.Disposable[] = []
-  const registerCommand = (
-    command: string,
-    callback: (...args: any[]) => any
-  ) => {
-    const wrapper = async (...args: any[]) => {
-      track(`${command}:request`)
-      try {
-        const result = await callback(...args)
-        track(`${command}:success`)
-        return result
-      } catch (error) {
-        if (isError(error)) {
-          vscode.window.showErrorMessage(error.message)
-          track(`${command}:error`, { message: error.message })
-          report(error)
-        } else {
-          const msg = `Something went wrong running command "${command}"`
-          vscode.window.showErrorMessage(msg)
-          track(`${command}:error`)
-          report(new Error(msg))
+    // Helper ro register a command
+    const disposables: vscode.Disposable[] = []
+    const registerCommand = (
+      command: string,
+      callback: (...args: any[]) => any
+    ) => {
+      const wrapper = async (...args: any[]) => {
+        track(`${command}:request`)
+        try {
+          const result = await callback(...args)
+          track(`${command}:success`)
+          return result
+        } catch (error) {
+          if (isError(error)) {
+            vscode.window.showErrorMessage(error.message)
+            track(`${command}:error`, { message: error.message })
+            report(error)
+          } else {
+            const msg = `Something went wrong running command "${command}"`
+            vscode.window.showErrorMessage(msg)
+            track(`${command}:error`)
+            report(new Error(msg))
+          }
         }
       }
+      disposables.push(vscode.commands.registerCommand(command, wrapper))
     }
-    disposables.push(vscode.commands.registerCommand(command, wrapper))
-  }
 
-  // Register GLTF preview custom editor
-  GLTFPreviewEditorProvider.register(context, disposables)
+    // Register GLTF preview custom editor
+    GLTFPreviewEditorProvider.register(context, disposables)
 
-  // Setup debugger
-  vscode.debug.registerDebugConfigurationProvider(
-    'decentraland',
-    {
-      resolveDebugConfiguration() {
-        if (!isDCL()) {
-          throw new Error(`The current workspace is not a Decentraland project`)
-        }
-        return null
+    // Setup debugger
+    vscode.debug.registerDebugConfigurationProvider(
+      'decentraland',
+      {
+        resolveDebugConfiguration() {
+          if (!isDCL()) {
+            throw new Error(
+              `The current workspace is not a Decentraland project`
+            )
+          }
+          return null
+        },
       },
-    },
-    vscode.DebugConfigurationProviderTriggerKind.Dynamic
-  )
-
-  // Decentraland Commands
-  registerCommand('decentraland.commands.init', () => init().then(validate))
-  registerCommand('decentraland.commands.update', () => npmInstall())
-  registerCommand('decentraland.commands.install', () => install())
-  registerCommand('decentraland.commands.uninstall', () => uninstall())
-  registerCommand('decentraland.commands.start', () => start())
-  registerCommand(
-    'decentraland.commands.getDebugURL',
-    async () =>
-      `${await getServerUrl(ServerName.DCLPreview)}${await getServerParams(
-        ServerName.DCLPreview
-      )}`
-  )
-  registerCommand('decentraland.commands.restart', () => restart())
-  registerCommand('decentraland.commands.deploy', () => deploy())
-  registerCommand('decentraland.commands.deployCustom', async () =>
-    deploy(
-      `--target ${await vscode.window.showInputBox({
-        title: 'Deploy to custom Catalyst',
-        prompt: 'Enter the URL of the Catalyst',
-        placeHolder: 'peer-testing.decentraland.org',
-      })}`
+      vscode.DebugConfigurationProviderTriggerKind.Dynamic
     )
-  )
-  registerCommand('decentraland.commands.browser.run', () =>
-    browser(ServerName.DCLPreview)
-  )
-  registerCommand('decentraland.commands.browser.deploy', () =>
-    browser(ServerName.DCLDeploy)
-  )
 
-  // Dependencies
-  registerTree(disposables)
-  registerCommand('dependencies.commands.delete', (node: Dependency) =>
-    npmUninstall(node.label)
-  )
-  registerCommand('dependencies.commands.update', (node: Dependency) =>
-    npmInstall(`${node.label}@latest`)
-  )
-
-  // Walkthrough
-  registerCommand('walkthrough.createProject', () =>
-    init(ProjectType.SCENE).then(validate)
-  )
-  registerCommand('walkthrough.viewCode', () => {
-    vscode.commands.executeCommand(
-      'vscode.openFolder',
-      vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
+    // Decentraland Commands
+    registerCommand('decentraland.commands.init', () => init().then(validate))
+    registerCommand('decentraland.commands.update', () => npmInstall())
+    registerCommand('decentraland.commands.install', () => install())
+    registerCommand('decentraland.commands.uninstall', () => uninstall())
+    registerCommand('decentraland.commands.start', () => start())
+    registerCommand(
+      'decentraland.commands.getDebugURL',
+      async () =>
+        `${await getServerUrl(ServerName.DCLPreview)}${await getServerParams(
+          ServerName.DCLPreview
+        )}`
     )
-  })
+    registerCommand('decentraland.commands.restart', () => restart())
+    registerCommand('decentraland.commands.deploy', () => deploy())
+    registerCommand('decentraland.commands.deployCustom', async () =>
+      deploy(
+        `--target ${await vscode.window.showInputBox({
+          title: 'Deploy to custom Catalyst',
+          prompt: 'Enter the URL of the Catalyst',
+          placeHolder: 'peer-testing.decentraland.org',
+        })}`
+      )
+    )
+    registerCommand('decentraland.commands.browser.run', () =>
+      browser(ServerName.DCLPreview)
+    )
+    registerCommand('decentraland.commands.browser.deploy', () =>
+      browser(ServerName.DCLDeploy)
+    )
 
-  // push all disposables into subscriptions
-  for (const disposable of disposables) {
-    if (disposable) {
-      context.subscriptions.push(disposable)
+    // Dependencies
+    registerTree(disposables)
+    registerCommand('dependencies.commands.delete', (node: Dependency) =>
+      npmUninstall(node.label)
+    )
+    registerCommand('dependencies.commands.update', (node: Dependency) =>
+      npmInstall(`${node.label}@latest`)
+    )
+
+    // Walkthrough
+    registerCommand('walkthrough.createProject', () =>
+      init(ProjectType.SCENE).then(validate)
+    )
+    registerCommand('walkthrough.viewCode', () => {
+      vscode.commands.executeCommand(
+        'vscode.openFolder',
+        vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
+      )
+    })
+
+    // push all disposables into subscriptions
+    for (const disposable of disposables) {
+      if (disposable) {
+        context.subscriptions.push(disposable)
+      }
     }
+
+    // Check node binaries, download them if necessary
+    await checkBinaries()
+
+    // Start servers and watchers
+    await boot()
+
+    // report activation success
+    const decentralandEcsVersion = getPackageVersion('decentraland-ecs', true)
+    const dclSdkVersion = getPackageVersion('@dcl/sdk', true)
+    const isSdk6 = decentralandEcsVersion !== null
+    const isSdk7 = dclSdkVersion !== null
+    const info = {
+      mode,
+      is_dcl: isDCL(),
+      is_empty: isEmpty(),
+      decentraland_ecs_version: decentralandEcsVersion,
+      dcl_sdk_version: dclSdkVersion,
+      is_sdk6: isSdk6,
+      is_sdk7: isSdk7,
+    }
+    track('activation:success', info)
+  } catch (error) {
+    track('activation:error', { message: getMessage(error) })
   }
-
-  // Check node binaries, download them if necessary
-  await checkBinaries()
-
-  // Start servers and watchers
-  await boot()
 }
 
 export async function deactivate() {
