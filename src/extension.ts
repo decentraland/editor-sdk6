@@ -194,14 +194,19 @@ export async function activate(context: vscode.ExtensionContext) {
     await boot()
 
     // report activation success
-    const decentralandEcsVersion = getPackageVersion('decentraland-ecs', true)
-    const dclSdkVersion = getPackageVersion('@dcl/sdk', true)
-    const isSdk6 = decentralandEcsVersion !== null
-    const isSdk7 = dclSdkVersion !== null
+    const isDecentraland = isDCL()
+    const decentralandEcsVersion = isDecentraland
+      ? getPackageVersion('decentraland-ecs', true)
+      : null
+    const dclSdkVersion = isDecentraland
+      ? getPackageVersion('@dcl/sdk', true)
+      : null
+    const isSdk6 = isDecentraland && decentralandEcsVersion !== null
+    const isSdk7 = isDecentraland && dclSdkVersion !== null
     const info = {
       mode,
-      is_dcl: isDCL(),
-      is_empty: isEmpty(),
+      is_dcl: isDecentraland,
+      is_empty: !isDecentraland && isEmpty(),
       decentraland_ecs_version: decentralandEcsVersion,
       dcl_sdk_version: dclSdkVersion,
       is_sdk6: isSdk6,
