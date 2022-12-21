@@ -11,6 +11,10 @@ import {
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
 import {
+  startServer as startWSServer,
+  stopServer as stopWSServer,
+} from './entity-tree/server'
+import {
   getCwd,
   isDCL,
   isEmpty,
@@ -82,7 +86,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Create dependency tree
     createTree()
 
-    // Helper ro register a command
+    // Helper to register a command
     const disposables: vscode.Disposable[] = []
     const registerCommand = (
       command: string,
@@ -222,10 +226,10 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
+  await Promise.all([stopGLTFPreview(), stopDCLPreview(), stopWSServer()])
   // Deactivate analytics
   deactivateAnalytics()
-  // Deactivate rror reporting
+  // Deactivate error reporting
   deactivateRollbar()
 }
 
@@ -246,7 +250,7 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([startGLTFPreview(), startDCLPreview()])
+      ? Promise.all([startGLTFPreview(), startDCLPreview(), startWSServer()])
       : startGLTFPreview())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)

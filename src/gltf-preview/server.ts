@@ -15,9 +15,7 @@ app.use(express.static(dir))
 let server: Server | null = null
 
 export async function startServer() {
-  if (server) {
-    await stopServer()
-  }
+  await stopServer()
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()
   server = app.listen(port, () => {
@@ -31,8 +29,8 @@ export async function startServer() {
 export async function stopServer() {
   if (server) {
     server.close()
+    server = null
+    clearPort(ServerName.GTLFPreview)
+    console.info(`GLTFPreview: http server closed`)
   }
-  server = null
-  clearPort(ServerName.GTLFPreview)
-  console.info(`GLTFPreview: http server closed`)
 }

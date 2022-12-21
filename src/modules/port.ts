@@ -12,6 +12,7 @@ export enum ServerName {
   GTLFPreview = 'gltf-preview',
   DCLPreview = 'dcl-preview',
   DCLDeploy = 'dcl-deploy',
+  WSTransport = 'ws-transport',
 }
 
 /**
