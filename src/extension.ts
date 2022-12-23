@@ -45,6 +45,7 @@ import {
 } from './modules/analytics'
 import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
 import { getPackageJson, getPackageVersion } from './modules/pkg'
+import { testTransport } from './entity-tree/state'
 
 export async function activate(context: vscode.ExtensionContext) {
   track('activation:request')
@@ -196,6 +197,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Start servers and watchers
     await boot()
+
+    await testTransport()
 
     // report activation success
     const isDecentraland = isDCL()

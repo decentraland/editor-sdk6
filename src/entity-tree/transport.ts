@@ -1,17 +1,23 @@
-import { Transport } from '@dcl/sdk/ecs'
+import WebSocket from 'ws'
+import future from 'fp-future'
+import { getServerUrl, ServerName } from '../modules/port'
 
-interface SafeTransport implements Transport extends EventEn {
+export async function createTransport(): Promise<any> {
+  const url = await getServerUrl(ServerName.WSTransport)
+  const ws = new WebSocket(url)
 
-}
-
-interface IChannel {
-  postMessage(message: any, targetOrigin: string)
-}
-
-export function createTransport(channel: IChannel): Transport {
   return {
-    async send(bytes) {
-      vscode.
+    type: 'websocket',
+    filter() {
+      return true
+    },
+    async send(bytes: Uint8Array) {
+      const promise = future<void>()
+      console.log('Sending', bytes)
+      ws.send(bytes, (error) =>
+        error ? promise.reject(error) : promise.resolve()
+      )
+      return promise
     },
   }
 }

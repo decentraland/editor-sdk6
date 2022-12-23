@@ -16,7 +16,6 @@ class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
 
   getChildren(element?: Dependency): Thenable<Dependency[]> {
     if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage('No dependency in empty workspace')
       return Promise.resolve([])
     }
 
