@@ -159,6 +159,9 @@ export async function activate(context: vscode.ExtensionContext) {
     registerCommand('decentraland.commands.browser.deploy', () =>
       browser(ServerName.DCLDeploy)
     )
+    registerCommand('decentraland.commands.browser.web3', () =>
+      browser(ServerName.DCLPreview, '&ENABLE_WEB3')
+    )
 
     // Dependencies
     registerTree(disposables)

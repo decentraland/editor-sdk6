@@ -1,8 +1,8 @@
 import open = require('open')
 import { getServerParams, getServerUrl, ServerName } from '../modules/port'
 
-export async function browser(server: ServerName) {
+export async function browser(server: ServerName, extraParams = '') {
   const url = await getServerUrl(server)
   const params = getServerParams(server)
-  open(url.toString() + params)
+  open(url.toString() + params + extraParams)
 }

@@ -141,6 +141,11 @@
         "category": "Decentraland"
       },
       {
+        "command": "decentraland.commands.browser.web3",
+        "title": "Open In Browser With Web3",
+        "category": "Decentraland"
+      },
+      {
         "command": "decentraland.commands.browser.deploy",
         "title": "Open in browser",
         "category": "Decentraland"
@@ -222,7 +227,12 @@
         {
           "command": "decentraland.commands.deployCustom",
           "when": "view == decentraland && decentraland.isDCL",
-          "group": "1_actions"
+          "group": "1_actions@1"
+        },
+        {
+          "command": "decentraland.commands.browser.web3",
+          "when": "view == decentraland && decentraland.isDCL",
+          "group": "1_actions@2"
         },
         {
           "command": "decentraland.commands.restart",
