@@ -144,6 +144,9 @@ export async function activate(context: vscode.ExtensionContext) {
     )
     registerCommand('decentraland.commands.restart', () => restart())
     registerCommand('decentraland.commands.deploy', () => deploy())
+    registerCommand('decentraland.commands.deployTest', async () =>
+      deploy(`--target peer-testing.decentraland.org`)
+    )
     registerCommand('decentraland.commands.deployCustom', async () =>
       deploy(
         `--target ${await vscode.window.showInputBox({

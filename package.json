@@ -157,8 +157,14 @@
         "category": "Decentraland"
       },
       {
+        "command": "decentraland.commands.deployTest",
+        "title": "Publish Scene To Test Server",
+        "icon": "$(rocket)",
+        "category": "Decentraland"
+      },
+      {
         "command": "decentraland.commands.deployCustom",
-        "title": "Publish Scene To Custom Catalyst",
+        "title": "Publish Scene To Custom Server",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
@@ -225,14 +231,19 @@
       ],
       "view/title": [
         {
-          "command": "decentraland.commands.deployCustom",
+          "command": "decentraland.commands.deployTest",
           "when": "view == decentraland && decentraland.isDCL",
           "group": "1_actions@1"
         },
         {
-          "command": "decentraland.commands.browser.web3",
+          "command": "decentraland.commands.deployCustom",
           "when": "view == decentraland && decentraland.isDCL",
           "group": "1_actions@2"
+        },
+        {
+          "command": "decentraland.commands.browser.web3",
+          "when": "view == decentraland && decentraland.isDCL",
+          "group": "1_actions@3"
         },
         {
           "command": "decentraland.commands.restart",
