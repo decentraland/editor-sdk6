@@ -4,13 +4,24 @@ import expressWs from 'express-ws'
 import future from 'fp-future'
 import { clearPort, getPort, ServerName } from '../modules/port'
 import { log } from '../modules/log'
+import { WebSocket } from 'ws'
 
 const { app } = expressWs(express())
 
+const clients: Set<WebSocket> = new Set()
 app.ws('/ws', (ws) => {
+  clients.add(ws)
   ws.on('message', function (msg) {
-    ws.send(msg)
+    for (const client of clients) {
+      if (client !== ws) {
+        client.send(msg)
+      }
+    }
   })
+  ws.on('close', () => {
+    clients.delete(ws)
+  })
+  ws.on('error', (error) => console.error(`WS Error:`, error))
 })
 
 let server: Server | null = null

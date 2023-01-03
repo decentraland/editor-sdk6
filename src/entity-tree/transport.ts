@@ -1,23 +1,57 @@
 import WebSocket from 'ws'
-import future from 'fp-future'
-import { getServerUrl, ServerName } from '../modules/port'
+import { Transport } from '@dcl/sdk/ecs'
+import { getPort, ServerName } from '../modules/port'
 
-export async function createTransport(): Promise<any> {
-  const url = await getServerUrl(ServerName.WSTransport)
-  const ws = new WebSocket(url)
+export async function createTransport(): Promise<Transport> {
+  const port = await getPort(ServerName.WSTransport)
+  const ws = new WebSocket(`ws://localhost:${port}/ws`)
 
-  return {
+  ws.on('open', open)
+  ws.on('message', handleMessage)
+
+  let isOpen = false
+  let queue: Uint8Array[] = []
+
+  function open() {
+    isOpen = true
+    if (queue.length > 0) {
+      for (const message of queue) {
+        send(message)
+      }
+    }
+  }
+
+  async function send(bytes: Uint8Array) {
+    if (isOpen) {
+      ws.send(bytes, (error) => {
+        if (error) {
+          console.error(error)
+        }
+      })
+    } else {
+      queue.push(bytes)
+    }
+  }
+
+  function handleMessage(data: WebSocket.RawData) {
+    if (transport.onmessage) {
+      if (Array.isArray(data)) {
+        for (const item of data) {
+          transport.onmessage(new Uint8Array(item))
+        }
+      } else {
+        transport.onmessage(new Uint8Array(data))
+      }
+    }
+  }
+
+  const transport: Transport = {
     type: 'websocket',
     filter() {
       return true
     },
-    async send(bytes: Uint8Array) {
-      const promise = future<void>()
-      console.log('Sending', bytes)
-      ws.send(bytes, (error) =>
-        error ? promise.reject(error) : promise.resolve()
-      )
-      return promise
-    },
+    send,
   }
+
+  return transport
 }
