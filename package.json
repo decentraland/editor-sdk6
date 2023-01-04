@@ -34,7 +34,7 @@
     "onCommand:walkthrough.createProject",
     "onCommand:walkthrough.viewCode"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -378,13 +378,13 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "vscode:prepublish": "npm run build",
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "tsc -w -p ./",
     "deploy": "vsce publish",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "build": "./scripts/build.js",
+    "build-debug": "./scripts/build.js --debug"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
@@ -422,6 +422,7 @@
     "decentraland": "^3.14.2",
     "decentraland-ecs": "^6.11.11",
     "dotenv": "^16.0.3",
+    "estrella": "^1.4.1",
     "express": "^4.18.2",
     "fp-future": "^1.0.1",
     "gunzip-maybe": "^1.4.2",
