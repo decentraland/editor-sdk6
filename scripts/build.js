@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const { build, cliopts } = require('estrella')
-const path = require('path')
+const { build } = require('estrella')
 
 // I took this from here: https://github.com/evanw/esbuild/issues/1051#issuecomment-806325487
 const nativeNodeModulesPlugin = {
