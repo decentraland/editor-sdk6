@@ -11,12 +11,10 @@ import {
   stopServer as stopDCLPreview,
 } from './dcl-preview/server'
 import {
-  getCwd,
-  isDCL,
-  isEmpty,
-  setExtensionPath,
-  setGlobalStoragePath,
-} from './modules/path'
+  startServer as startWSServer,
+  stopServer as stopWSServer,
+} from './entity-tree/server'
+import { setExtensionPath, setGlobalStoragePath } from './modules/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
 import { browser } from './commands/browser'
@@ -29,7 +27,7 @@ import { Dependency } from './dependencies/types'
 import { npmInstall, npmUninstall } from './modules/npm'
 import { getServerParams, getServerUrl, ServerName } from './modules/port'
 import { ProjectType } from './modules/project'
-import { checkBinaries, resolveVersion, setVersion } from './modules/node'
+import { checkNodeBinaries, resolveVersion, setVersion } from './modules/node'
 import { unwatch, watch } from './modules/watch'
 import { log } from './modules/log'
 import { setContext } from './modules/context'
@@ -41,6 +39,7 @@ import {
 } from './modules/analytics'
 import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
 import { getPackageJson, getPackageVersion } from './modules/pkg'
+import { getCwd, isDCL, isEmpty } from './modules/workspace'
 
 export async function activate(context: vscode.ExtensionContext) {
   track('activation:request')
@@ -82,7 +81,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Create dependency tree
     createTree()
 
-    // Helper ro register a command
+    // Helper to register a command
     const disposables: vscode.Disposable[] = []
     const registerCommand = (
       command: string,
@@ -123,6 +122,7 @@ export async function activate(context: vscode.ExtensionContext) {
               `The current workspace is not a Decentraland project`
             )
           }
+          // It's important to return null here, so the configuration defined in the package.json is used
           return null
         },
       },
@@ -194,7 +194,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     // Check node binaries, download them if necessary
-    await checkBinaries()
+    await checkNodeBinaries()
 
     // Start servers and watchers
     await boot()
@@ -228,10 +228,10 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
+  await Promise.all([stopGLTFPreview(), stopDCLPreview(), stopWSServer()])
   // Deactivate analytics
   deactivateAnalytics()
-  // Deactivate rror reporting
+  // Deactivate error reporting
   deactivateRollbar()
 }
 
@@ -252,7 +252,7 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([startGLTFPreview(), startDCLPreview()])
+      ? Promise.all([startGLTFPreview(), startDCLPreview(), startWSServer()])
       : startGLTFPreview())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)

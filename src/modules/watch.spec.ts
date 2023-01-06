@@ -12,8 +12,8 @@ import { debounce } from './debounce'
 jest.mock('./debounce')
 const debounceMock = debounce as jest.MockedFunction<typeof debounce>
 
-import { getCwd } from './path'
-jest.mock('./path')
+import { getCwd } from './workspace'
+jest.mock('./workspace')
 const getCwdMock = getCwd as jest.MockedFunction<typeof getCwd>
 
 import chokidar from 'chokidar'

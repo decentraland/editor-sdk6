@@ -21,9 +21,8 @@ import { bind } from './log'
 jest.mock('./log')
 const bindMock = bind as jest.MockedFunction<typeof bind>
 
-import { getCwd, getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
+import { getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
 jest.mock('./path')
-const getCwdMock = getCwd as jest.MockedFunction<typeof getCwd>
 const getModuleBinPathMock = getModuleBinPath as jest.MockedFunction<
   typeof getModuleBinPath
 >
@@ -33,6 +32,10 @@ const getNodeBinPathMock = getNodeBinPath as jest.MockedFunction<
 const joinEnvPathsMock = joinEnvPaths as jest.MockedFunction<
   typeof joinEnvPaths
 >
+
+import { getCwd } from './workspace'
+jest.mock('./workspace')
+const getCwdMock = getCwd as jest.MockedFunction<typeof getCwd>
 
 let promiseMock: ReturnType<typeof mockFuture>
 function mockFuture() {

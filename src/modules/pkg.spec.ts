@@ -4,11 +4,14 @@ import { getPackageJson, getPackageVersion } from './pkg'
                           Mocks
 *********************************************************/
 
-import { getExtensionPath, getCwd } from './path'
+import { getExtensionPath } from './path'
 jest.mock('./path')
 const getExtensionPathMock = getExtensionPath as jest.MockedFunction<
   typeof getExtensionPath
 >
+
+import { getCwd } from './workspace'
+jest.mock('./workspace')
 const getCwdMock = getCwd as jest.MockedFunction<typeof getCwd>
 
 import fs from 'fs'

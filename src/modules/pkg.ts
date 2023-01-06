@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { getCwd, getExtensionPath } from './path'
+import { getExtensionPath } from './path'
+import { getCwd } from './workspace'
 
 /**
  * Return the package json of a given module
