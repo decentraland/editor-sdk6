@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
 import { Dependency } from './types'
-import { getCwd } from '../modules/path'
+import { getCwd } from '../modules/workspace'
 
 // Dependency tree (UI)
 let dependencies: DependenciesProvider | null = null
@@ -16,7 +16,6 @@ class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
 
   getChildren(element?: Dependency): Thenable<Dependency[]> {
     if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage('No dependency in empty workspace')
       return Promise.resolve([])
     }
 

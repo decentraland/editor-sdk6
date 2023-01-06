@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import semver, { SemVer } from 'semver'
 import rimraf from 'rimraf'
-import cmdShim from 'cmd-shim'
 import fetch from 'node-fetch'
 import Progress from 'node-fetch-progress'
 import tar from 'tar-fs'
@@ -15,6 +14,7 @@ import { getPackageJson } from './pkg'
 import { sleep } from './sleep'
 import { track } from './analytics'
 import { getMessage } from './error'
+import { link } from './bin'
 
 /**
  * Returns the node version that will be used to run binaries
@@ -241,7 +241,7 @@ export function isWindows(distribution: string) {
  * Installs a given distribution
  * @param distribution
  */
-async function install(distribution: string) {
+async function installNode(distribution: string) {
   try {
     track(`node.install:request`, { distribution })
     const binPath = getGlobalBinPath()
@@ -298,7 +298,7 @@ async function install(distribution: string) {
  * Uninstalls a given distribution
  * @param distribution
  */
-async function uninstall(distribution: string) {
+async function uninstallNode(distribution: string) {
   try {
     track(`node.uninstall:request`, { distribution })
     log(`Uninstalling ${distribution}...`)
@@ -322,7 +322,7 @@ async function uninstall(distribution: string) {
  * This checks if the necessary binaries are installed. If not, it proceeds to uninstall older distributions and install the expected one.
  * @returns
  */
-export async function checkBinaries() {
+export async function checkNodeBinaries() {
   try {
     const distribution = getDistribution()
     const nodeBinPath = getNodeBinPath()
@@ -345,7 +345,7 @@ export async function checkBinaries() {
       // Uninstall and unlink older distributions
       const distributions = await getInstalledDistributions()
       for (const distribution of distributions) {
-        await uninstall(distribution)
+        await uninstallNode(distribution)
       }
       if (distributions.length > 0) {
         await unlink()
@@ -353,11 +353,11 @@ export async function checkBinaries() {
 
       // Install the current distribution
       const distribution = getDistribution()
-      await install(distribution)
+      await installNode(distribution)
     }
 
     if (!isLinked()) {
-      await link()
+      await linkNode()
     }
 
     track(`node.check:success`, { distribution, wasInstalled: isNodeInstalled })
@@ -373,20 +373,14 @@ export async function checkBinaries() {
  * Link the current distribution
  * @returns
  */
-async function link() {
+async function linkNode() {
   track(`node.link:request`)
   try {
     const cmdPath = getNodeCmdPath()
     const binPath = getNodeBinPath()
-    if (process.platform === 'win32') {
-      log('Linking distribution using cmd-shim (win)...')
-      await cmdShim(binPath, cmdPath.split('.cmd')[0]) // remove the .cmd part, since it will get added by cmdShim
-    } else {
-      log('Linking distribution using symlink (unix)...')
-      fs.symlinkSync(binPath, cmdPath)
-    }
-    log('Link from:', cmdPath)
-    log('Link to:', binPath)
+    log('Cmd path:', cmdPath)
+    log('Bin path:', binPath)
+    await link(cmdPath, binPath)
     log('Done!')
     track(`node.link:success`)
   } catch (error) {

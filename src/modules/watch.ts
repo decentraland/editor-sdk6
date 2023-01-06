@@ -3,7 +3,7 @@ import path from 'path'
 import { refreshTree } from '../dependencies/tree'
 import { debounce } from './debounce'
 import { log } from './log'
-import { getCwd } from './path'
+import { getCwd } from './workspace'
 
 let watcher: chokidar.FSWatcher | null = null
 

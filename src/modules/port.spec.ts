@@ -19,8 +19,8 @@ import { sleep } from './sleep'
 jest.mock('./sleep')
 const sleepMock = sleep as jest.MockedFunction<typeof sleep>
 
-import { getScene } from './path'
-jest.mock('./path')
+import { getScene } from './workspace'
+jest.mock('./workspace')
 const getSceneMock = getScene as jest.MockedFunction<typeof getScene>
 
 import net from 'net'

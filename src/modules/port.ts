@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 import future from 'fp-future'
 import net, { AddressInfo } from 'net'
 import { sleep } from './sleep'
-import { getScene } from './path'
+import { getScene } from './workspace'
 
 /**
  * List of all the servers
@@ -12,6 +12,7 @@ export enum ServerName {
   GTLFPreview = 'gltf-preview',
   DCLPreview = 'dcl-preview',
   DCLDeploy = 'dcl-deploy',
+  WSTransport = 'ws-transport',
 }
 
 /**
