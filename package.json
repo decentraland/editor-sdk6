@@ -409,13 +409,15 @@
   },
   "dependencies": {
     "@dcl/schemas": "^5.18.1",
-    "@dcl/sdk": "^7.0.5",
+    "@dcl/sdk": "^7.0.6-3857398079.commit-7a4c5cb",
     "@dcl/wearable-preview": "^1.14.0",
     "@types/analytics-node": "^3.1.9",
     "@types/cmd-shim": "^5.0.0",
+    "@types/express-ws": "^3.0.1",
     "@types/jest": "^29.2.3",
     "@types/semver": "^7.3.13",
     "@types/unzip-stream": "^0.3.1",
+    "@types/ws": "^8.5.4",
     "analytics-node": "^6.2.0",
     "chokidar": "^3.5.3",
     "cmd-shim": "^6.0.0",
@@ -425,6 +427,7 @@
     "dotenv": "^16.0.3",
     "estrella": "^1.4.1",
     "express": "^4.18.2",
+    "express-ws": "^5.0.2",
     "fp-future": "^1.0.1",
     "gunzip-maybe": "^1.4.2",
     "is-running": "^2.1.0",
@@ -440,6 +443,7 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "unzip-stream": "^0.3.1",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "ws": "^8.11.0"
   }
 }
