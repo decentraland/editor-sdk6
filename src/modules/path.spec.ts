@@ -2,6 +2,7 @@ import {
   getExtensionPath,
   getGlobalStoragePath,
   getModuleBinPath,
+  getNodeBinPath,
   joinEnvPaths,
   setExtensionPath,
   setGlobalStoragePath,
@@ -16,6 +17,7 @@ jest.mock('./log')
 const logMock = log as jest.MockedFunction<typeof log>
 
 import { getPackageJson } from './pkg'
+import { setVersion } from './node'
 jest.mock('./pkg')
 const getPackageJsonMock = getPackageJson as jest.MockedFunction<
   typeof getPackageJson
@@ -112,6 +114,64 @@ describe('path', () => {
       })
       it('should throw', () => {
         expect(() => getModuleBinPath('some-module', 'cmd')).toThrow()
+      })
+    })
+  })
+  describe('When getting the node bin path', () => {
+    const realProcessPlatform = process.platform
+    const realProcessArch = process.arch
+    beforeAll(() => {
+      setVersion('1.0.0')
+      setGlobalStoragePath('/globalStorage')
+    })
+    afterAll(() => {
+      setVersion(null)
+      setGlobalStoragePath(null)
+    })
+    describe('and the platform is Windows', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        })
+        Object.defineProperty(process, 'arch', {
+          value: 'x64',
+        })
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
+        })
+      })
+      it('should return the path to the Windows node bin', () => {
+        expect(getNodeBinPath()).toBe(
+          '/globalStorage/bin/node-v1.0.0-win-x64/node.exe'
+        )
+      })
+    })
+    describe('and the platform is MacOS', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'darwin',
+        })
+        Object.defineProperty(process, 'arch', {
+          value: 'arm64',
+        })
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
+        })
+      })
+      it('should return the path to the MacOS node bin', () => {
+        expect(getNodeBinPath()).toBe(
+          '/globalStorage/bin/node-v1.0.0-darwin-arm64/bin/node'
+        )
       })
     })
   })

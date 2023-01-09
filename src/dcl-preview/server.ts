@@ -10,7 +10,7 @@ import { SpanwedChild } from '../modules/spawn'
 import { log } from '../modules/log'
 import { loader } from '../modules/loader'
 import { hasNodeModules } from '../modules/workspace'
-import { linkSdk } from '../modules/sdk'
+import { syncSdkVersion } from '../modules/sdk'
 
 let child: SpanwedChild | null = null
 let isStarting = false
@@ -31,7 +31,8 @@ export async function startServer() {
       await npmInstall()
     }
 
-    await linkSdk()
+    // sync sdk version with workspace
+    await syncSdkVersion()
 
     const port = await getPort(ServerName.DCLPreview)
 

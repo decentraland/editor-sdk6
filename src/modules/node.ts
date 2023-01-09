@@ -228,6 +228,20 @@ export function getExtension(distribution: string) {
 }
 
 /**
+ * Returns the extension for a given distribution
+ * @param distribution
+ * @returns
+ */
+export function getStream(binPath: string, distribution: string) {
+  const extension = getExtension(distribution)
+  const stream: NodeJS.WritableStream =
+    extension === '.tar.gz'
+      ? tar.extract(binPath)
+      : zip.Extract({ path: binPath })
+  return stream
+}
+
+/**
  * Util to detect if a distribution is for Windows
  * @param distribution
  * @returns
@@ -273,10 +287,7 @@ async function installNode(distribution: string) {
       }
     })
     const save = future()
-    const stream =
-      extension === '.tar.gz'
-        ? tar.extract(binPath)
-        : zip.Extract({ path: binPath })
+    const stream = getStream(binPath, distribution)
     resp.body.pipe(gunzip()).pipe(stream)
     resp.body.on('end', save.resolve)
     stream.on('error', save.reject)
@@ -348,7 +359,7 @@ export async function checkNodeBinaries() {
         await uninstallNode(distribution)
       }
       if (distributions.length > 0) {
-        await unlink()
+        await unlinkNode()
       }
 
       // Install the current distribution
@@ -380,7 +391,9 @@ async function linkNode() {
     const binPath = getNodeBinPath()
     log('Cmd path:', cmdPath)
     log('Bin path:', binPath)
-    await link(cmdPath, binPath)
+    if (!isLinked()) {
+      await link(cmdPath, binPath)
+    }
     log('Done!')
     track(`node.link:success`)
   } catch (error) {
@@ -395,7 +408,7 @@ async function linkNode() {
  * Unlink the current distribution
  * @returns
  */
-async function unlink() {
+async function unlinkNode() {
   track(`node.unlink:request`)
   try {
     const promise = future<void>()
