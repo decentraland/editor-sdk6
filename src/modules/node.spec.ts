@@ -87,11 +87,27 @@ const zipExtractMock = zip.Extract as jest.MockedFunction<typeof zip.Extract>
 *********************************************************/
 
 describe('node', () => {
+  const realProcessPlatform = process.platform
+  const realProcessArch = process.arch
   beforeAll(() => {
     setGlobalStoragePath('/globalStorage')
+    Object.defineProperty(process, 'platform', {
+      value: 'darwin',
+    })
+    Object.defineProperty(process, 'arch', {
+      value: 'arm64',
+    })
   })
   afterEach(() => {
     logMock.mockReset()
+  })
+  afterAll(() => {
+    Object.defineProperty(process, 'platform', {
+      value: realProcessPlatform,
+    })
+    Object.defineProperty(process, 'arch', {
+      value: realProcessArch,
+    })
   })
   describe('When getting the node version', () => {
     it('should throw if was not set already', () => {
@@ -604,198 +620,188 @@ describe('node', () => {
       })
     })
   })
-})
-describe('When getting the platform', () => {
-  const realProcessPlatform = process.platform
-  const realProcessArch = process.arch
-  afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: realProcessPlatform,
-    })
-    Object.defineProperty(process, 'arch', {
-      value: realProcessArch,
-    })
-  })
-  describe('and the platform is MacOS', () => {
-    beforeEach(() => {
-      Object.defineProperty(process, 'platform', {
-        value: 'darwin',
-      })
-    })
-    describe('and the architecture is ARM', () => {
+  describe('When getting the platform', () => {
+    describe('and the platform is MacOS', () => {
       beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'arm64',
+        Object.defineProperty(process, 'platform', {
+          value: 'darwin',
         })
       })
-      it('should return "darwin-arm64"', () => {
-        expect(getPlatform()).toBe('darwin-arm64')
-      })
-    })
-    describe('and the architecture is 64bit', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'x64',
+      describe('and the architecture is ARM', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'arm64',
+          })
+        })
+        it('should return "darwin-arm64"', () => {
+          expect(getPlatform()).toBe('darwin-arm64')
         })
       })
-      it('should return "darwin-x64"', () => {
-        expect(getPlatform()).toBe('darwin-x64')
+      describe('and the architecture is 64bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'x64',
+          })
+        })
+        it('should return "darwin-x64"', () => {
+          expect(getPlatform()).toBe('darwin-x64')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an "Unsupported architecture" error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
       })
     })
-    describe('and the architecture is not supported', () => {
+    describe('and the platform is Windows', () => {
       beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        })
+      })
+      describe('and the architecture is 64bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'x64',
+          })
+        })
+        it('should return "win-x64"', () => {
+          expect(getPlatform()).toBe('win-x64')
+        })
+      })
+      describe('and the architecture is 32bit', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'ia32',
+          })
+        })
+        it('should return "win-x86"', () => {
+          expect(getPlatform()).toBe('win-x86')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an "Unsupported architecture" error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
+      })
+    })
+    describe('and the platform is Linux', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'linux',
+        })
+      })
+      describe('and the architecture is ARM', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'arm',
+          })
+        })
+        it('should return "linux-armv71"', () => {
+          expect(getPlatform()).toBe('linux-armv71')
+        })
+      })
+      describe('and the architecture is ppc64', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'ppc64',
+          })
+        })
+        it('should return "linux-ppc64le"', () => {
+          expect(getPlatform()).toBe('linux-ppc64le')
+        })
+      })
+      describe('and the architecture is s390x', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 's390x',
+          })
+        })
+        it('should return "linux-s390x"', () => {
+          expect(getPlatform()).toBe('linux-s390x')
+        })
+      })
+      describe('and the architecture is not supported', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'unknown',
+          })
+        })
+        it('should throw an "Unsupported architecture" error', () => {
+          expect(getPlatform).toThrow('Unsupported architecture')
+        })
+      })
+    })
+    describe('and the platform is not supported', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
           value: 'unknown',
         })
       })
-      it('should throw an "Unsupported architecture" error', () => {
-        expect(getPlatform).toThrow('Unsupported architecture')
+      it('should throw an "Unsupported platform" error', () => {
+        expect(getPlatform).toThrow('Unsupported platform')
       })
     })
-  })
-  describe('and the platform is Windows', () => {
-    beforeEach(() => {
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-      })
-    })
-    describe('and the architecture is 64bit', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'x64',
+    describe('when getting the file extension for a given distribution', () => {
+      describe('and the distribution is for Windows', () => {
+        it('should return ".zip"', () => {
+          expect(getExtension('node-v1.0.0-win-x64')).toBe('.zip')
         })
       })
-      it('should return "win-x64"', () => {
-        expect(getPlatform()).toBe('win-x64')
-      })
-    })
-    describe('and the architecture is 32bit', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'ia32',
+      describe('and the distribution is for MacOS', () => {
+        it('should return ".tar.gz"', () => {
+          expect(getExtension('node-v1.0.0-darwin-arm64')).toBe('.tar.gz')
         })
       })
-      it('should return "win-x86"', () => {
-        expect(getPlatform()).toBe('win-x86')
-      })
-    })
-    describe('and the architecture is not supported', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'unknown',
-        })
-      })
-      it('should throw an "Unsupported architecture" error', () => {
-        expect(getPlatform).toThrow('Unsupported architecture')
-      })
-    })
-  })
-  describe('and the platform is Linux', () => {
-    beforeEach(() => {
-      Object.defineProperty(process, 'platform', {
-        value: 'linux',
-      })
-    })
-    describe('and the architecture is ARM', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'arm',
-        })
-      })
-      it('should return "linux-armv71"', () => {
-        expect(getPlatform()).toBe('linux-armv71')
-      })
-    })
-    describe('and the architecture is ppc64', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'ppc64',
-        })
-      })
-      it('should return "linux-ppc64le"', () => {
-        expect(getPlatform()).toBe('linux-ppc64le')
-      })
-    })
-    describe('and the architecture is s390x', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 's390x',
-        })
-      })
-      it('should return "linux-s390x"', () => {
-        expect(getPlatform()).toBe('linux-s390x')
-      })
-    })
-    describe('and the architecture is not supported', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'arch', {
-          value: 'unknown',
-        })
-      })
-      it('should throw an "Unsupported architecture" error', () => {
-        expect(getPlatform).toThrow('Unsupported architecture')
-      })
-    })
-  })
-  describe('and the platform is not supported', () => {
-    beforeEach(() => {
-      Object.defineProperty(process, 'platform', {
-        value: 'unknown',
-      })
-    })
-    it('should throw an "Unsupported platform" error', () => {
-      expect(getPlatform).toThrow('Unsupported platform')
-    })
-  })
-  describe('when getting the file extension for a given distribution', () => {
-    describe('and the distribution is for Windows', () => {
-      it('should return ".zip"', () => {
-        expect(getExtension('node-v1.0.0-win-x64')).toBe('.zip')
-      })
-    })
-    describe('and the distribution is for MacOS', () => {
-      it('should return ".tar.gz"', () => {
-        expect(getExtension('node-v1.0.0-darwin-arm64')).toBe('.tar.gz')
-      })
-    })
-    describe('and the distribution is for Linux', () => {
-      it('should return ".tar.gz"', () => {
-        expect(getExtension('node-v1.0.0-linux-arm')).toBe('.tar.gz')
-      })
-    })
-  })
-  describe('when getting the stream for a given distribution', () => {
-    describe('and the distribution is for Windows', () => {
-      it('should return a zip stream', () => {
-        getStream(
-          '/globalStorage/bin/node-v1.0.0-win-x64/bin/node',
-          'node-v1.0.0-win-x64'
-        )
-        expect(zipExtractMock).toHaveBeenCalledWith({
-          path: '/globalStorage/bin/node-v1.0.0-win-x64/bin/node',
+      describe('and the distribution is for Linux', () => {
+        it('should return ".tar.gz"', () => {
+          expect(getExtension('node-v1.0.0-linux-arm')).toBe('.tar.gz')
         })
       })
     })
-    describe('and the distribution is for MacOS', () => {
-      it('should return a tar stream', () => {
-        getStream(
-          '/globalStorage/bin/node-v1.0.0-darwin-arm64/bin/node',
-          'node-v1.0.0-darwin-arm64'
-        )
-        expect(tarExtractMock).toHaveBeenCalledWith(
-          '/globalStorage/bin/node-v1.0.0-darwin-arm64/bin/node'
-        )
+    describe('when getting the stream for a given distribution', () => {
+      describe('and the distribution is for Windows', () => {
+        it('should return a zip stream', () => {
+          getStream(
+            '/globalStorage/bin/node-v1.0.0-win-x64/bin/node',
+            'node-v1.0.0-win-x64'
+          )
+          expect(zipExtractMock).toHaveBeenCalledWith({
+            path: '/globalStorage/bin/node-v1.0.0-win-x64/bin/node',
+          })
+        })
       })
-    })
-    describe('and the distribution is for Linux', () => {
-      it('should return ".tar.gz"', () => {
-        getStream(
-          '/globalStorage/bin/node-v1.0.0-linux-arm/bin/node',
-          'node-v1.0.0-linux-arm'
-        )
-        expect(tarExtractMock).toHaveBeenCalledWith(
-          '/globalStorage/bin/node-v1.0.0-linux-arm/bin/node'
-        )
+      describe('and the distribution is for MacOS', () => {
+        it('should return a tar stream', () => {
+          getStream(
+            '/globalStorage/bin/node-v1.0.0-darwin-arm64/bin/node',
+            'node-v1.0.0-darwin-arm64'
+          )
+          expect(tarExtractMock).toHaveBeenCalledWith(
+            '/globalStorage/bin/node-v1.0.0-darwin-arm64/bin/node'
+          )
+        })
+      })
+      describe('and the distribution is for Linux', () => {
+        it('should return ".tar.gz"', () => {
+          getStream(
+            '/globalStorage/bin/node-v1.0.0-linux-arm/bin/node',
+            'node-v1.0.0-linux-arm'
+          )
+          expect(tarExtractMock).toHaveBeenCalledWith(
+            '/globalStorage/bin/node-v1.0.0-linux-arm/bin/node'
+          )
+        })
       })
     })
   })
