@@ -1,4 +1,4 @@
-import { bin } from './bin'
+import { bin, link } from './bin'
 import { setGlobalStoragePath, setExtensionPath } from './path'
 
 /********************************************************
@@ -16,6 +16,16 @@ const getPackageJsonMock = getPackageJson as jest.MockedFunction<
 import { SpanwedChild, spawn } from './spawn'
 jest.mock('./spawn')
 const spawnMock = spawn as jest.MockedFunction<typeof spawn>
+
+import cmdShim from 'cmd-shim'
+jest.mock('cmd-shim')
+const cmdShimMock = cmdShim as jest.MockedFunction<typeof cmdShim>
+
+import fs from 'fs'
+jest.spyOn(fs, 'symlinkSync')
+const fsSymlinkSyncMock = fs.symlinkSync as jest.MockedFunction<
+  typeof fs.symlinkSync
+>
 
 /********************************************************
                           Tests
@@ -173,6 +183,66 @@ describe('bin', () => {
           '/globalStorage/node.cmd',
           [expect.any(String)],
           expect.any(Object)
+        )
+      })
+    })
+  })
+  describe('when linking a binary', () => {
+    const realProcessPlatform = process.platform
+    const realProcessArch = process.arch
+    describe('and the platform is Windows', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        })
+        Object.defineProperty(process, 'arch', {
+          value: 'x64',
+        })
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
+        })
+        cmdShimMock.mockReset()
+      })
+      it('should use cmd-shim to make the link', async () => {
+        await expect(link('path/to/cmd', 'path/to/bin')).resolves.toBe(void 0)
+        expect(cmdShimMock).toHaveBeenCalledWith('path/to/bin', 'path/to/cmd')
+      })
+      it('should remove the .cmd part since it will be added by cmd-shim', async () => {
+        await expect(link('path/to/file.cmd', 'path/to/bin')).resolves.toBe(
+          void 0
+        )
+        expect(cmdShimMock).toHaveBeenCalledWith('path/to/bin', 'path/to/file')
+      })
+    })
+    describe('and the platform is Windows', () => {
+      beforeEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: 'darwin',
+        })
+        Object.defineProperty(process, 'arch', {
+          value: 'arm64',
+        })
+        fsSymlinkSyncMock.mockReturnValueOnce()
+      })
+      afterEach(() => {
+        Object.defineProperty(process, 'platform', {
+          value: realProcessPlatform,
+        })
+        Object.defineProperty(process, 'arch', {
+          value: realProcessArch,
+        })
+        fsSymlinkSyncMock.mockReset()
+      })
+      it('should use a regular symlink to make the link', async () => {
+        await expect(link('path/to/cmd', 'path/to/bin')).resolves.toBe(void 0)
+        expect(fsSymlinkSyncMock).toHaveBeenCalledWith(
+          'path/to/bin',
+          'path/to/cmd'
         )
       })
     })

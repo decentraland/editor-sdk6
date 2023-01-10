@@ -3,6 +3,7 @@ import express from 'express'
 import { Server } from 'http'
 import future from 'fp-future'
 import { clearPort, getPort, ServerName } from '../modules/port'
+import { log } from '../modules/log'
 
 const app = express()
 const dir = path.join(
@@ -15,13 +16,11 @@ app.use(express.static(dir))
 let server: Server | null = null
 
 export async function startServer() {
-  if (server) {
-    await stopServer()
-  }
+  await stopServer()
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()
   server = app.listen(port, () => {
-    console.info(`GLTFPreview: http server assigned port is ${port}`)
+    log(`GLTFPreview: http server assigned port is ${port}`)
     promise.resolve()
   })
 
@@ -31,8 +30,8 @@ export async function startServer() {
 export async function stopServer() {
   if (server) {
     server.close()
+    server = null
+    clearPort(ServerName.GTLFPreview)
+    log(`GLTFPreview: http server closed`)
   }
-  server = null
-  clearPort(ServerName.GTLFPreview)
-  console.info(`GLTFPreview: http server closed`)
 }

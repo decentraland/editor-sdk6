@@ -5,7 +5,8 @@ import future from 'fp-future'
 import { Readable } from 'stream'
 import isRunning from 'is-running'
 import { bind, log } from './log'
-import { getCwd, getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
+import { getModuleBinPath, getNodeBinPath, joinEnvPaths } from './path'
+import { getCwd } from './workspace'
 
 export type SpanwedChild = {
   id: string

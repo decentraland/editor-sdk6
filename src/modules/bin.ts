@@ -1,5 +1,8 @@
+import fs from 'fs'
+import cmdShim from 'cmd-shim'
 import { escapeWhiteSpaces, getModuleBinPath, getNodeCmdPath } from './path'
 import { spawn, SpawnOptions } from './spawn'
+import { log } from './log'
 
 /**
  * Runs an command binary from the local modules
@@ -23,4 +26,20 @@ export function bin(
     [bin, ...(args.filter((arg: string | undefined) => !!arg) as string[])],
     options
   )
+}
+
+/**
+ * Creates either a symlink (unix) or a command shim (windows) from a command file to a binary file
+ */
+export async function link(cmdPath: string, binPath: string) {
+  log(`Linking from "${cmdPath}" to "${binPath}"...`)
+  if (process.platform === 'win32') {
+    await cmdShim(
+      binPath,
+      // remove the .cmd part if present, since it will get added by cmdShim
+      cmdPath.endsWith('.cmd') ? cmdPath.replace(/\.cmd$/, '') : cmdPath
+    )
+  } else {
+    fs.symlinkSync(binPath, cmdPath)
+  }
 }

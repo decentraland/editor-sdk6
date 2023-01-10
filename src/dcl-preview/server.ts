@@ -1,15 +1,16 @@
+import { ProgressLocation } from 'vscode'
 import {
   npmInstall,
   warnDecentralandLibrary,
   warnOutdatedDependency,
 } from '../modules/npm'
-import { hasNodeModules } from '../modules/path'
 import { getPort, ServerName } from '../modules/port'
 import { bin } from '../modules/bin'
 import { SpanwedChild } from '../modules/spawn'
 import { log } from '../modules/log'
 import { loader } from '../modules/loader'
-import { ProgressLocation } from 'vscode'
+import { hasNodeModules } from '../modules/workspace'
+import { syncSdkVersion } from '../modules/sdk'
 
 let child: SpanwedChild | null = null
 let isStarting = false
@@ -25,9 +26,13 @@ export async function startServer() {
       await stopServer()
     }
 
+    // install dependencies
     if (!hasNodeModules()) {
       await npmInstall()
     }
+
+    // sync sdk version with workspace
+    await syncSdkVersion()
 
     const port = await getPort(ServerName.DCLPreview)
 
