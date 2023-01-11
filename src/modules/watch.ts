@@ -1,6 +1,6 @@
 import chokidar from 'chokidar'
 import path from 'path'
-import { refreshTree } from '../dependencies/tree'
+import { refreshTree } from '../views/dependency-tree/tree'
 import { debounce } from './debounce'
 import { log } from './log'
 import { getCwd } from './workspace'

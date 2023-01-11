@@ -3,14 +3,14 @@ import {
   npmInstall,
   warnDecentralandLibrary,
   warnOutdatedDependency,
-} from '../modules/npm'
-import { getPort, ServerName } from '../modules/port'
-import { bin } from '../modules/bin'
-import { SpanwedChild } from '../modules/spawn'
-import { log } from '../modules/log'
-import { loader } from '../modules/loader'
-import { hasNodeModules } from '../modules/workspace'
-import { syncSdkVersion } from '../modules/sdk'
+} from '../../modules/npm'
+import { getPort, ServerName } from '../../modules/port'
+import { bin } from '../../modules/bin'
+import { SpanwedChild } from '../../modules/spawn'
+import { log } from '../../modules/log'
+import { loader } from '../../modules/loader'
+import { hasNodeModules } from '../../modules/workspace'
+import { syncSdkVersion } from '../../modules/sdk'
 
 let child: SpanwedChild | null = null
 let isStarting = false
@@ -34,9 +34,9 @@ export async function startServer() {
     // sync sdk version with workspace
     await syncSdkVersion()
 
-    const port = await getPort(ServerName.DCLPreview)
+    const port = await getPort(ServerName.RunScene)
 
-    log(`DCLPreview: http server assigned port is ${port}`)
+    log(`RunScene: http server assigned port is ${port}`)
 
     child = bin('decentraland', 'dcl', [
       'start',
@@ -63,7 +63,7 @@ export async function startServer() {
 
     child.process.on('close', (code) => {
       if (code !== null) {
-        log(`DCLPreview: http server closed with status code ${code}`)
+        log(`RunScene: http server closed with status code ${code}`)
       }
       child = null
     })
@@ -79,7 +79,7 @@ export async function startServer() {
       ProgressLocation.Window
     )
   } catch (error) {
-    log('Could not initialize DCLPreview server')
+    log('Could not initialize RunScene server')
   }
 
   // unset

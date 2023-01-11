@@ -1,25 +1,25 @@
 import * as vscode from 'vscode'
 import env from 'dotenv'
 import path from 'path'
-import { GLTFPreviewEditorProvider } from './gltf-preview/provider'
+import { GLTFPreviewEditorProvider } from './views/gltf-preview/provider'
 import {
   startServer as startGLTFPreview,
   stopServer as stopGLTFPreview,
-} from './gltf-preview/server'
+} from './views/gltf-preview/server'
 import {
-  startServer as startDCLPreview,
-  stopServer as stopDCLPreview,
-} from './dcl-preview/server'
+  startServer as startRunScene,
+  stopServer as stopRunScene,
+} from './views/run-scene/server'
 import { setExtensionPath, setGlobalStoragePath } from './modules/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
 import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
-import { createTree, registerTree } from './dependencies/tree'
+import { createTree, registerTree } from './views/dependency-tree/tree'
 import { init } from './commands/init'
 import { restart } from './commands/restart'
-import { Dependency } from './dependencies/types'
+import { Dependency } from './views/dependency-tree/types'
 import { npmInstall, npmUninstall } from './modules/npm'
 import { getServerParams, getServerUrl, ServerName } from './modules/port'
 import { ProjectType } from './modules/project'
@@ -45,8 +45,8 @@ export async function activate(context: vscode.ExtensionContext) {
       context.extensionMode === vscode.ExtensionMode.Development
         ? 'development'
         : context.extensionMode === vscode.ExtensionMode.Production
-        ? 'production'
-        : 'test'
+          ? 'production'
+          : 'test'
     log(`Extension mode: ${mode}`)
 
     // Load .env
@@ -134,8 +134,8 @@ export async function activate(context: vscode.ExtensionContext) {
     registerCommand(
       'decentraland.commands.getDebugURL',
       async () =>
-        `${await getServerUrl(ServerName.DCLPreview)}${await getServerParams(
-          ServerName.DCLPreview
+        `${await getServerUrl(ServerName.RunScene)}${await getServerParams(
+          ServerName.RunScene
         )}`
     )
     registerCommand('decentraland.commands.restart', () => restart())
@@ -153,13 +153,13 @@ export async function activate(context: vscode.ExtensionContext) {
       )
     )
     registerCommand('decentraland.commands.browser.run', () =>
-      browser(ServerName.DCLPreview)
+      browser(ServerName.RunScene)
     )
     registerCommand('decentraland.commands.browser.deploy', () =>
       browser(ServerName.DCLDeploy)
     )
     registerCommand('decentraland.commands.browser.web3', () =>
-      browser(ServerName.DCLPreview, '&ENABLE_WEB3')
+      browser(ServerName.RunScene, '&ENABLE_WEB3')
     )
 
     // Dependencies
@@ -224,7 +224,7 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopDCLPreview()])
+  await Promise.all([stopGLTFPreview(), stopRunScene()])
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
@@ -248,7 +248,7 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([startGLTFPreview(), startDCLPreview()])
+      ? Promise.all([startGLTFPreview(), startRunScene()])
       : startGLTFPreview())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)

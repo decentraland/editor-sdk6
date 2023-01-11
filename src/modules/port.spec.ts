@@ -36,7 +36,7 @@ const createServerSpy = net.createServer as jest.MockedFunction<
 
 describe('port', () => {
   beforeEach(() => {
-    clearPort(ServerName.DCLPreview)
+    clearPort(ServerName.RunScene)
   })
   afterEach(() => {
     createServerSpy.mockClear()
@@ -45,33 +45,33 @@ describe('port', () => {
   })
   describe('When getting a port for a given server', () => {
     it('should resolve to an available port', async () => {
-      await expect(getPort(ServerName.DCLPreview)).resolves.toEqual(
+      await expect(getPort(ServerName.RunScene)).resolves.toEqual(
         expect.any(Number)
       )
     })
     it('should create a server', async () => {
-      await getPort(ServerName.DCLPreview)
+      await getPort(ServerName.RunScene)
       expect(createServerSpy).toHaveBeenCalled()
     })
     describe('and the port has already been assigned', () => {
       it('should reuse the port already assigned to that server', async () => {
-        await getPort(ServerName.DCLPreview)
+        await getPort(ServerName.RunScene)
         expect(createServerSpy).toHaveBeenCalledTimes(1)
         createServerSpy.mockClear()
-        await getPort(ServerName.DCLPreview)
+        await getPort(ServerName.RunScene)
         expect(createServerSpy).toHaveBeenCalledTimes(0)
       })
     })
   })
   describe('When getting the url for a server', () => {
     it('should point to localhost and the port for the given server name', async () => {
-      await expect(getServerUrl(ServerName.DCLPreview)).resolves.toMatch(
+      await expect(getServerUrl(ServerName.RunScene)).resolves.toMatch(
         /http:\/\/localhost:\d+/
       )
     })
   })
   describe('When params for a server', () => {
-    describe('and the server is DCLPreview', () => {
+    describe('and the server is RunScene', () => {
       beforeEach(() => {
         getSceneMock.mockReturnValue({
           scene: { base: '0,0' },
@@ -81,10 +81,10 @@ describe('port', () => {
         getSceneMock.mockReset()
       })
       it('should return the position', () => {
-        expect(getServerParams(ServerName.DCLPreview)).toBe('?position=0,0')
+        expect(getServerParams(ServerName.RunScene)).toBe('?position=0,0')
       })
     })
-    describe('and the server is not DCLPreview', () => {
+    describe('and the server is not RunScene', () => {
       it('should return nothing', () => {
         expect(getServerParams(ServerName.DCLDeploy)).toBe('')
       })

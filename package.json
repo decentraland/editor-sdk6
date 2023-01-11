@@ -221,7 +221,7 @@
         {
           "command": "decentraland.commands.browser.run",
           "group": "navigation",
-          "when": "activeWebviewPanelId == decentraland.DCLPreview"
+          "when": "activeWebviewPanelId == decentraland.RunScene"
         },
         {
           "command": "decentraland.commands.browser.deploy",

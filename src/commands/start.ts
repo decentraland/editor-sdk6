@@ -11,11 +11,11 @@ import {
 } from '../modules/port'
 
 export async function start() {
-  const url = await getServerUrl(ServerName.DCLPreview)
+  const url = await getServerUrl(ServerName.RunScene)
 
   // Webview
   const panel = vscode.window.createWebviewPanel(
-    `decentraland.DCLPreview`,
+    `decentraland.RunScene`,
     `Decentraland`,
     vscode.ViewColumn.Two,
     { enableScripts: true, retainContextWhenHidden: true }
@@ -40,8 +40,8 @@ export async function start() {
     panel.webview,
     url,
     `<iframe
-      id="dcl-preview"
-      src="${url}${getServerParams(ServerName.DCLPreview)}"
+      id="run-scene"
+      src="${url}${getServerParams(ServerName.RunScene)}"
       width="100%"
       height="100%"
       frameBorder="0"
@@ -52,7 +52,7 @@ export async function start() {
 
 export function getHtml(webview: vscode.Webview, url: string, content: string) {
   const nonce = getNonce()
-  const webviewDirectory = 'src/dcl-preview/webview'
+  const webviewDirectory = 'src/views/run-scene/webview'
 
   const styleUri = webview.asWebviewUri(
     vscode.Uri.file(

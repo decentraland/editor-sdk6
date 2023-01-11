@@ -2,20 +2,23 @@ import path from 'path'
 import express from 'express'
 import { Server } from 'http'
 import future from 'fp-future'
-import { clearPort, getPort, ServerName } from '../modules/port'
-import { log } from '../modules/log'
+import { clearPort, getPort, ServerName } from '../../modules/port'
+import { log } from '../../modules/log'
+import { getExtensionPath } from '../../modules/path'
 
 const app = express()
-const dir = path.join(
-  __dirname,
-  '../../node_modules/@dcl/wearable-preview/static-local'
-)
-
-app.use(express.static(dir))
-
+let isRouted = false
 let server: Server | null = null
 
 export async function startServer() {
+  if (!isRouted) {
+    const dir = path.join(
+      getExtensionPath(),
+      './node_modules/@dcl/wearable-preview/static-local'
+    )
+    app.use(express.static(dir))
+    isRouted = true
+  }
   await stopServer()
   const port = await getPort(ServerName.GTLFPreview)
   const promise = future<void>()

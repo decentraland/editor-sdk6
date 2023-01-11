@@ -1,4 +1,4 @@
-import { startServer, stopServer } from '../dcl-preview/server'
+import { startServer, stopServer } from '../views/run-scene/server'
 
 export async function restart() {
   await stopServer()
