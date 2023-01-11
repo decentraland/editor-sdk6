@@ -18,8 +18,8 @@ const getPackageVersionMock = getPackageVersion as jest.MockedFunction<
                           Tests
 *********************************************************/
 
-let extensionSdkVersion = '1.0.0'
-let workspaceSdkVersion = '1.0.0'
+let extensionSdkVersion: string = '1.0.0'
+let workspaceSdkVersion: string | null = '1.0.0'
 
 describe('sdk', () => {
   beforeEach(() => {
@@ -30,8 +30,18 @@ describe('sdk', () => {
   afterEach(() => {
     getPackageVersionMock.mockReset()
   })
-  describe('When syncing the SDK version', () => {
-    describe('and the version of the workspace is the same than the one on the extension', () => {
+  describe('When syncing the @dcl/sdk version', () => {
+    describe('and the workspace does not use @dcl/sdk', () => {
+      beforeEach(() => {
+        extensionSdkVersion = '1.0.0'
+        workspaceSdkVersion = null
+      })
+      it('should not install the sdk', async () => {
+        await syncSdkVersion()
+        expect(npmInstallMock).not.toHaveBeenCalled()
+      })
+    })
+    describe('and the version of the workspace\'s @dcl/sdk is the same than the one on the extension', () => {
       beforeEach(() => {
         extensionSdkVersion = '1.0.0'
         workspaceSdkVersion = extensionSdkVersion
@@ -41,7 +51,7 @@ describe('sdk', () => {
         expect(npmInstallMock).not.toHaveBeenCalled()
       })
     })
-    describe('and the version of the workspace is the same than the one on the extension', () => {
+    describe('and the version of the workspace\'s @dcl/sdk is different to the one on the extension', () => {
       beforeEach(() => {
         extensionSdkVersion = '2.0.0'
         workspaceSdkVersion = '1.0.0'
