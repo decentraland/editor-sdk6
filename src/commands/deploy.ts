@@ -126,7 +126,7 @@ export async function deploy(...args: string[]) {
 
 function getHtml(webview: vscode.Webview, url: string, content: string) {
   const nonce = getNonce()
-  const webviewDirectory = 'src/dcl-preview/webview'
+  const webviewDirectory = 'src/views/run-scene/webview'
 
   const styleUri = webview.asWebviewUri(
     vscode.Uri.file(

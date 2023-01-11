@@ -10,9 +10,9 @@ import {
   GLFTPreviewWebviewMessage,
   GLFTPreviewWebviewMessageType,
 } from './types/webview-message'
-import { WebviewCollection, getNonce } from '../modules/webviews'
-import { getPort, ServerName } from '../modules/port'
-import { track } from '../modules/analytics'
+import { WebviewCollection, getNonce } from '../../modules/webviews'
+import { getPort, ServerName } from '../../modules/port'
+import { track } from '../../modules/analytics'
 
 export class GLTFPreviewEditorProvider
   implements vscode.CustomReadonlyEditorProvider<GLTFPreviewDocument>
@@ -39,7 +39,7 @@ export class GLTFPreviewEditorProvider
    */
   private readonly webviews = new WebviewCollection()
 
-  constructor(private readonly _context: vscode.ExtensionContext) {}
+  constructor(private readonly _context: vscode.ExtensionContext) { }
 
   //#region CustomEditorProvider
 
@@ -88,7 +88,7 @@ export class GLTFPreviewEditorProvider
     )
 
     // files
-    const webviewDirectory = 'src/gltf-preview/webview'
+    const webviewDirectory = 'src/views/gltf-preview/webview'
 
     // Local path to script and css for the webview
     const scriptUri = webview.asWebviewUri(

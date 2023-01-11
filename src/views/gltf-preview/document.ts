@@ -1,13 +1,12 @@
 import * as vscode from 'vscode'
-import { Disposable } from '../modules/dispose'
+import { Disposable } from '../../modules/dispose'
 
 /**
  * Define the document (the data model) used for paw draw files.
  */
 export class GLTFPreviewDocument
   extends Disposable
-  implements vscode.CustomDocument
-{
+  implements vscode.CustomDocument {
   static async create(
     uri: vscode.Uri
   ): Promise<GLTFPreviewDocument | PromiseLike<GLTFPreviewDocument>> {

@@ -17,8 +17,8 @@ import { restart } from '../commands/restart'
 jest.mock('../commands/restart')
 const restartMock = restart as jest.MockedFunction<typeof restart>
 
-import { stopServer } from '../dcl-preview/server'
-jest.mock('../dcl-preview/server')
+import { stopServer } from '../views/run-scene/server'
+jest.mock('../views/run-scene/server')
 const stopServerMock = stopServer as jest.MockedFunction<typeof stopServer>
 
 import { getLocalValue, setLocalValue } from './storage'

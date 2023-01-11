@@ -10,7 +10,7 @@ import { getScene } from './workspace'
  */
 export enum ServerName {
   GTLFPreview = 'gltf-preview',
-  DCLPreview = 'dcl-preview',
+  RunScene = 'run-scene',
   DCLDeploy = 'dcl-deploy',
   WSTransport = 'ws-transport',
 }
@@ -76,7 +76,7 @@ export async function getServerUrl(server: ServerName) {
  */
 export function getServerParams(server: ServerName) {
   const params =
-    server === ServerName.DCLPreview
+    server === ServerName.RunScene
       ? `?position=${encodeURI(getScene().scene.base)}`
       : ''
   return params

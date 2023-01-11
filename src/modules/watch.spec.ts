@@ -4,8 +4,8 @@ import { watch, unwatch } from './watch'
                           Mocks
 *********************************************************/
 
-import { refreshTree } from '../dependencies/tree'
-jest.mock('../dependencies/tree')
+import { refreshTree } from '../views/dependency-tree/tree'
+jest.mock('../views/dependency-tree/tree')
 const refreshTreeMock = refreshTree as jest.MockedFunction<typeof refreshTree>
 
 import { debounce } from './debounce'
