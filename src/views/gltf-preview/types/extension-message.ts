@@ -10,6 +10,7 @@ export enum GLFTPreviewExtensionMessageType {
 export declare type GLFTPreviewExtensionMessagePayload = {
   [GLFTPreviewExtensionMessageType.INIT]: {
     file: Uint8Array
+    otherFiles: { name: string, data: Uint8Array }[]
     type: GLTFPreviewType
   }
 }
