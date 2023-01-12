@@ -26,10 +26,14 @@
         let blob
         let options = {}
         const file = new Blob([payload.file], { type: 'model/gltf-binary' })
+        const otherFiles = payload.otherFiles.map((file) => ({
+          key: file.name,
+          blob: new Blob([file.data]),
+        }))
 
         switch (payload.type) {
           case 'model': {
-            blob = toWearableWithBlobs(file)
+            blob = toWearableWithBlobs(file, otherFiles)
             options = {
               wheelZoom: 2,
               skin: '555555',
@@ -38,7 +42,7 @@
             break
           }
           case 'emote': {
-            blob = toEmoteWithBlobs(file)
+            blob = toEmoteWithBlobs(file, otherFiles)
             options = {
               profile: 'default',
               skin: '555555',
@@ -62,7 +66,7 @@
   })
 
   // Helpers to build wearable and emote with blobs
-  function toWearableWithBlobs(file, category = 'hat') {
+  function toWearableWithBlobs(file, otherFiles = [], category = 'hat') {
     return {
       id: 'some-id',
       name: '',
@@ -87,6 +91,7 @@
                 key: 'model.glb',
                 blob: file,
               },
+              ...otherFiles,
             ],
             overrideHides: [],
             overrideReplaces: [],
@@ -96,7 +101,7 @@
     }
   }
 
-  function toEmoteWithBlobs(file) {
+  function toEmoteWithBlobs(file, otherFiles = []) {
     return {
       id: 'some-id',
       name: '',
@@ -119,6 +124,7 @@
                 key: 'model.glb',
                 blob: file,
               },
+              ...otherFiles,
             ],
           },
         ],

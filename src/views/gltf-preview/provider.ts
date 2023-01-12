@@ -160,6 +160,7 @@ export class GLTFPreviewEditorProvider
         for (const webview of this.webviews.get(document.uri)) {
           this.postMessage(webview, GLFTPreviewExtensionMessageType.INIT, {
             file: document.documentData,
+            otherFiles: document.otherFiles,
             type: isEmote ? GLTFPreviewType.EMOTE : GLTFPreviewType.MODEL,
           })
         }
