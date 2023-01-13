@@ -15,13 +15,21 @@ export class GLTFPreviewDocument
     const fileData = await GLTFPreviewDocument.readFile(uri)
     const folder = path.dirname(uri.fsPath)
     const fileNames = fs.readdirSync(folder)
-    const otherFiles = await Promise.all(fileNames.filter(fileName => !uri.fsPath.endsWith(fileName)).map(async (fileName) => {
-      const filePath = path.resolve(folder, fileName)
-      return {
-        name: fileName,
-        data: await GLTFPreviewDocument.readFile(vscode.Uri.parse(filePath))
-      }
-    }))
+    const otherFiles = await Promise.all(fileNames
+      // filter out the main file and any directories (TODO: we might need to add support to recursively add files within directories in the future)
+      .filter(fileName => {
+        const filePath = path.resolve(folder, fileName)
+        const isMainFile = uri.fsPath === filePath
+        const isDirectory = fs.lstatSync(filePath).isDirectory()
+        return !isMainFile && !isDirectory
+      })
+      .map(async (fileName) => {
+        const filePath = path.resolve(folder, fileName)
+        return {
+          name: fileName,
+          data: await GLTFPreviewDocument.readFile(vscode.Uri.parse(filePath))
+        }
+      }))
     return new GLTFPreviewDocument(uri, fileData, otherFiles)
   }
 
