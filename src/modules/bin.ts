@@ -1,6 +1,6 @@
 import fs from 'fs'
 import cmdShim from 'cmd-shim'
-import { escapeWhiteSpaces, getModuleBinPath, getNodeCmdPath } from './path'
+import { fixWhiteSpaces, getModuleBinPath, getNodeCmdPath } from './path'
 import { spawn, SpawnOptions } from './spawn'
 import { log } from './log'
 
@@ -18,7 +18,7 @@ export function bin(
   args: (string | undefined)[] = [],
   options: SpawnOptions = {}
 ) {
-  const node = escapeWhiteSpaces(getNodeCmdPath())
+  const node = fixWhiteSpaces(getNodeCmdPath())
   const bin = getModuleBinPath(moduleName, command)
   return spawn(
     args[0] ? `${command} ${args[0]}` : command,

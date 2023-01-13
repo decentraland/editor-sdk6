@@ -77,7 +77,7 @@ describe('bin', () => {
       bin('decentraland', 'dcl', ['start'])
       expect(spawn).toBeCalledWith(
         expect.any(String),
-        '/globalStorage/node',
+        '"/globalStorage/node"',
         expect.any(Array),
         expect.any(Object)
       )
@@ -159,7 +159,7 @@ describe('bin', () => {
         bin('decentraland', 'dcl')
         expect(spawn).toBeCalledWith(
           expect.any(String),
-          '/globalStorage\\ with\\ white\\ spaces/node',
+          '"/globalStorage with white spaces/node"',
           [expect.any(String)],
           expect.any(Object)
         )
@@ -180,7 +180,7 @@ describe('bin', () => {
         bin('decentraland', 'dcl')
         expect(spawn).toBeCalledWith(
           expect.any(String),
-          '/globalStorage/node.cmd',
+          '"/globalStorage/node.cmd"',
           [expect.any(String)],
           expect.any(Object)
         )
