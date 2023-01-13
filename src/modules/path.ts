@@ -114,12 +114,12 @@ export function getNodeCmdPath() {
 }
 
 /**
- * Replace white spaces with "\ "
+ * Wrap path with double quotes to fix white spaces
  * @param p path to fix
  * @returns fixed path
  */
-export function escapeWhiteSpaces(p: string) {
-  return p.replace(/\s/g, '\\ ')
+export function fixWhiteSpaces(p: string) {
+  return `"${p}"`
 }
 
 /**
