@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import { getDistribution, isWindows } from './node'
 import { getPackageJson } from './pkg'
 import { log } from './log'
@@ -129,4 +130,26 @@ export function fixWhiteSpaces(p: string) {
 export function joinEnvPaths(...paths: (undefined | string)[]) {
   const separator = process.platform === 'win32' ? ';' : ':'
   return paths.filter((path): path is string => !!path).join(separator)
+}
+
+/**
+ * Returns all the paths for files in a directory, and in subdirectories
+ */
+
+export function getFilePaths(folder: string) {
+  const fileNames = fs.readdirSync(folder)
+  const filePaths: string[] = []
+  for (const fileName of fileNames) {
+    const filePath = path.resolve(folder, fileName)
+    const stats = fs.lstatSync(filePath)
+    if (stats.isDirectory()) {
+      const nestedFilePaths = getFilePaths(filePath)
+      for (const nestedFilePath of nestedFilePaths) {
+        filePaths.push(nestedFilePath)
+      }
+    } else if (stats.isFile()) {
+      filePaths.push(filePath)
+    }
+  }
+  return filePaths
 }

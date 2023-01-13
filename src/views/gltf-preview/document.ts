@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import fs from 'fs'
 import path from 'path'
 import { Disposable } from '../../modules/dispose'
+import { getFilePaths } from '../../modules/path'
 
 /**
  * Define the document (the data model) used for paw draw files.
@@ -14,19 +15,13 @@ export class GLTFPreviewDocument
   ): Promise<GLTFPreviewDocument | PromiseLike<GLTFPreviewDocument>> {
     const fileData = await GLTFPreviewDocument.readFile(uri)
     const folder = path.dirname(uri.fsPath)
-    const fileNames = fs.readdirSync(folder)
-    const otherFiles = await Promise.all(fileNames
-      // filter out the main file and any directories (TODO: we might need to add support to recursively add files within directories in the future)
-      .filter(fileName => {
-        const filePath = path.resolve(folder, fileName)
-        const isMainFile = uri.fsPath === filePath
-        const isDirectory = fs.lstatSync(filePath).isDirectory()
-        return !isMainFile && !isDirectory
-      })
-      .map(async (fileName) => {
-        const filePath = path.resolve(folder, fileName)
+    const filePaths = getFilePaths(folder)
+    const otherFiles = await Promise.all(filePaths
+      // filter out the main file
+      .filter(filePath => uri.fsPath !== filePath)
+      .map(async (filePath) => {
         return {
-          name: fileName,
+          name: path.basename(filePath),
           data: await GLTFPreviewDocument.readFile(vscode.Uri.file(filePath))
         }
       }))
