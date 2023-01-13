@@ -1,5 +1,6 @@
 import {
   getExtensionPath,
+  getFilePaths,
   getGlobalStoragePath,
   getModuleBinPath,
   getNodeBinPath,
@@ -15,6 +16,13 @@ import {
 import { log } from './log'
 jest.mock('./log')
 const logMock = log as jest.MockedFunction<typeof log>
+
+import fs, { Dirent, Stats } from 'fs'
+jest.mock('fs')
+const fsReaddirSyncMock = fs.readdirSync as jest.MockedFunction<
+  typeof fs.readdirSync
+>
+const fsLstatSyncMock = fs.lstatSync as jest.MockedFunction<typeof fs.lstatSync>
 
 import { getPackageJson } from './pkg'
 import { setVersion } from './node'
@@ -209,6 +217,67 @@ describe('path', () => {
         expect(
           joinEnvPaths('usr/bin', '/path/to/folder', '/path/to/another/folder')
         ).toBe('usr/bin:/path/to/folder:/path/to/another/folder')
+      })
+    })
+  })
+  describe('When getting the file paths of a folder', () => {
+    describe('and the folder has two files', () => {
+      beforeEach(() => {
+        fsReaddirSyncMock.mockReturnValue([
+          'file1.txt',
+          'file2.txt',
+        ] as unknown as Dirent[])
+        fsLstatSyncMock.mockReturnValue({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as Stats)
+      })
+      it('should return the two files', () => {
+        expect(getFilePaths('/some/folder')).toEqual([
+          '/some/folder/file1.txt',
+          '/some/folder/file2.txt',
+        ])
+      })
+    })
+    describe('and the folder has a subfolder', () => {
+      beforeEach(() => {
+        fsReaddirSyncMock.mockReturnValueOnce([
+          'file1.txt',
+          'file2.txt',
+          'subfolder',
+        ] as unknown as Dirent[])
+        fsLstatSyncMock.mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as Stats)
+        fsLstatSyncMock.mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as Stats)
+        fsLstatSyncMock.mockReturnValueOnce({
+          isDirectory: () => true,
+          isFile: () => false,
+        } as Stats)
+        fsReaddirSyncMock.mockReturnValueOnce([
+          'subfile1.txt',
+          'subfile2.txt',
+        ] as unknown as Dirent[])
+        fsLstatSyncMock.mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as Stats)
+        fsLstatSyncMock.mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as Stats)
+      })
+      it('should include the files in the subfolder', () => {
+        expect(getFilePaths('/some/folder')).toEqual([
+          '/some/folder/file1.txt',
+          '/some/folder/file2.txt',
+          '/some/folder/subfolder/subfile1.txt',
+          '/some/folder/subfolder/subfile2.txt',
+        ])
       })
     })
   })
