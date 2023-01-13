@@ -27,7 +27,7 @@ export class GLTFPreviewDocument
         const filePath = path.resolve(folder, fileName)
         return {
           name: fileName,
-          data: await GLTFPreviewDocument.readFile(vscode.Uri.parse(filePath))
+          data: await GLTFPreviewDocument.readFile(vscode.Uri.file(filePath))
         }
       }))
     return new GLTFPreviewDocument(uri, fileData, otherFiles)
