@@ -9,6 +9,10 @@ import crossSpawn from 'cross-spawn'
 jest.mock('cross-spawn')
 const crossSpawnMock = crossSpawn as jest.MockedFunction<typeof crossSpawn>
 
+import treeKill from 'tree-kill'
+jest.mock('tree-kill')
+const treeKillMock = treeKill as jest.MockedFunction<typeof treeKill>
+
 import future, { IFuture } from 'fp-future'
 jest.mock('fp-future')
 const futureMock = future as jest.MockedFunction<typeof future<void>>
@@ -374,10 +378,10 @@ describe('When spawning a child process', () => {
     })
   })
   describe('and the child process is killed', () => {
-    it('should kill the child process with a signal 9', () => {
+    it('should kill the child process along with all its children', () => {
       const child = spawn('id', 'command')
       child.kill()
-      expect(childMock.kill).toHaveBeenCalledWith(9)
+      expect(treeKillMock).toHaveBeenCalledWith(child.process.pid)
     })
     describe('and the process can be gracefully killed', () => {
       beforeEach(() => {
