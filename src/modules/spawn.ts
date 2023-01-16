@@ -1,6 +1,7 @@
 import { ChildProcess } from 'child_process'
 import path from 'path'
 import crossSpawn from 'cross-spawn'
+import treeKill from 'tree-kill'
 import future from 'fp-future'
 import { Readable } from 'stream'
 import isRunning from 'is-running'
@@ -65,6 +66,8 @@ export function spawn(
     env: newEnv,
   })
 
+  log(`Spawning child process "${id}" with pid=${child.pid}`)
+
   child.stdout!.pipe(process.stdout)
   child.stderr!.pipe(process.stderr)
 
@@ -118,7 +121,7 @@ export function spawn(
         }
       }),
     kill: async () => {
-      log(`Killing process "${id}"...`)
+      log(`Killing process "${id}" with pid=${child.pid}...`)
       // if child already killed, return
       if (killed) return
       killed = true
@@ -127,26 +130,28 @@ export function spawn(
       const promise = future<void>()
 
       // kill child gracefully
-      child.kill(9)
+      treeKill(child.pid!)
 
       // child succesfully killed
-      const die = () => {
+      const die = (force: boolean = false) => {
         alive = false
         clearInterval(interval)
         clearTimeout(timeout)
         if (!child.killed) {
-          child.kill()
+          const signal = force ? 'SIGKILL' : 'SIGTERM'
+          log(`Killing process "${id}" with pid=${child.pid} using ${signal}`)
+          treeKill(child.pid!, signal)
         }
         for (const matcher of matchers) {
           matcher.enabled = false
         }
+        log(`Process "${id}" with pid=${child.pid} ${force ? 'forcefully' : 'gracefully'} killed`)
         promise.resolve()
       }
 
       // interval to check if child still running and flag it as dead when is not running anymore
       const interval = setInterval(() => {
         if (!child.pid || !isRunning(child.pid)) {
-          log(`Process "${id}" gracefully killed`)
           die()
         }
       }, 100)
@@ -154,8 +159,7 @@ export function spawn(
       // timeout to stop checking if child still running, kill it with fire
       const timeout = setTimeout(() => {
         if (alive) {
-          log(`Process "${id}" forcefully killed`)
-          die()
+          die(true)
         }
       }, 5000)
 

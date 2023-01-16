@@ -437,6 +437,7 @@
     "rollbar": "^2.25.2",
     "semver": "^7.3.8",
     "tar-fs": "^2.1.1",
+    "tree-kill": "^1.2.2",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "unzip-stream": "^0.3.1",

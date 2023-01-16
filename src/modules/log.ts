@@ -14,8 +14,7 @@ export function append(message: string) {
  * Append a message to the output in a new line
  */
 export function appendLine(message: string) {
-  const line = message + '\n'
-  output.append(line)
+  append(message + '\n')
 }
 
 /**
