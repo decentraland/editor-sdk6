@@ -37,6 +37,19 @@ export async function deploy(args: string = '', isWorld = false) {
   // Set world flag
   setLocalValue('isWorld', isWorld)
 
+  if (isWorld) {
+    const scene = getScene()
+    if (!scene.worldConfiguration) {
+      throw new Error('You need to add a "worldConfiguration" section to your scene.json')
+    }
+    if (!scene.worldConfiguration.name) {
+      throw new Error('You need to add a "name" property to the "worldConfiguration" section in your scene.json')
+    }
+    if (!scene.worldConfiguration.name.endsWith('.dcl.eth')) {
+      throw new Error('The name of your world in your scene.json must end with ".dcl.eth"')
+    }
+  }
+
   // Get url for the server
   const url = await getServerUrl(ServerName.PublishScene) + await getServerParams(ServerName.PublishScene)
 
