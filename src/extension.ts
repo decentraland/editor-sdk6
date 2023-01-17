@@ -140,6 +140,9 @@ export async function activate(context: vscode.ExtensionContext) {
     )
     registerCommand('decentraland.commands.restart', () => restart())
     registerCommand('decentraland.commands.deploy', () => deploy())
+    registerCommand('decentraland.commands.deployWorld', async () =>
+      deploy(`--target-content https://worlds-content-server.decentraland.org`, true)
+    )
     registerCommand('decentraland.commands.deployTest', async () =>
       deploy(`--target peer-testing.decentraland.org`)
     )
@@ -156,7 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
       browser(ServerName.RunScene)
     )
     registerCommand('decentraland.commands.browser.deploy', () =>
-      browser(ServerName.DCLDeploy)
+      browser(ServerName.PublishScene)
     )
     registerCommand('decentraland.commands.browser.web3', () =>
       browser(ServerName.RunScene, '&ENABLE_WEB3')
@@ -233,10 +236,10 @@ export async function deactivate() {
 
 export async function validate() {
   // Set in context if it is valid project
-  vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
+  await vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
 
   // Set in context if it is an empty folder
-  vscode.commands.executeCommand(
+  await vscode.commands.executeCommand(
     'setContext',
     'decentraland.isEmpty',
     isEmpty()

@@ -8,8 +8,8 @@ import {
 } from './port'
 
 /********************************************************
-                          Mocks
-*********************************************************/
+ Mocks
+ *********************************************************/
 
 import fetch from 'node-fetch'
 jest.mock('node-fetch')
@@ -22,6 +22,10 @@ const sleepMock = sleep as jest.MockedFunction<typeof sleep>
 import { getScene } from './workspace'
 jest.mock('./workspace')
 const getSceneMock = getScene as jest.MockedFunction<typeof getScene>
+
+import { getLocalValue } from './storage'
+jest.mock('./storage')
+const getLocalValueMock = getLocalValue as jest.MockedFunction<typeof getLocalValue>
 
 import net from 'net'
 import { Scene } from '@dcl/schemas'
@@ -84,9 +88,33 @@ describe('port', () => {
         expect(getServerParams(ServerName.RunScene)).toBe('?position=0,0')
       })
     })
-    describe('and the server is not RunScene', () => {
+    describe('and the server is PublishScene', () => {
+      describe('and the scene is being published to Genesis City', () => {
+        beforeEach(() => {
+          getLocalValueMock.mockReturnValueOnce(false)
+        })
+        afterEach(() => {
+          getLocalValueMock.mockReset()
+        })
+        it('should return nothing', () => {
+          expect(getServerParams(ServerName.PublishScene)).toBe('')
+        })
+      })
+      describe('and the scene is being published to Genesis City', () => {
+        beforeEach(() => {
+          getLocalValueMock.mockReturnValueOnce(true)
+        })
+        afterEach(() => {
+          getLocalValueMock.mockReset()
+        })
+        it('should add the skipValidations query param', () => {
+          expect(getServerParams(ServerName.PublishScene)).toBe('?skipValidations=true')
+        })
+      })
+    })
+    describe('and the server does not match any case', () => {
       it('should return nothing', () => {
-        expect(getServerParams(ServerName.DCLDeploy)).toBe('')
+        expect(getServerParams(ServerName.GTLFPreview)).toBe('')
       })
     })
   })
