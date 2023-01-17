@@ -83,7 +83,7 @@
       },
       {
         "view": "decentraland",
-        "contents": "Once you are done building your scene, you can publish it to the world:\n[Publish Scene](command:decentraland.commands.deploy)",
+        "contents": "Once you are done building your scene, you can publish it to Genesis City:\n[Publish Scene](command:decentraland.commands.deploy)",
         "when": "workbenchState != empty && decentraland.isDCL"
       }
     ],
@@ -160,7 +160,7 @@
       },
       {
         "command": "decentraland.commands.deployWorld",
-        "title": "Publish Scene To World",
+        "title": "Publish Scene To Your World",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
