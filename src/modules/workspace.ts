@@ -22,7 +22,11 @@ export function getCwd() {
 export function getScene() {
   const sceneJsonPath = path.join(getCwd(), 'scene.json')
   const scene = fs.readFileSync(sceneJsonPath, 'utf8')
-  return JSON.parse(scene) as Scene
+  return JSON.parse(scene) as Scene & {
+    worldConfiguration?: {
+      name: string
+    }
+  }
 }
 
 /**

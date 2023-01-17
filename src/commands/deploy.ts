@@ -5,6 +5,7 @@ import { getNonce } from '../modules/webviews'
 import { loader } from '../modules/loader'
 import {
   getPort,
+  getServerParams,
   getServerUrl,
   ServerName,
   waitForServer,
@@ -12,6 +13,8 @@ import {
 import { bin } from '../modules/bin'
 import { SpanwedChild } from '../modules/spawn'
 import { log } from '../modules/log'
+import { setLocalValue } from '../modules/storage'
+import { getScene } from '../modules/workspace'
 
 let child: SpanwedChild | null = null
 let panel: vscode.WebviewPanel | null = null
@@ -27,16 +30,19 @@ async function kill() {
   }
 }
 
-export async function deploy(...args: string[]) {
+export async function deploy(args: string = '', isWorld = false) {
   // kill previous server if open
   kill()
 
+  // Set world flag
+  setLocalValue('isWorld', isWorld)
+
   // Get url for the server
-  const url = await getServerUrl(ServerName.DCLDeploy)
+  const url = await getServerUrl(ServerName.PublishScene) + await getServerParams(ServerName.PublishScene)
 
   // Webview
   panel = vscode.window.createWebviewPanel(
-    `decentraland.DCLDeploy`,
+    `decentraland.PublishScene`,
     `Decentraland`,
     vscode.ViewColumn.One,
     { enableScripts: true, retainContextWhenHidden: true }
@@ -54,12 +60,12 @@ export async function deploy(...args: string[]) {
   )
 
   // start server
-  const port = await getPort(ServerName.DCLDeploy)
+  const port = await getPort(ServerName.PublishScene)
   child = bin('decentraland', 'dcl', [
     'deploy',
     `--port ${port}`,
     `--no-browser`,
-    ...args,
+    args,
   ])
 
   // This promise resolves when everything is done, or fails on any error
@@ -72,7 +78,7 @@ export async function deploy(...args: string[]) {
       kill()
       throw new Error(error instanceof Error ? error.message : error.toString())
     } else {
-      log('DCLDeploy: main promise failed, but server was already up')
+      log('PublishScene: main promise failed, but server was already up')
     }
   })
 
@@ -112,7 +118,10 @@ export async function deploy(...args: string[]) {
     if (!child) return
     await deploymentPromise
     panel.dispose()
-    vscode.window.showInformationMessage(`Scene published successfully!`)
+    const jumpIn = await vscode.window.showInformationMessage("Scene published successfully!", 'Jump In')
+    if (jumpIn) {
+      vscode.env.openExternal(vscode.Uri.parse(getSceneLink(isWorld)))
+    }
   } catch (error) {
     if (error instanceof Error) {
       handleDeploymentError(error.message)
@@ -158,11 +167,25 @@ function getHtml(webview: vscode.Webview, url: string, content: string) {
   </html>`
 }
 
+function getSceneLink(isWorld: boolean) {
+  const scene = getScene()
+  if (isWorld && scene.worldConfiguration) {
+    return `https://play.decentraland.org?realm=${scene.worldConfiguration.name}`
+  } else {
+    return `https://play.decentraland.org?position=${scene.scene.base}`
+  }
+}
+
 function handleDeploymentError(error: string) {
   kill()
   if (/address does not have access/gi.test(error)) {
     throw new Error(
       "You don't have permission to publish on the parcels selected"
+    )
+  } if (/not have permission to deploy under/gi.test(error)) {
+    const name = error.match(/under \"((\d|\w|\.)+)\"/)![1]
+    throw new Error(
+      `You don't have permission to publish under the name "${name}".`
     )
   } else {
     throw new Error(error)

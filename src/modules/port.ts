@@ -4,6 +4,7 @@ import future from 'fp-future'
 import net, { AddressInfo } from 'net'
 import { sleep } from './sleep'
 import { getScene } from './workspace'
+import { getLocalValue } from './storage'
 
 /**
  * List of all the servers
@@ -11,7 +12,7 @@ import { getScene } from './workspace'
 export enum ServerName {
   GTLFPreview = 'gltf-preview',
   RunScene = 'run-scene',
-  DCLDeploy = 'dcl-deploy',
+  PublishScene = 'dcl-deploy',
   WSTransport = 'ws-transport',
 }
 
@@ -75,11 +76,14 @@ export async function getServerUrl(server: ServerName) {
  * @returns The url of that server
  */
 export function getServerParams(server: ServerName) {
-  const params =
-    server === ServerName.RunScene
-      ? `?position=${encodeURI(getScene().scene.base)}`
-      : ''
-  return params
+  switch (server) {
+    case ServerName.RunScene:
+      return `?position=${encodeURI(getScene().scene.base)}`
+    case ServerName.PublishScene:
+      return getLocalValue<boolean>('isWorld') ? `?skipValidations=true` : ''
+    default:
+      return ''
+  }
 }
 
 /**
