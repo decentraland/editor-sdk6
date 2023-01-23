@@ -106,7 +106,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     // Register GLTF preview custom editor
-    GLTFPreviewEditorProvider.register(context, disposables)
+    GLTFPreviewEditorProvider.register(disposables)
 
     // Setup debugger
     vscode.debug.registerDebugConfigurationProvider(

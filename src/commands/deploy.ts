@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import path from 'path'
 import { getExtensionPath } from '../modules/path'
-import { getNonce } from '../modules/webviews'
+import { getNonce } from '../modules/webview'
 import { loader } from '../modules/loader'
 import {
   getPort,
@@ -68,7 +68,7 @@ export async function deploy(args: string = '', isWorld = false) {
     '<div class="loading">Loading&hellip;<div>'
   )
 
-  panel.iconPath = vscode.Uri.parse(
+  panel.iconPath = vscode.Uri.file(
     path.join(getExtensionPath(), 'resources', 'logo.ico')
   )
 

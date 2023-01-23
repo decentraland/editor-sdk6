@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import path from 'path'
 import { getExtensionPath } from '../modules/path'
-import { getNonce } from '../modules/webviews'
+import { getNonce } from '../modules/webview'
 import { loader } from '../modules/loader'
 import {
   getServerParams,
