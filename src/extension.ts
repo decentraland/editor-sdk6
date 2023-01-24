@@ -21,7 +21,6 @@ import { init } from './commands/init'
 import { restart } from './commands/restart'
 import { Dependency } from './views/dependency-tree/types'
 import { npmInstall, npmUninstall } from './modules/npm'
-import { getServerParams, getServerUrl, ServerName } from './modules/port'
 import { ProjectType } from './modules/project'
 import { checkNodeBinaries, resolveVersion, setVersion } from './modules/node'
 import { unwatch, watch } from './modules/watch'
@@ -36,6 +35,7 @@ import {
 import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
 import { getPackageJson, getPackageVersion } from './modules/pkg'
 import { getCwd, isDCL, isEmpty } from './modules/workspace'
+import { getServerUrl, ServerName } from './modules/server'
 
 export async function activate(context: vscode.ExtensionContext) {
   track('activation:request')
@@ -45,8 +45,8 @@ export async function activate(context: vscode.ExtensionContext) {
       context.extensionMode === vscode.ExtensionMode.Development
         ? 'development'
         : context.extensionMode === vscode.ExtensionMode.Production
-          ? 'production'
-          : 'test'
+        ? 'production'
+        : 'test'
     log(`Extension mode: ${mode}`)
 
     // Load .env
@@ -131,17 +131,16 @@ export async function activate(context: vscode.ExtensionContext) {
     registerCommand('decentraland.commands.install', () => install())
     registerCommand('decentraland.commands.uninstall', () => uninstall())
     registerCommand('decentraland.commands.start', () => start())
-    registerCommand(
-      'decentraland.commands.getDebugURL',
-      async () =>
-        `${await getServerUrl(ServerName.RunScene)}${await getServerParams(
-          ServerName.RunScene
-        )}`
+    registerCommand('decentraland.commands.getDebugURL', () =>
+      getServerUrl(ServerName.RunScene)
     )
     registerCommand('decentraland.commands.restart', () => restart())
     registerCommand('decentraland.commands.deploy', () => deploy())
     registerCommand('decentraland.commands.deployWorld', async () =>
-      deploy(`--target-content https://worlds-content-server.decentraland.org`, true)
+      deploy(
+        `--target-content https://worlds-content-server.decentraland.org`,
+        true
+      )
     )
     registerCommand('decentraland.commands.deployTest', async () =>
       deploy(`--target peer-testing.decentraland.org`)
@@ -236,7 +235,11 @@ export async function deactivate() {
 
 export async function validate() {
   // Set in context if it is valid project
-  await vscode.commands.executeCommand('setContext', 'decentraland.isDCL', isDCL())
+  await vscode.commands.executeCommand(
+    'setContext',
+    'decentraland.isDCL',
+    isDCL()
+  )
 
   // Set in context if it is an empty folder
   await vscode.commands.executeCommand(

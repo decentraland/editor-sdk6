@@ -2,9 +2,10 @@ import path from 'path'
 import express from 'express'
 import { Server } from 'http'
 import future from 'fp-future'
-import { clearPort, getPort, ServerName } from '../../modules/port'
+import { clearPort, getPort } from '../../modules/port'
 import { log } from '../../modules/log'
 import { getExtensionPath } from '../../modules/path'
+import { ServerName } from '../../modules/server'
 
 const app = express()
 let isRouted = false
@@ -20,7 +21,7 @@ export async function startServer() {
     isRouted = true
   }
   await stopServer()
-  const port = await getPort(ServerName.GTLFPreview)
+  const port = await getPort(ServerName.GLTFPreview)
   const promise = future<void>()
   server = app.listen(port, () => {
     log(`GLTFPreview: http server assigned port is ${port}`)
@@ -34,7 +35,7 @@ export async function stopServer() {
   if (server) {
     server.close()
     server = null
-    clearPort(ServerName.GTLFPreview)
+    clearPort(ServerName.GLTFPreview)
     log(`GLTFPreview: http server closed`)
   }
 }

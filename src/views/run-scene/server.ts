@@ -4,13 +4,14 @@ import {
   warnDecentralandLibrary,
   warnOutdatedDependency,
 } from '../../modules/npm'
-import { getPort, ServerName } from '../../modules/port'
+import { getPort } from '../../modules/port'
 import { bin } from '../../modules/bin'
 import { SpanwedChild } from '../../modules/spawn'
 import { log } from '../../modules/log'
 import { loader } from '../../modules/loader'
 import { hasNodeModules } from '../../modules/workspace'
 import { syncSdkVersion } from '../../modules/sdk'
+import { ServerName } from '../../modules/server'
 
 let child: SpanwedChild | null = null
 let isStarting = false

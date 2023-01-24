@@ -6,8 +6,8 @@ import {
   WearableCategory,
   WearableWithBlobs,
 } from '@dcl/schemas'
-import { getPort, ServerName } from '../../modules/port'
-import { Webview, WebviewCollection } from '../../modules/webview'
+import { ServerName } from '../../modules/server'
+import { Webview } from '../../modules/webview'
 import { GLTFPreviewDocument } from './document'
 import {
   GLFTPreviewInboundMessagePayload,
@@ -23,13 +23,12 @@ export async function createWebview(
   panel.webview.options = {
     enableScripts: true,
   }
-  const port = await getPort(ServerName.GTLFPreview)
   const webview = new Webview<
     GLFTPreviewInboundMessageType,
     GLFTPreviewInboundMessagePayload,
     GLFTPreviewOutboundMessageType,
     GLFTPreviewOutboundMessagePayload
-  >('gltf-preview', port!, panel)
+  >(ServerName.GLTFPreview, panel)
 
   // Handle messages
   webview.onMessage((message) => {
