@@ -1,6 +1,5 @@
-import { startServer, stopServer } from '../views/run-scene/server'
+import { runSceneServer } from '../views/run-scene/server'
 
 export async function restart() {
-  await stopServer()
-  await startServer()
+  await runSceneServer.restart()
 }

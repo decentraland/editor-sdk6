@@ -4,20 +4,66 @@ import { getPort } from './port'
 import { sleep } from './sleep'
 import { getLocalValue } from './storage'
 import { getScene } from './workspace'
+import { log } from './log'
+import { getMessage } from './error'
 
 export enum ServerName {
-  GLTFPreview = 'gltf-preview',
-  RunScene = 'run-scene',
-  PublishScene = 'publish-scene',
+  GLTFPreview = 'GLTFPreview',
+  RunScene = 'RunScene',
+  PublishScene = 'PublishScene',
 }
 
 export abstract class Server {
   constructor(public name: ServerName) {}
+
+  isStarting = false
+  isStopping = false
+  isRunning = false
+
   async getPort() {
     return getPort(this.name)
   }
-  abstract start(...args: any[]): Promise<void>
-  abstract stop(): Promise<void>
+
+  async start(...args: any[]) {
+    try {
+      await this.stop()
+      if (this.isStarting) {
+        return
+      }
+      this.isStarting = true
+      await this.onStart(...args)
+      this.isStarting = false
+      this.isRunning = true
+      log(`${this.name} server started on port=${await this.getPort()}`)
+    } catch (error) {
+      this.isStarting = false
+      log(`Error starting ${this.name} server: ${getMessage(error)}`)
+    }
+  }
+
+  async stop() {
+    try {
+      if (this.isStopping || !this.isRunning) {
+        return
+      }
+      this.isStopping = true
+      await this.onStop()
+      this.isStopping = false
+      this.isRunning = false
+      log(`${this.name} server stopped`)
+    } catch (error) {
+      this.isStopping = false
+      log(`Error stopping ${this.name} server: ${getMessage(error)}`)
+    }
+  }
+
+  async restart() {
+    await this.stop()
+    await this.start()
+  }
+
+  abstract onStart(...args: any[]): Promise<void>
+  abstract onStop(): Promise<void>
 }
 
 /**

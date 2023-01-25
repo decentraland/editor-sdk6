@@ -1,21 +1,15 @@
 import { bin } from '../../modules/bin'
-import { log } from '../../modules/log'
 import { Server, ServerName } from '../../modules/server'
 import { SpanwedChild } from '../../modules/spawn'
 
 class PublishSceneServer extends Server {
   child: SpanwedChild | null = null
-  promise: Promise<void> | null = null
-
-  isStopping = false
-  isKilled = false
 
   constructor() {
     super(ServerName.PublishScene)
   }
 
-  async start(...args: string[]) {
-    await this.stop()
+  async onStart(...args: string[]) {
     this.child = bin('decentraland', 'dcl', [
       'deploy',
       `--port ${await this.getPort()}`,
@@ -24,24 +18,27 @@ class PublishSceneServer extends Server {
     ])
   }
 
-  async stop() {
-    if (!this.isStopping && this.child && this.child.alive()) {
-      this.isStopping = true
-      this.isKilled = true
+  async onStop() {
+    if (this.child && this.child.alive()) {
       await this.child.kill()
       this.child = null
-      this.isStopping = false
     }
   }
 
   async waitForPublish() {
     if (this.child && !this.isStopping) {
-      return Promise.race([
+      const success = await Promise.race([
         this.child.waitFor(/content uploaded/gi, /error/gi).then(() => true),
         this.child.wait().then(() => false),
       ])
+      /* 
+        Success will be true only if the deployment is successful. 
+        If there is an error, this method will throw. 
+        If there are no errors, but the process exits gracefully, it will not throw, but the success flag will be false
+      */
+      return success
     }
   }
 }
 
-export const server = new PublishSceneServer()
+export const publishSceneServer = new PublishSceneServer()

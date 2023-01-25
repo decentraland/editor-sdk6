@@ -72,6 +72,7 @@ export function spawn(
   child.stderr!.pipe(process.stderr)
 
   child.on('close', (code) => {
+    alive = false
     if (code !== 0 && code !== null) {
       promise.reject(
         new Error(`Error: process "${command}" exited with code "${code}".`)
@@ -145,7 +146,11 @@ export function spawn(
         for (const matcher of matchers) {
           matcher.enabled = false
         }
-        log(`Process "${id}" with pid=${child.pid} ${force ? 'forcefully' : 'gracefully'} killed`)
+        log(
+          `Process "${id}" with pid=${child.pid} ${
+            force ? 'forcefully' : 'gracefully'
+          } killed`
+        )
         promise.resolve()
       }
 

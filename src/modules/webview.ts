@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import mitt from 'mitt'
+import future from 'fp-future'
 import { getContext } from './context'
 import { getServerUrl, ServerName, waitForServer } from './server'
 import { getPort } from './port'
@@ -58,6 +59,12 @@ export class Webview<
     const uri = await this.getUrl()
     await waitForServer(uri.toString())
     this.panel.webview.html = await this.getIframeHtml()
+  }
+
+  async loadOrDispose() {
+    const dispose = future<void>()
+    this.onDispose(dispose.resolve)
+    return Promise.race([this.load(), dispose])
   }
 
   private getLoadingHtml() {

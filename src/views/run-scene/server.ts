@@ -4,49 +4,37 @@ import {
   warnDecentralandLibrary,
   warnOutdatedDependency,
 } from '../../modules/npm'
-import { getPort } from '../../modules/port'
 import { bin } from '../../modules/bin'
 import { SpanwedChild } from '../../modules/spawn'
 import { log } from '../../modules/log'
 import { loader } from '../../modules/loader'
 import { hasNodeModules } from '../../modules/workspace'
 import { syncSdkVersion } from '../../modules/sdk'
-import { ServerName } from '../../modules/server'
+import { Server, ServerName } from '../../modules/server'
 
-let child: SpanwedChild | null = null
-let isStarting = false
-
-export async function startServer() {
-  if (isStarting) {
-    return
+class RunSceneServer extends Server {
+  child: SpanwedChild | null = null
+  constructor() {
+    super(ServerName.RunScene)
   }
-  isStarting = true
 
-  try {
-    if (child) {
-      await stopServer()
-    }
-
+  async onStart() {
     // install dependencies
     if (!hasNodeModules()) {
       await npmInstall()
     }
-
     // sync sdk version with workspace
     await syncSdkVersion()
 
-    const port = await getPort(ServerName.RunScene)
-
-    log(`RunScene: http server assigned port is ${port}`)
-
-    child = bin('decentraland', 'dcl', [
+    // start scene preview server
+    this.child = bin('decentraland', 'dcl', [
       'start',
-      `-p ${port}`,
+      `-p ${await this.getPort()}`,
       '--no-browser',
       '--skip-install',
     ])
 
-    child.on(/package is outdated/gi, (data) => {
+    this.child.on(/package is outdated/gi, (data) => {
       const match = /npm install ((\d|\w|\_|\-)+)@latest/gi.exec(data!)
       if (match && match.length > 0) {
         const dependency = match[1]
@@ -54,7 +42,7 @@ export async function startServer() {
       }
     })
 
-    child.on(/field \"decentralandLibrary\" is missing/gi, (data) => {
+    this.child.on(/field \"decentralandLibrary\" is missing/gi, (data) => {
       const match = /Error in library ((\d|\w|\_|\-)+): field/gi.exec(data!)
       if (match && match.length > 0) {
         const dependency = match[1]
@@ -62,34 +50,30 @@ export async function startServer() {
       }
     })
 
-    child.process.on('close', (code) => {
+    this.child.process.on('close', async (code) => {
       if (code !== null) {
         log(`RunScene: http server closed with status code ${code}`)
       }
-      child = null
+      await this.stop()
     })
 
     // Show loader while server is starting
-    loader(
+    await loader(
       'Starting server...',
       async () =>
         Promise.race([
-          child?.waitFor(/server is now running/gi, /error/gi),
-          child?.wait(),
+          this.child!.waitFor(/server is now running/gi, /error/gi),
+          this.child!.wait(),
         ]),
       ProgressLocation.Window
     )
-  } catch (error) {
-    log('Could not initialize RunScene server')
   }
 
-  // unset
-  isStarting = false
+  async onStop() {
+    if (this.child && this.child.alive()) {
+      this.child.kill()
+    }
+  }
 }
 
-export async function stopServer() {
-  if (child && child.alive()) {
-    await child.kill()
-  }
-  child = null
-}
+export const runSceneServer = new RunSceneServer()

@@ -8,7 +8,7 @@ import {
   handleDeploymentError,
   validateWorldConfiguration,
 } from '../views/publish-scene/utils'
-import { server } from '../views/publish-scene/server'
+import { publishSceneServer } from '../views/publish-scene/server'
 
 export async function deploy(args: string = '', isWorld = false) {
   // Set world flag
@@ -23,22 +23,22 @@ export async function deploy(args: string = '', isWorld = false) {
   const webview = createWebview()
 
   // Start the server
-  server.start(...args.split(' '))
+  publishSceneServer.start(...args.split(' '))
 
   // Listen for the user closing the webview
   let didDispose
   webview.onDispose(() => {
     didDispose = true
-    server.stop()
+    publishSceneServer.stop()
   })
 
   // Open publish screen
   try {
     await loader('Opening publish screen...', () =>
-      Promise.race([webview.load(), server.waitForPublish()])
+      Promise.race([webview.load(), publishSceneServer.waitForPublish()])
     )
   } catch (error) {
-    server.stop()
+    publishSceneServer.stop()
     if (!didDispose) {
       throw new Error('Something went wrong opening publish screen')
     }
@@ -47,7 +47,7 @@ export async function deploy(args: string = '', isWorld = false) {
 
   try {
     // Wait for user to publish
-    const success = await server.waitForPublish()
+    const success = await publishSceneServer.waitForPublish()
 
     // Close view
     webview.dispose()
@@ -65,7 +65,7 @@ export async function deploy(args: string = '', isWorld = false) {
     // Not successful is ignored, it means the process was killed gracefuly without getting to deploy, if an actual error ocurred it would throw and be handled by the catch block
   } catch (error) {
     // Something went wrong, kill server and show error
-    await server.stop()
+    await publishSceneServer.stop()
     handleDeploymentError(getMessage(error))
   }
 }

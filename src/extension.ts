@@ -6,10 +6,7 @@ import {
   startServer as startGLTFPreview,
   stopServer as stopGLTFPreview,
 } from './views/gltf-preview/server'
-import {
-  startServer as startRunScene,
-  stopServer as stopRunScene,
-} from './views/run-scene/server'
+import { runSceneServer } from './views/run-scene/server'
 import { setExtensionPath, setGlobalStoragePath } from './modules/path'
 import { install } from './commands/install'
 import { start } from './commands/start'
@@ -226,7 +223,7 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), stopRunScene()])
+  await Promise.all([stopGLTFPreview(), runSceneServer.stop()])
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
@@ -254,7 +251,7 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([startGLTFPreview(), startRunScene()])
+      ? Promise.all([startGLTFPreview(), runSceneServer.start()])
       : startGLTFPreview())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)
