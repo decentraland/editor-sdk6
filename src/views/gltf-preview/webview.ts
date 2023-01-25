@@ -8,6 +8,7 @@ import {
 } from '@dcl/schemas'
 import { ServerName } from '../../modules/server'
 import { Webview } from '../../modules/webview'
+import { track } from '../../modules/analytics'
 import { GLTFPreviewDocument } from './document'
 import {
   GLFTPreviewInboundMessagePayload,
@@ -66,6 +67,13 @@ export async function createWebview(
             ...options,
           },
         })
+
+        track(`gltf_preview.open`)
+        break
+      }
+      case GLFTPreviewOutboundMessageType.ERROR: {
+        track(`gltf_preview.error`, message.payload || {})
+        break
       }
     }
   })

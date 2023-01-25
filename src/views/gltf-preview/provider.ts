@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
 import { GLTFPreviewDocument } from './document'
-import { track } from '../../modules/analytics'
 import { createWebview } from './webview'
 
 export class GLTFPreviewEditorProvider
@@ -24,7 +23,6 @@ export class GLTFPreviewEditorProvider
 
   async openCustomDocument(uri: vscode.Uri): Promise<GLTFPreviewDocument> {
     const document: GLTFPreviewDocument = await GLTFPreviewDocument.create(uri)
-    track(`gltf_preview.open`)
     return document
   }
 
@@ -32,10 +30,7 @@ export class GLTFPreviewEditorProvider
     document: GLTFPreviewDocument,
     panel: vscode.WebviewPanel
   ): Promise<void> {
-    // Create webview
     const webview = await createWebview(document, panel)
-
-    // Load
     await webview.load()
   }
 
