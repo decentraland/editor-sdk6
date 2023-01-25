@@ -1,11 +1,4 @@
 import vscode from 'vscode'
-import {
-  BodyShape,
-  EmoteCategory,
-  EmoteWithBlobs,
-  WearableCategory,
-  WearableWithBlobs,
-} from '@dcl/schemas'
 import { ServerName } from '../../modules/server'
 import { Webview } from '../../modules/webview'
 import { track } from '../../modules/analytics'
@@ -16,6 +9,7 @@ import {
   GLFTPreviewOutboundMessagePayload,
   GLFTPreviewOutboundMessageType,
 } from './types'
+import { toEmoteWithBlobs, toWearableWithBlobs } from './utils'
 
 export async function createWebview(
   document: GLTFPreviewDocument,
@@ -79,75 +73,4 @@ export async function createWebview(
   })
 
   return webview
-}
-
-// Helpers to build wearable and emote with blobs
-function toWearableWithBlobs(
-  document: GLTFPreviewDocument,
-  category: WearableCategory = WearableCategory.HAT
-): WearableWithBlobs {
-  return {
-    id: 'some-id',
-    name: '',
-    description: '',
-    image: '',
-    thumbnail: '',
-    i18n: [],
-    data: {
-      category,
-      hides: [],
-      replaces: [],
-      tags: [],
-      representations: [
-        {
-          bodyShapes: [BodyShape.MALE, BodyShape.FEMALE],
-          mainFile: 'model.glb',
-          contents: [
-            {
-              key: 'model.glb',
-              blob: document.data,
-            },
-            ...document.otherFiles.map(({ key, data }) => ({
-              key,
-              blob: data,
-            })),
-          ],
-          overrideHides: [],
-          overrideReplaces: [],
-        },
-      ],
-    },
-  }
-}
-
-function toEmoteWithBlobs(document: GLTFPreviewDocument): EmoteWithBlobs {
-  return {
-    id: 'some-id',
-    name: '',
-    description: '',
-    image: '',
-    thumbnail: '',
-    i18n: [],
-    emoteDataADR74: {
-      category: EmoteCategory.DANCE,
-      tags: [],
-      representations: [
-        {
-          bodyShapes: [BodyShape.MALE, BodyShape.FEMALE],
-          mainFile: 'model.glb',
-          contents: [
-            {
-              key: 'model.glb',
-              blob: document.data,
-            },
-            ...document.otherFiles.map(({ key, data }) => ({
-              key,
-              blob: data,
-            })),
-          ],
-        },
-      ],
-      loop: false,
-    },
-  }
 }
