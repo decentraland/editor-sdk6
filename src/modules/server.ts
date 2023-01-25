@@ -12,8 +12,11 @@ export enum ServerName {
 }
 
 export abstract class Server {
-  abstract init?(): Promise<void>
-  abstract start(): Promise<void>
+  constructor(public name: ServerName) {}
+  async getPort() {
+    return getPort(this.name)
+  }
+  abstract start(...args: any[]): Promise<void>
   abstract stop(): Promise<void>
 }
 
