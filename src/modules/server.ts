@@ -1,6 +1,9 @@
 import vscode from 'vscode'
+import http from 'http'
 import fetch from 'node-fetch'
-import { getPort } from './port'
+import express from 'express'
+import future from 'fp-future'
+import { clearPort, getPort } from './port'
 import { sleep } from './sleep'
 import { getLocalValue } from './storage'
 import { getScene } from './workspace'
@@ -50,6 +53,7 @@ export abstract class Server {
       await this.onStop()
       this.isStopping = false
       this.isRunning = false
+      clearPort(this.name)
       log(`${this.name} server stopped`)
     } catch (error) {
       this.isStopping = false
@@ -64,6 +68,43 @@ export abstract class Server {
 
   abstract onStart(...args: any[]): Promise<void>
   abstract onStop(): Promise<void>
+}
+
+export class StaticServer extends Server {
+  public app = express()
+  server: http.Server | null = null
+  private isRouted = false
+
+  constructor(
+    public name: ServerName,
+    public directory: string | (() => string)
+  ) {
+    super(name)
+  }
+
+  async onStart() {
+    if (!this.isRouted) {
+      this.app.use(
+        express.static(
+          typeof this.directory === 'function'
+            ? this.directory()
+            : this.directory
+        )
+      )
+      this.isRouted = true
+    }
+    const port = await this.getPort()
+    const promise = future<void>()
+    this.server = this.app.listen(port, promise.resolve)
+    return promise
+  }
+
+  async onStop() {
+    if (this.server) {
+      this.server.close()
+      this.server = null
+    }
+  }
 }
 
 /**

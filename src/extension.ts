@@ -2,10 +2,7 @@ import * as vscode from 'vscode'
 import env from 'dotenv'
 import path from 'path'
 import { GLTFPreviewEditorProvider } from './views/gltf-preview/provider'
-import {
-  startServer as startGLTFPreview,
-  stopServer as stopGLTFPreview,
-} from './views/gltf-preview/server'
+import { gltfPreviewServer } from './views/gltf-preview/server'
 import { runSceneServer } from './views/run-scene/server'
 import { setExtensionPath, setGlobalStoragePath } from './modules/path'
 import { install } from './commands/install'
@@ -223,7 +220,7 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([stopGLTFPreview(), runSceneServer.stop()])
+  await Promise.all([gltfPreviewServer.stop(), runSceneServer.stop()])
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
@@ -251,8 +248,8 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([startGLTFPreview(), runSceneServer.start()])
-      : startGLTFPreview())
+      ? Promise.all([gltfPreviewServer.start(), runSceneServer.start()])
+      : gltfPreviewServer.start())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)
   }
