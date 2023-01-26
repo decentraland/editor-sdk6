@@ -1,6 +1,6 @@
 import open = require('open')
-import { getServerUrl } from '../modules/server'
-import { ServerName } from '../modules/server'
+import { ServerName } from '../types'
+import { getServerUrl } from '../utils'
 
 export async function browser(server: ServerName, params = '') {
   const url = await getServerUrl(server)

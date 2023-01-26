@@ -2,9 +2,10 @@ import vscode from 'vscode'
 import path from 'path'
 import { getExtensionPath } from '../../modules/path'
 import { Webview } from '../../modules/webview'
-import { ServerName } from '../../modules/server'
+import { ServerName } from '../../types'
+import { getServerUrl } from '../../utils'
 
-export function createWebview() {
+export async function createWebview() {
   // Webview
   const panel = vscode.window.createWebviewPanel(
     `decentraland.PublishScene`,
@@ -17,7 +18,8 @@ export function createWebview() {
     path.join(getExtensionPath(), 'resources', 'logo.ico')
   )
 
-  const webview = new Webview(ServerName.PublishScene, panel)
+  const url = await getServerUrl(ServerName.PublishScene)
+  const webview = new Webview(url, panel)
 
   return webview
 }

@@ -9,7 +9,8 @@ import {
   GLFTPreviewOutboundMessageType,
 } from './types'
 import { toEmoteWithBlobs, toWearableWithBlobs } from './utils'
-import { ServerName } from '../../modules/server'
+import { ServerName } from '../../types'
+import { getServerUrl } from '../../utils'
 
 export async function createWebview(
   document: GLTFPreviewDocument,
@@ -18,12 +19,15 @@ export async function createWebview(
   panel.webview.options = {
     enableScripts: true,
   }
+
+  const url = await getServerUrl(ServerName.GLTFPreview)
+
   const webview = new Webview<
     GLFTPreviewInboundMessageType,
     GLFTPreviewInboundMessagePayload,
     GLFTPreviewOutboundMessageType,
     GLFTPreviewOutboundMessagePayload
-  >(ServerName.GLTFPreview, panel)
+  >(url, panel)
 
   // Handle messages
   webview.onMessage((message) => {

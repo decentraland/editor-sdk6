@@ -29,7 +29,8 @@ import {
 import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
 import { getPackageJson, getPackageVersion } from './modules/pkg'
 import { getCwd, isDCL, isEmpty } from './modules/workspace'
-import { getServerUrl, ServerName } from './modules/server'
+import { getServerUrl } from './utils'
+import { ServerName } from './types'
 
 export async function activate(context: vscode.ExtensionContext) {
   track('activation:request')
@@ -60,10 +61,10 @@ export async function activate(context: vscode.ExtensionContext) {
     await validate()
 
     // Initialize analytics
-    activateAnalytics()
+    activateAnalytics(process.env.DCL_EDITOR_SEGMENT_KEY)
 
     // Initialize error reporting
-    activateRollbar(context.extensionMode)
+    activateRollbar(context.extensionMode, process.env.DCL_EDITOR_ROLLBAR_KEY)
 
     // Set node binary version
     setVersion(await resolveVersion())

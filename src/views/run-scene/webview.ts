@@ -1,8 +1,9 @@
 import path from 'path'
 import vscode from 'vscode'
 import { getExtensionPath } from '../../modules/path'
-import { ServerName } from '../../modules/server'
 import { Webview } from '../../modules/webview'
+import { ServerName } from '../../types'
+import { getServerUrl } from '../../utils'
 
 export async function createWebivew() {
   const panel = vscode.window.createWebviewPanel(
@@ -16,7 +17,9 @@ export async function createWebivew() {
     path.join(getExtensionPath(), 'resources', 'logo.ico')
   )
 
-  const webview = new Webview(ServerName.RunScene, panel)
+  const url = await getServerUrl(ServerName.RunScene)
+
+  const webview = new Webview(url, panel)
 
   return webview
 }

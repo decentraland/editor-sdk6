@@ -1,7 +1,7 @@
 import { bin } from '../../modules/bin'
 import { Server } from '../../modules/server'
 import { SpanwedChild } from '../../modules/spawn'
-import { ServerName } from '../../modules/server'
+import { ServerName } from '../../types'
 
 class PublishSceneServer extends Server {
   child: SpanwedChild | null = null

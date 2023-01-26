@@ -20,7 +20,7 @@ export async function deploy(args: string = '', isWorld = false) {
   }
 
   // Create the webview
-  const webview = createWebview()
+  const webview = await createWebview()
 
   // Start the server
   publishSceneServer.start(...args.split(' '))

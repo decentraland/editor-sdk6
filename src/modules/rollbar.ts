@@ -4,12 +4,12 @@ import { log } from './log'
 
 let rollbar: Rollbar | null = null
 
-export function activateRollbar(mode: ExtensionMode) {
+export function activateRollbar(mode: ExtensionMode, key?: string) {
   if (rollbar) {
     console.warn('Rollbar already initialized')
     return
   }
-  const key = process.env.DCL_EDITOR_ROLLBAR_KEY
+
   if (!key) {
     log(`Reporting disabled`)
     return

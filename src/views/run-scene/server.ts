@@ -11,7 +11,7 @@ import { loader } from '../../modules/loader'
 import { hasNodeModules } from '../../modules/workspace'
 import { syncSdkVersion } from '../../modules/sdk'
 import { Server } from '../../modules/server'
-import { ServerName } from '../../modules/server'
+import { ServerName } from '../../types'
 
 class RunSceneServer extends Server {
   child: SpanwedChild | null = null
