@@ -1,6 +1,7 @@
 import path from 'path'
 import { getExtensionPath } from '../../modules/path'
-import { ServerName, StaticServer } from '../../modules/server'
+import { StaticServer } from '../../modules/server'
+import { ServerName } from '../../modules/server'
 
 export const gltfPreviewServer = new StaticServer(ServerName.GLTFPreview, () =>
   path.join(

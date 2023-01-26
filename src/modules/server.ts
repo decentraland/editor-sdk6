@@ -1,4 +1,4 @@
-import vscode from 'vscode'
+import { env, Uri } from 'vscode'
 import http from 'http'
 import fetch from 'node-fetch'
 import express from 'express'
@@ -114,10 +114,9 @@ export class StaticServer extends Server {
  */
 export async function getServerUrl(server: ServerName) {
   const port = await getPort(server)
-  const url = await vscode.env.asExternalUri(
-    vscode.Uri.parse(`http://localhost:${port}`)
-  )
-  return url.toString() + getServerParams(server)
+  const params = getServerParams(server)
+  const url = await env.asExternalUri(Uri.parse(`http://localhost:${port}`))
+  return url.toString() + params
 }
 
 /**

@@ -17,9 +17,11 @@ import { restart } from '../commands/restart'
 jest.mock('../commands/restart')
 const restartMock = restart as jest.MockedFunction<typeof restart>
 
-import { stopServer } from '../views/run-scene/server'
-jest.mock('../views/run-scene/server')
-const stopServerMock = stopServer as jest.MockedFunction<typeof stopServer>
+import { runSceneServer } from '../views/run-scene/server'
+jest.spyOn(runSceneServer, 'stop')
+const stopServerMock = runSceneServer.stop as jest.MockedFunction<
+  typeof runSceneServer.stop
+>
 
 import { getLocalValue, setLocalValue } from './storage'
 jest.mock('./storage')

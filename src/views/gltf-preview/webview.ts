@@ -1,5 +1,4 @@
 import vscode from 'vscode'
-import { ServerName } from '../../modules/server'
 import { Webview } from '../../modules/webview'
 import { track } from '../../modules/analytics'
 import { GLTFPreviewDocument } from './document'
@@ -10,6 +9,7 @@ import {
   GLFTPreviewOutboundMessageType,
 } from './types'
 import { toEmoteWithBlobs, toWearableWithBlobs } from './utils'
+import { ServerName } from '../../modules/server'
 
 export async function createWebview(
   document: GLTFPreviewDocument,
