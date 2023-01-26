@@ -155,7 +155,7 @@ export class Webview<
 }
 
 /**
- * Get a nonce for a script tag
+ * Get a nonce for a script tag or an iframe id
  */
 export function getNonce() {
   let text = ''
