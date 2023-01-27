@@ -8,12 +8,11 @@ const ANALYTICS_USER_ID_STORAGE_KEY = 'analytics-user-id'
 
 let analytics: Analytics | null
 
-export function activateAnalytics() {
+export function activateAnalytics(key?: string) {
   if (analytics) {
     return
   }
 
-  const key = process.env.DCL_EDITOR_SEGMENT_KEY
   if (!key) {
     log('Analytics disabled')
     return

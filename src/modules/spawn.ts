@@ -49,6 +49,10 @@ export function spawn(
 ): SpanwedChild {
   const { cwd = getCwd(), env = { ...process.env } } = options
 
+  // status
+  let isKilling = false
+  let alive = true
+
   const promise = future<void>()
 
   const matchers: Matcher[] = []
@@ -72,6 +76,7 @@ export function spawn(
   child.stderr!.pipe(process.stderr)
 
   child.on('close', (code) => {
+    alive = false
     if (code !== 0 && code !== null) {
       promise.reject(
         new Error(`Error: process "${command}" exited with code "${code}".`)
@@ -87,9 +92,6 @@ export function spawn(
 
   handleStream(child.stdout!)
   handleStream(child.stderr!)
-
-  let killed = false
-  let alive = true
 
   const spawned: SpanwedChild = {
     id,
@@ -122,9 +124,9 @@ export function spawn(
       }),
     kill: async () => {
       log(`Killing process "${id}" with pid=${child.pid}...`)
-      // if child already killed, return
-      if (killed) return
-      killed = true
+      // if child is being killed or already killed then return
+      if (isKilling || !alive) return
+      isKilling = true
 
       // create promise to kill child
       const promise = future<void>()
@@ -134,6 +136,7 @@ export function spawn(
 
       // child succesfully killed
       const die = (force: boolean = false) => {
+        isKilling = false
         alive = false
         clearInterval(interval)
         clearTimeout(timeout)
@@ -145,7 +148,11 @@ export function spawn(
         for (const matcher of matchers) {
           matcher.enabled = false
         }
-        log(`Process "${id}" with pid=${child.pid} ${force ? 'forcefully' : 'gracefully'} killed`)
+        log(
+          `Process "${id}" with pid=${child.pid} ${
+            force ? 'forcefully' : 'gracefully'
+          } killed`
+        )
         promise.resolve()
       }
 

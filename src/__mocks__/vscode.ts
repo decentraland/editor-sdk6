@@ -39,6 +39,7 @@ export const env = {
 
 export const Uri = {
   parse: jest.fn().mockImplementation((value) => value),
+  joinPath: (...paths: string[]) => paths.join(''),
 }
 
 export const ExtensionMode = {

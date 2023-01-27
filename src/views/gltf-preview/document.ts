@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import fs from 'fs'
 import path from 'path'
 import { Disposable } from '../../modules/dispose'
 import { getFilePaths } from '../../modules/path'
@@ -13,19 +12,22 @@ export class GLTFPreviewDocument
   static async create(
     uri: vscode.Uri
   ): Promise<GLTFPreviewDocument | PromiseLike<GLTFPreviewDocument>> {
-    const fileData = await GLTFPreviewDocument.readFile(uri)
+    const mainFile = await GLTFPreviewDocument.readFile(uri)
     const folder = path.dirname(uri.fsPath)
     const filePaths = getFilePaths(folder)
+    /*
+      Other files means all the files in the same directory or subdirectories. They might be needed if the main reads other files (like a GLB that loads an external texture).
+    */
     const otherFiles = await Promise.all(filePaths
       // filter out the main file
       .filter(filePath => uri.fsPath !== filePath)
       .map(async (filePath) => {
         return {
-          name: path.basename(filePath),
+          key: path.relative(folder, filePath),
           data: await GLTFPreviewDocument.readFile(vscode.Uri.file(filePath))
         }
       }))
-    return new GLTFPreviewDocument(uri, fileData, otherFiles)
+    return new GLTFPreviewDocument(uri, mainFile, otherFiles)
   }
 
   private static async readFile(uri: vscode.Uri): Promise<Uint8Array> {
@@ -35,44 +37,20 @@ export class GLTFPreviewDocument
     return new Uint8Array(await vscode.workspace.fs.readFile(uri))
   }
 
-  private readonly _uri: vscode.Uri
 
-  private _documentData: Uint8Array
-
-  private _otherFiles: { name: string, data: Uint8Array }[]
-
-  private constructor(uri: vscode.Uri, initialContent: Uint8Array, otherFiles: { name: string, data: Uint8Array }[]) {
+  constructor(
+    public uri: vscode.Uri,
+    public data: Uint8Array,
+    public otherFiles: { key: string, data: Uint8Array }[]
+  ) {
     super()
-    this._uri = uri
-    this._documentData = initialContent
-    this._otherFiles = otherFiles
   }
 
-  public get uri() {
-    return this._uri
-  }
-
-  public get documentData(): Uint8Array {
-    return this._documentData
-  }
-
-  public get otherFiles(): { name: string, data: Uint8Array }[] {
-    return this._otherFiles
-  }
-
+  // Disposable
   private readonly _onDidDispose = this._register(
     new vscode.EventEmitter<void>()
   )
-  /**
-   * Fired when the document is disposed of.
-   */
   public readonly onDidDispose = this._onDidDispose.event
-
-  /**
-   * Called by VS Code when there are no more references to the document.
-   *
-   * This happens when all editors for it have been closed.
-   */
   dispose(): void {
     this._onDidDispose.fire()
     super.dispose()

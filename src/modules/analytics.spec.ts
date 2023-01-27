@@ -46,17 +46,16 @@ describe('analytics', () => {
       deactivateAnalytics()
       logMock.mockReset()
     })
-    describe('and the DCL_EDITOR_SEGMENT_KEY env var is not present', () => {
+    describe('and not passing a key', () => {
       it('should not activate', () => {
         activateAnalytics()
         expect(logMock).toHaveBeenCalledWith('Analytics disabled')
       })
     })
-    describe('and the DCL_EDITOR_SEGMENT_KEY env var is present', () => {
+    describe('and the key is passed', () => {
       const { env } = process
       beforeEach(() => {
         process.env = {
-          DCL_EDITOR_SEGMENT_KEY: 'api-key',
           platform: 'test-platform',
           arch: 'test-arch',
         }
@@ -85,12 +84,12 @@ describe('analytics', () => {
           AnalyticsMock.mockReset()
         })
         it('should activate analytics', () => {
-          activateAnalytics()
+          activateAnalytics('api-key')
           expect(AnalyticsMock).toHaveBeenCalledWith('api-key')
           expect(getAnalytics()).not.toBeNull()
         })
         it('should create a user ID and store in global state', () => {
-          activateAnalytics()
+          activateAnalytics('api-key')
           expect(getGlobalValueMock).toHaveBeenCalledWith('analytics-user-id')
           expect(setGlobalValueMock).toHaveBeenCalledWith(
             'analytics-user-id',
@@ -98,7 +97,7 @@ describe('analytics', () => {
           )
         })
         it('should identify the user', () => {
-          activateAnalytics()
+          activateAnalytics('api-key')
           expect(getAnalytics().identify).toHaveBeenCalledWith({
             userId: 'user-id',
             traits: {
@@ -127,7 +126,7 @@ describe('analytics', () => {
       })
       describe('and calling deactivateAnalytics afterwards', () => {
         it('should make getAnalytics() throw', () => {
-          activateAnalytics()
+          activateAnalytics('api-key')
           expect(getAnalytics()).not.toBeNull()
           deactivateAnalytics()
           expect(() => getAnalytics()).toThrow(
@@ -137,7 +136,7 @@ describe('analytics', () => {
       })
       describe('and calling track() afterwards', () => {
         it('should track an event', () => {
-          activateAnalytics()
+          activateAnalytics('api-key')
           getGlobalValueMock.mockReturnValueOnce('user-id')
           track('event-name', { some: 'value' })
           expect(getAnalytics().track).toHaveBeenCalledWith(
@@ -165,7 +164,7 @@ describe('analytics', () => {
             AnalyticsMock.mockReset()
           })
           it('should warn the error', () => {
-            activateAnalytics()
+            activateAnalytics('api-key')
             getGlobalValueMock.mockReturnValueOnce('user-id')
             track('event-name', { some: 'value' })
             expect(console.warn).toHaveBeenCalledWith(
@@ -176,8 +175,8 @@ describe('analytics', () => {
       })
       describe('and calling activateAnalytics again afterwads', () => {
         it('should work even if already activated', () => {
-          activateAnalytics()
-          activateAnalytics()
+          activateAnalytics('api-key')
+          activateAnalytics('api-key')
         })
       })
     })

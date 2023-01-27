@@ -19,35 +19,24 @@ const RollbarMock = Rollbar as jest.MockedFunction<any>
 *********************************************************/
 
 describe('rollbar', () => {
-  const realProcessEnv = process.env
-  beforeEach(() => {
-    Object.defineProperty(process, 'env', {
-      value: {
-        DCL_EDITOR_ROLLBAR_KEY: 'rollbar-key',
-      },
-    })
-  })
   afterEach(() => {
-    Object.defineProperty(process, 'env', {
-      value: realProcessEnv,
-    })
     RollbarMock.mockClear()
     deactivateRollbar()
   })
   describe('When activating Rollbar', () => {
     it('should not throw when getting Rollbar', () => {
-      activateRollbar(ExtensionMode.Test)
+      activateRollbar(ExtensionMode.Test, 'api-key')
       expect(() => getRollbar()).not.toThrow()
     })
     it('should use the Rollbar access token from the environment', () => {
-      activateRollbar(ExtensionMode.Test)
+      activateRollbar(ExtensionMode.Test, 'api-key')
       expect(RollbarMock).toHaveBeenCalledWith(
-        expect.objectContaining({ accessToken: 'rollbar-key' })
+        expect.objectContaining({ accessToken: 'api-key' })
       )
     })
     describe('and the extension mode is development mode', () => {
       it('should use use Rollbar in the development environment', () => {
-        activateRollbar(ExtensionMode.Development)
+        activateRollbar(ExtensionMode.Development, 'api-key')
         expect(RollbarMock).toHaveBeenCalledWith(
           expect.objectContaining({ environment: 'development' })
         )
@@ -55,23 +44,13 @@ describe('rollbar', () => {
     })
     describe('and the extension mode is production mode', () => {
       it('should use use Rollbar in the production environment', () => {
-        activateRollbar(ExtensionMode.Production)
+        activateRollbar(ExtensionMode.Production, 'api-key')
         expect(RollbarMock).toHaveBeenCalledWith(
           expect.objectContaining({ environment: 'production' })
         )
       })
     })
-    describe('and there is no Rollbar key in the environment', () => {
-      beforeEach(() => {
-        Object.defineProperty(process, 'env', {
-          value: {},
-        })
-      })
-      afterEach(() => {
-        Object.defineProperty(process, 'env', {
-          value: realProcessEnv,
-        })
-      })
+    describe('and no API key is used', () => {
       it('should not activate Rollbar', () => {
         activateRollbar(ExtensionMode.Test)
         expect(RollbarMock).not.toHaveBeenCalled()
@@ -86,8 +65,8 @@ describe('rollbar', () => {
         console.warn = realConsoleWarn
       })
       it('should not activate Rollbar', () => {
-        activateRollbar(ExtensionMode.Test)
-        activateRollbar(ExtensionMode.Test)
+        activateRollbar(ExtensionMode.Test, 'api-key')
+        activateRollbar(ExtensionMode.Test, 'api-key')
         expect(RollbarMock).toHaveBeenCalledTimes(1)
       })
     })
