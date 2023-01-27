@@ -26,7 +26,7 @@ export class Webview<
   didDispose = false
 
   constructor(public url: string, public panel: vscode.WebviewPanel) {
-    this.panel.webview.onDidReceiveMessage((event: unknown) => {
+    this.panel.webview.onDidReceiveMessage((event: any) => {
       if (event && 'type' in event && 'payload' in event) {
         const message = event as Message<
           OutboundMessageType,
