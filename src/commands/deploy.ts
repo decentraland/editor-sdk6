@@ -6,7 +6,7 @@ import { createWebview } from '../views/publish-scene/webview'
 import {
   getSceneLink,
   handleDeploymentError,
-  validateWorldConfiguration,
+  validateSceneJson,
 } from '../views/publish-scene/utils'
 import { publishSceneServer } from '../views/publish-scene/server'
 
@@ -14,10 +14,8 @@ export async function deploy(args: string = '', isWorld = false) {
   // Set world flag
   setLocalValue('isWorld', isWorld)
 
-  // If it's a world, make sure the configuration is valid
-  if (isWorld) {
-    validateWorldConfiguration()
-  }
+  // Make sure the scene json is correct
+  validateSceneJson()
 
   // Create the webview
   const webview = await createWebview()

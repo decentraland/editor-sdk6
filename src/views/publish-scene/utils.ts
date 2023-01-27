@@ -1,21 +1,31 @@
+import { getLocalValue } from '../../modules/storage'
 import { getScene } from '../../modules/workspace'
 
-export function validateWorldConfiguration() {
+export function validateSceneJson() {
   const scene = getScene()
-  if (!scene.worldConfiguration) {
-    throw new Error(
-      'You need to add a "worldConfiguration" section to your scene.json'
-    )
-  }
-  if (!scene.worldConfiguration.name) {
-    throw new Error(
-      'You need to add a "name" property to the "worldConfiguration" section in your scene.json'
-    )
-  }
-  if (!scene.worldConfiguration.name.endsWith('.dcl.eth')) {
-    throw new Error(
-      'The name of your world in your scene.json must end with ".dcl.eth"'
-    )
+  const isWorld = getLocalValue<boolean>('isWorld')
+  if (isWorld) {
+    if (!scene.worldConfiguration) {
+      throw new Error(
+        'You need to add a "worldConfiguration" section to your scene.json'
+      )
+    }
+    if (!scene.worldConfiguration.name) {
+      throw new Error(
+        'You need to add a "name" property to the "worldConfiguration" section in your scene.json'
+      )
+    }
+    if (!scene.worldConfiguration.name.endsWith('.dcl.eth')) {
+      throw new Error(
+        'The name of your world in your scene.json must end with ".dcl.eth"'
+      )
+    }
+  } else {
+    if (scene.worldConfiguration) {
+      throw new Error(
+        'Your scene will be rejected by the Catalyst network because your scene.json has a "worldConfiguration".\n\nPlease remove it or publish this scene to a World instead.'
+      )
+    }
   }
 }
 
