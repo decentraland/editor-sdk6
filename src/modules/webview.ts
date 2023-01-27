@@ -44,9 +44,9 @@ export class Webview<
   }
 
   async load() {
-    this.panel.webview.html = await this.getLoadingHtml()
+    this.panel.webview.html = this.getLoadingHtml()
     await waitForServer(this.url)
-    this.panel.webview.html = await this.getIframeHtml()
+    this.panel.webview.html = this.getIframeHtml()
   }
 
   async loadOrDispose() {
@@ -108,7 +108,7 @@ export class Webview<
     this.panel.webview.postMessage(message)
   }
 
-  private async getHtml(body: string, nonce = getNonce()) {
+  private getHtml(body: string, nonce = getNonce()) {
     // resources
     const resourcesDirectory = 'resources/webview'
 
