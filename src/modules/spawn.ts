@@ -142,7 +142,9 @@ export function spawn(
         clearTimeout(timeout)
         if (!child.killed) {
           const signal = force ? 'SIGKILL' : 'SIGTERM'
-          log(`Killed process "${id}" with pid=${child.pid} using ${signal}`)
+          log(
+            `Sending signal=${signal} to process "${id}" with pid=${child.pid}`
+          )
           treeKill(child.pid!, signal)
         }
         for (const matcher of matchers) {
