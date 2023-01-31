@@ -111,7 +111,7 @@ export function getNodeBinPath() {
  */
 export function getNodeCmdPath() {
   const cmd = process.platform === 'win32' ? `node.cmd` : `node`
-  return `${getGlobalStoragePath()}/${cmd}`
+  return path.join(getGlobalStoragePath(), cmd)
 }
 
 /**
