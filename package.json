@@ -31,6 +31,7 @@
     "onCommand:decentraland.commands.deployWorld",
     "onCommand:decentraland.commands.deployTest",
     "onCommand:decentraland.commands.deployCustom",
+    "onCommand:decentraland.commands.runInspector",
     "onCommand:dependencies.commands.delete",
     "onCommand:dependencies.commands.update",
     "onCommand:walkthrough.createProject",
@@ -192,6 +193,12 @@
         "title": "Restart Server",
         "icon": "$(debug-restart)",
         "category": "Decentraland"
+      },
+      {
+        "command": "decentraland.commands.browser.runInspector",
+        "title": "Run Inspector",
+        "icon": "$(play)",
+        "category": "Decentraland"
       }
     ],
     "keybindings": [
@@ -222,6 +229,10 @@
         },
         {
           "command": "decentraland.commands.getDebugURL",
+          "when": "false"
+        },
+        {
+          "command": "decentraland.commands.browser.runInspector",
           "when": "false"
         }
       ],
@@ -257,6 +268,11 @@
           "command": "decentraland.commands.browser.web3",
           "when": "view == decentraland && decentraland.isDCL",
           "group": "1_actions@4"
+        },
+        {
+          "command": "decentraland.commands.browser.runInspector",
+          "when": "view == decentraland && decentraland.isDCL",
+          "group": "1_actions@5"
         },
         {
           "command": "decentraland.commands.restart",
@@ -421,6 +437,7 @@
     "semi": false
   },
   "dependencies": {
+    "@dcl/inspector": "^0.1.0-4057700455.commit-453395e",
     "@dcl/schemas": "^5.18.1",
     "@dcl/sdk": "^7.0.5",
     "@dcl/wearable-preview": "^1.14.0",

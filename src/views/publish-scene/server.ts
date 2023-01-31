@@ -32,9 +32,9 @@ class PublishSceneServer extends Server {
         this.child.waitFor(/content uploaded/gi, /error/gi).then(() => true),
         this.child.wait().then(() => false),
       ])
-      /* 
-        Success will be true only if the deployment is successful. 
-        If there is an error, this method will throw. 
+      /*
+        Success will be true only if the deployment is successful.
+        If there is an error, this method will throw.
         If there are no errors, but the process exits gracefully, it will not throw, but the success flag will be false
       */
       return success
