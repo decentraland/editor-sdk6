@@ -91,7 +91,7 @@ export function getModuleBinPath(moduleName: string, command: string) {
  * @returns The path to the node bin
  */
 export function getGlobalBinPath() {
-  return `${getGlobalStoragePath()}/bin`
+  return path.join(getGlobalStoragePath(), 'bin')
 }
 
 /**
@@ -101,8 +101,8 @@ export function getGlobalBinPath() {
 export function getNodeBinPath() {
   const distribution = getDistribution()
   const globalBinPath = getGlobalBinPath()
-  const pathToBin = isWindows(distribution) ? `node.exe` : `bin/node`
-  return `${globalBinPath}/${distribution}/${pathToBin}`
+  const pathToBin = isWindows(distribution) ? [`node.exe`] : [`bin`, `node`]
+  return path.join(globalBinPath, distribution, ...pathToBin)
 }
 
 /**
