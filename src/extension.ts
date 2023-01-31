@@ -245,6 +245,7 @@ export async function validate() {
 }
 
 async function boot() {
+  log(`Workspace: "${getCwd()}"`)
   const isValid = isDCL()
   // Start webservers
   try {

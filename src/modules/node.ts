@@ -369,6 +369,9 @@ export async function checkNodeBinaries() {
       await linkNode()
     }
 
+    log(`Node command path: "${getNodeCmdPath()}"`)
+    log(`Node bin path: "${nodeBinPath}"`)
+
     track(`node.check:success`, { distribution, wasInstalled: isNodeInstalled })
   } catch (error) {
     track(`node.check:error`, {
@@ -387,12 +390,9 @@ async function linkNode() {
   try {
     const cmdPath = getNodeCmdPath()
     const binPath = getNodeBinPath()
-    log('Cmd path:', cmdPath)
-    log('Bin path:', binPath)
     if (!isLinked()) {
       await link(cmdPath, binPath)
     }
-    log('Done!')
     track(`node.link:success`)
   } catch (error) {
     track(`node.link:error`, {
