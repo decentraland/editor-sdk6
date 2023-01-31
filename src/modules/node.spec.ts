@@ -684,6 +684,16 @@ describe('node', () => {
           expect(getPlatform()).toBe('win-x86')
         })
       })
+      describe('and the architecture is arm64', () => {
+        beforeEach(() => {
+          Object.defineProperty(process, 'arch', {
+            value: 'arm64',
+          })
+        })
+        it('should return "win-x64"', () => {
+          expect(getPlatform()).toBe('win-x64')
+        })
+      })
       describe('and the architecture is not supported', () => {
         beforeEach(() => {
           Object.defineProperty(process, 'arch', {

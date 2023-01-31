@@ -164,47 +164,45 @@ async function getAvailableVersions(page: number) {
  * @returns
  */
 export function getPlatform() {
-  let platform = ''
+  const platform: string[] = []
   switch (process.platform) {
     case 'darwin':
-      platform = 'darwin'
+      platform.push('darwin')
       break
     case 'win32':
-      platform = 'win'
+      platform.push('win')
       break
     case 'linux':
-      platform = 'linux'
+      platform.push('linux')
       break
     default:
       throw new Error(`Unsupported platform: "${process.platform}"`)
   }
 
-  platform += '-'
-
   switch (process.arch) {
     case 'arm64':
-      platform += 'arm64'
+      platform.push(platform[0] === 'win' ? 'x64' : 'arm64')
       break
     case 'arm':
-      platform += 'armv71'
+      platform.push('armv71')
       break
     case 'x64':
-      platform += 'x64'
+      platform.push('x64')
       break
     case 'ia32':
-      platform += 'x86'
+      platform.push('x86')
       break
     case 'ppc64':
-      platform += 'ppc64le'
+      platform.push('ppc64le')
       break
     case 's390x':
-      platform += 's390x'
+      platform.push('s390x')
       break
     default:
       throw new Error(`Unsupported architecture: "${process.arch}"`)
   }
 
-  return platform
+  return platform.join('-')
 }
 
 /**
