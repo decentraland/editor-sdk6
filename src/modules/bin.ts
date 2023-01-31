@@ -42,4 +42,5 @@ export async function link(cmdPath: string, binPath: string) {
   } else {
     fs.symlinkSync(binPath, cmdPath)
   }
+  log('Done!')
 }
