@@ -9,7 +9,7 @@ export async function createWebview() {
   const panel = vscode.window.createWebviewPanel(
     `decentraland.Inspector`,
     `Decentraland`,
-    vscode.ViewColumn.Three,
+    vscode.ViewColumn.One,
     { enableScripts: true, retainContextWhenHidden: true }
   )
 

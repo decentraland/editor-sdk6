@@ -14,6 +14,7 @@ import { deploy } from './commands/deploy'
 import { createTree, registerTree } from './views/dependency-tree/tree'
 import { init } from './commands/init'
 import { restart } from './commands/restart'
+import { inspector } from './commands/inspector'
 import { Dependency } from './views/dependency-tree/types'
 import { npmInstall, npmUninstall } from './modules/npm'
 import { ProjectType } from './modules/project'
@@ -159,9 +160,7 @@ export async function activate(context: vscode.ExtensionContext) {
     registerCommand('decentraland.commands.browser.web3', () =>
       browser(ServerName.RunScene, '&ENABLE_WEB3')
     )
-    registerCommand('decentraland.commands.browser.runInspector', () =>
-      browser(ServerName.Inspector)
-    )
+    registerCommand('decentraland.commands.inspector', async () => inspector())
 
     // Dependencies
     registerTree(disposables)
@@ -225,7 +224,11 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([gltfPreviewServer.stop(), runSceneServer.stop(), inspectorServer.stop()])
+  await Promise.all([
+    gltfPreviewServer.stop(),
+    runSceneServer.stop(),
+    inspectorServer.stop(),
+  ])
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
@@ -254,7 +257,11 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([gltfPreviewServer.start(), runSceneServer.start(), inspectorServer.start()])
+      ? Promise.all([
+          gltfPreviewServer.start(),
+          runSceneServer.start(),
+          inspectorServer.start(),
+        ])
       : gltfPreviewServer.start())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)

@@ -195,8 +195,8 @@
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.browser.runInspector",
-        "title": "Run Inspector",
+        "command": "decentraland.commands.inspector",
+        "title": "Open Inspector",
         "icon": "$(play)",
         "category": "Decentraland"
       }
@@ -229,10 +229,6 @@
         },
         {
           "command": "decentraland.commands.getDebugURL",
-          "when": "false"
-        },
-        {
-          "command": "decentraland.commands.browser.runInspector",
           "when": "false"
         }
       ],
@@ -270,7 +266,7 @@
           "group": "1_actions@4"
         },
         {
-          "command": "decentraland.commands.browser.runInspector",
+          "command": "decentraland.commands.inspector",
           "when": "view == decentraland && decentraland.isDCL",
           "group": "1_actions@5"
         },
