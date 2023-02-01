@@ -3,6 +3,7 @@ import env from 'dotenv'
 import path from 'path'
 import { GLTFPreviewEditorProvider } from './views/gltf-preview/provider'
 import { gltfPreviewServer } from './views/gltf-preview/server'
+import { inspectorServer } from './views/inspector/server'
 import { runSceneServer } from './views/run-scene/server'
 import { setExtensionPath, setGlobalStoragePath } from './modules/path'
 import { install } from './commands/install'
@@ -158,6 +159,9 @@ export async function activate(context: vscode.ExtensionContext) {
     registerCommand('decentraland.commands.browser.web3', () =>
       browser(ServerName.RunScene, '&ENABLE_WEB3')
     )
+    registerCommand('decentraland.commands.browser.runInspector', () =>
+      browser(ServerName.Inspector)
+    )
 
     // Dependencies
     registerTree(disposables)
@@ -221,7 +225,7 @@ export async function deactivate() {
   // Stop watching changes in node_modules
   unwatch()
   // Stop  webservers
-  await Promise.all([gltfPreviewServer.stop(), runSceneServer.stop()])
+  await Promise.all([gltfPreviewServer.stop(), runSceneServer.stop(), inspectorServer.stop()])
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
@@ -250,7 +254,7 @@ async function boot() {
   // Start webservers
   try {
     await (isValid
-      ? Promise.all([gltfPreviewServer.start(), runSceneServer.start()])
+      ? Promise.all([gltfPreviewServer.start(), runSceneServer.start(), inspectorServer.start()])
       : gltfPreviewServer.start())
   } catch (error: any) {
     log(`Something went wrong initializing servers:`, error.message)
