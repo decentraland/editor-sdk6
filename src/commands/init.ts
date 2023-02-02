@@ -1,73 +1,109 @@
 import * as vscode from 'vscode'
+import fs from 'fs'
 import { loader } from '../modules/loader'
 import { npmInstall } from '../modules/npm'
-import { getTemplates, getTypeOptions, ProjectType } from '../modules/project'
+import {
+  getSdkOptions,
+  getTemplates,
+  getProjectTypeOptions,
+  ProjectType,
+  SdkVersion,
+} from '../modules/project'
 import { bin } from '../modules/bin'
 import { track } from '../modules/analytics'
+import { pick } from '../modules/pick'
 
-export async function init(type?: ProjectType) {
-  const options = getTypeOptions()
+export async function init() {
+  const sdkOptions = getSdkOptions()
+  const selectedSdk = await pick(sdkOptions, 'name', {
+    ignoreFocusOut: true,
+    title: 'Create Project',
+    placeHolder: 'Select the SDK version',
+  })
 
-  let option: {
-    type: ProjectType
-    name: string
-  } | null = type
-    ? options.find((option) => option.type === type) || null
-    : null
-  let template = ''
+  if (!selectedSdk) {
+    return
+  }
 
-  if (!option) {
-    const selected = await vscode.window.showQuickPick(
-      options.map((option) => option.name),
-      {
-        ignoreFocusOut: true,
-        title: 'Create Project',
-        placeHolder: 'Select the project type',
+  track(`decentraland.commands.init:select_sdk_version`, {
+    version: selectedSdk.version,
+  })
+
+  switch (selectedSdk.version) {
+    case SdkVersion.SDK6: {
+      const params = await getSdk6InitParams()
+      if (!params) {
+        return
       }
-    )
-    if (!selected) {
-      return
+      await initSdk6(params.type, params.templateUrl)
+      break
     }
-
-    option = options.find((option) => option.name === selected)!
-
-    track(`decentraland.commands.init:select_project_type`, {
-      type: option.type,
-    })
-
-    if (option.type === ProjectType.SCENE) {
-      const templates = getTemplates()
-      const selectedTitle = await vscode.window.showQuickPick(
-        templates.map((option) => option.title),
-        {
-          ignoreFocusOut: true,
-          title: 'Select Template',
-          placeHolder: 'Select the project template',
-        }
-      )
-      const selectedTemplate = templates.find(
-        (template) => template.title === selectedTitle
-      )
-      if (selectedTemplate) {
-        template = `--template ${selectedTemplate.url}`
-        track(`decentraland.commands.init:select_template`, {
-          title: selectedTemplate.title,
-          url: selectedTemplate.url,
-        })
-      }
+    case SdkVersion.SDK7: {
+      await initSdk7()
+      break
     }
   }
+}
+
+export async function getSdk6InitParams(): Promise<{
+  type: ProjectType
+  templateUrl?: string
+} | null> {
+  const projectTypes = getProjectTypeOptions()
+  const selectedProjectType = await pick(projectTypes, 'name', {
+    ignoreFocusOut: true,
+    title: 'Create Project',
+    placeHolder: 'Select the project type',
+  })
+
+  if (!selectedProjectType) {
+    return null
+  }
+
+  track(`decentraland.commands.init:select_project_type`, {
+    type: selectedProjectType.type,
+  })
+
+  if (selectedProjectType.type === ProjectType.SCENE) {
+    const selectedTemplate = await pick(getTemplates(), 'title', {
+      ignoreFocusOut: true,
+      title: 'Select Template',
+      placeHolder: 'Select the project template',
+    })
+
+    if (!selectedTemplate) {
+      return null
+    }
+
+    track(`decentraland.commands.init:select_template`, {
+      title: selectedTemplate.title,
+      url: selectedTemplate.url,
+    })
+
+    return {
+      type: selectedProjectType.type,
+      templateUrl: selectedTemplate.url,
+    }
+  } else {
+    return {
+      type: selectedProjectType.type,
+    }
+  }
+}
+
+export async function initSdk6(type: ProjectType, templateUrl?: string) {
+  let templateArg = templateUrl ? `--template ${templateUrl}` : ''
 
   const child = bin('decentraland', 'dcl', [
     'init',
-    `--project ${option.type}`,
+    `--project ${type}`,
     `--skip-install`,
-    template,
+    templateArg,
   ])
 
   try {
     await loader(
-      `Creating ${option.name.toLowerCase()} project...`,
+      `Creating ${type} project...`,
       () =>
         Promise.race([
           child.wait(), // if main process halts we stop waiting
@@ -96,6 +132,16 @@ export async function init(type?: ProjectType) {
     }
     return
   }
+
+  await npmInstall()
+
+  vscode.window.showInformationMessage('Project created successfully!')
+}
+
+export async function initSdk7() {
+  const child = bin('@dcl/sdk', 'sdk-commands', ['init', `--skip-install`])
+
+  await child.wait()
 
   await npmInstall()
 
