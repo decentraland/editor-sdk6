@@ -139,9 +139,13 @@ export async function initSdk6(type: ProjectType, templateUrl?: string) {
 }
 
 export async function initSdk7() {
-  const child = bin('@dcl/sdk', 'sdk-commands', ['init', `--skip-install`])
+  const child = bin('@dcl/sdk', 'sdk-commands', ['init'])
 
-  await child.wait()
+  await loader(
+    `Creating project...`,
+    () => child.wait(),
+    vscode.ProgressLocation.Notification
+  )
 
   await npmInstall()
 

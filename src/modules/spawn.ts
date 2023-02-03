@@ -77,9 +77,12 @@ export function spawn(
 
   child.on('close', (code) => {
     alive = false
+    log(
+      `Process "${id}" with pid=${child.pid} closed with exit code=${code || 0}`
+    )
     if (code !== 0 && code !== null) {
       promise.reject(
-        new Error(`Error: process "${command}" exited with code "${code}".`)
+        new Error(`Error: process "${command}" exited with code=${code}`)
       )
     } else {
       promise.resolve(void 0)
