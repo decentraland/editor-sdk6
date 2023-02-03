@@ -435,7 +435,7 @@
   "dependencies": {
     "@dcl/inspector": "^0.1.0-4057700455.commit-453395e",
     "@dcl/schemas": "^5.18.1",
-    "@dcl/sdk": "^7.0.5",
+    "@dcl/sdk": "^7.0.6-4085247017.commit-f004317",
     "@dcl/wearable-preview": "^1.14.0",
     "@types/analytics-node": "^3.1.9",
     "@types/cmd-shim": "^5.0.0",

@@ -12,7 +12,7 @@ import { browser } from './commands/browser'
 import { uninstall } from './commands/uninstall'
 import { deploy } from './commands/deploy'
 import { createTree, registerTree } from './views/dependency-tree/tree'
-import { init } from './commands/init'
+import { init, initSdk6 } from './commands/init'
 import { restart } from './commands/restart'
 import { inspector } from './commands/inspector'
 import { Dependency } from './views/dependency-tree/types'
@@ -173,7 +173,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Walkthrough
     registerCommand('walkthrough.createProject', () =>
-      init(ProjectType.SCENE).then(validate)
+      // The walkthrough creates an SDK6 project
+      initSdk6(ProjectType.SCENE).then(validate)
     )
     registerCommand('walkthrough.viewCode', () => {
       vscode.commands.executeCommand(

@@ -1,5 +1,23 @@
 import { repos } from 'decentraland/dist/commands/init/repositories'
 
+export enum SdkVersion {
+  SDK6 = 'sdk6',
+  SDK7 = 'sdk7',
+}
+
+export function getSdkOptions() {
+  return [
+    {
+      version: SdkVersion.SDK6,
+      name: 'SDK6',
+    },
+    {
+      version: SdkVersion.SDK7,
+      name: 'SDK7 (Beta)',
+    },
+  ]
+}
+
 export enum ProjectType {
   SCENE = 'scene',
   LIBRARY = 'library',
@@ -7,7 +25,7 @@ export enum ProjectType {
   SMART_ITEM = 'smartItem',
 }
 
-export function getTypeOptions() {
+export function getProjectTypeOptions() {
   const options: { type: ProjectType; name: string }[] = [
     {
       type: ProjectType.SCENE,
