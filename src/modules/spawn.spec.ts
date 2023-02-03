@@ -230,7 +230,7 @@ describe('When spawning a child process', () => {
     it('should reject the promise', () => {
       spawn('id', 'command')
       expect(promiseMock.reject).toHaveBeenCalledWith(
-        new Error('Error: process "command" exited with code=1')
+        new Error('Error: process "id" with pid=1 exited with code=1')
       )
     })
   })

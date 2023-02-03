@@ -82,7 +82,9 @@ export function spawn(
     )
     if (code !== 0 && code !== null) {
       promise.reject(
-        new Error(`Error: process "${command}" exited with code=${code}`)
+        new Error(
+          `Error: process "${id}" with pid=${child.pid} exited with code=${code}`
+        )
       )
     } else {
       promise.resolve(void 0)
