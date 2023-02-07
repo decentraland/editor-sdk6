@@ -28,28 +28,13 @@ class RunSceneServer extends Server {
     await syncSdkVersion()
 
     // start scene preview server
-    this.child = bin('decentraland', 'dcl', [
+    this.child = bin('npm', 'npm', [
       'start',
-      `-p ${await this.getPort()}`,
+      '--',
+      `--port ${await this.getPort()}`,
       '--no-browser',
       '--skip-install',
     ])
-
-    this.child.on(/package is outdated/gi, (data) => {
-      const match = /npm install ((\d|\w|\_|\-)+)@latest/gi.exec(data!)
-      if (match && match.length > 0) {
-        const dependency = match[1]
-        warnOutdatedDependency(dependency)
-      }
-    })
-
-    this.child.on(/field \"decentralandLibrary\" is missing/gi, (data) => {
-      const match = /Error in library ((\d|\w|\_|\-)+): field/gi.exec(data!)
-      if (match && match.length > 0) {
-        const dependency = match[1]
-        warnDecentralandLibrary(dependency)
-      }
-    })
 
     this.child.process.on('close', async (code) => {
       if (code !== null) {
