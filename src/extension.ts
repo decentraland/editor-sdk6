@@ -236,7 +236,7 @@ export async function validate() {
   // Set in context if it is valid project
   await vscode.commands.executeCommand(
     'setContext',
-    'decentraland.isDCL',
+    'decentraland-sdk7.isDCL',
     isDCL()
   )
 

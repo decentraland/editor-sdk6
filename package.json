@@ -57,7 +57,7 @@
         {
           "id": "decentraland-sdk7.dependencies",
           "name": "Dependencies",
-          "when": "decentraland.isDCL"
+          "when": "decentraland-sdk7.isDCL"
         }
       ]
     },
@@ -70,22 +70,22 @@
       {
         "view": "decentraland-sdk7.home",
         "contents": "The current folder is empty, go ahead and create a new Decentraland project:\n[Create Project](command:decentraland-sdk7.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
-        "when": "workbenchState != empty && !decentraland.isDCL && decentraland.isEmpty"
+        "when": "workbenchState != empty && !decentraland-sdk7.isDCL && decentraland.isEmpty"
       },
       {
         "view": "decentraland-sdk7.home",
         "contents": "The current folder does not contain a Decentraland project. Open a folder with an existing project, or an empty folder to scaffold a new project:\n[Open Folder](command:vscode.openFolder)\nTo learn more [read our docs](https://docs.decentraland.org/).",
-        "when": "workbenchState != empty && !decentraland.isDCL && !decentraland.isEmpty"
+        "when": "workbenchState != empty && !decentraland-sdk7.isDCL && !decentraland.isEmpty"
       },
       {
         "view": "decentraland-sdk7.home",
         "contents": "You can preview and try out your scene:\n[Run Scene](command:decentraland-sdk7.commands.start)",
-        "when": "workbenchState != empty && decentraland.isDCL"
+        "when": "workbenchState != empty && decentraland-sdk7.isDCL"
       },
       {
         "view": "decentraland-sdk7.home",
         "contents": "Once you are done building your scene, you can publish it to Genesis City:\n[Publish Scene](command:decentraland-sdk7.commands.deploy)",
-        "when": "workbenchState != empty && decentraland.isDCL"
+        "when": "workbenchState != empty && decentraland-sdk7.isDCL"
       }
     ],
     "customEditors": [
@@ -104,14 +104,14 @@
       {
         "command": "decentraland-sdk7.commands.init",
         "title": "Create Project",
-        "enablement": "!decentraland.isDCL",
+        "enablement": "!decentraland-sdk7.isDCL",
         "category": "Decentraland"
       },
       {
         "command": "decentraland-sdk7.commands.install",
         "title": "Install Package",
         "icon": "$(add)",
-        "enablement": "decentraland.isDCL",
+        "enablement": "decentraland-sdk7.isDCL",
         "category": "Decentraland"
       },
       {
@@ -206,7 +206,7 @@
         "command": "decentraland-sdk7.commands.start",
         "key": "ctrl+e",
         "mac": "cmd+e",
-        "when": "decentraland.isDCL"
+        "when": "decentraland-sdk7.isDCL"
       }
     ],
     "menus": {
@@ -247,32 +247,32 @@
       "view/title": [
         {
           "command": "decentraland-sdk7.commands.deployWorld",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "1_actions@1"
         },
         {
           "command": "decentraland-sdk7.commands.deployTest",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "1_actions@2"
         },
         {
           "command": "decentraland-sdk7.commands.deployCustom",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "1_actions@3"
         },
         {
           "command": "decentraland-sdk7.commands.browser.web3",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "1_actions@4"
         },
         {
           "command": "decentraland-sdk7.commands.inspector",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "1_actions@5"
         },
         {
           "command": "decentraland-sdk7.commands.restart",
-          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
+          "when": "view == decentraland-sdk7.home && decentraland-sdk7.isDCL",
           "group": "navigation"
         },
         {
