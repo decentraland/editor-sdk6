@@ -7,7 +7,7 @@ import { getServerUrl } from '../../utils'
 
 export async function createWebivew() {
   const panel = vscode.window.createWebviewPanel(
-    `decentraland.RunScene`,
+    `decentraland-sdk7.webviews.RunScene`,
     `Decentraland`,
     vscode.ViewColumn.Two,
     { enableScripts: true, retainContextWhenHidden: true }

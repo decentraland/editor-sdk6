@@ -17,7 +17,7 @@ export class GLTFPreviewEditorProvider
     return disposable
   }
 
-  private static readonly viewType = 'decentraland.GLTFPreview'
+  private static readonly viewType = 'decentraland-sdk7.GLTFPreview'
 
   //#region CustomEditorProvider
 

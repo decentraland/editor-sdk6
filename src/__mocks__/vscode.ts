@@ -17,6 +17,7 @@ export const window = {
     ),
   showWarningMessage: jest.fn(),
   showErrorMessage: jest.fn(),
+  showQuickPick: jest.fn(),
 }
 
 export const ProgressLocation = {

@@ -8,7 +8,7 @@ import { getCwd } from '../../modules/workspace'
 let dependencies: DependenciesProvider | null = null
 
 class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
-  constructor(private workspaceRoot: string) { }
+  constructor(private workspaceRoot: string) {}
 
   getTreeItem(element: Dependency): vscode.TreeItem {
     return element
@@ -61,7 +61,7 @@ class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
               fs.readFileSync(modulePackageJsonPath, 'utf-8')
             )
             version = pkg.version
-          } catch (error) { }
+          } catch (error) {}
         }
         return new Dependency(
           moduleName,
@@ -72,13 +72,13 @@ class DependenciesProvider implements vscode.TreeDataProvider<Dependency> {
 
       const deps = packageJson.dependencies
         ? Object.keys(packageJson.dependencies).map((dep) =>
-          toDep(dep, packageJson.dependencies[dep])
-        )
+            toDep(dep, packageJson.dependencies[dep])
+          )
         : []
       const devDeps = packageJson.devDependencies
         ? Object.keys(packageJson.devDependencies).map((dep) =>
-          toDep(dep, packageJson.devDependencies[dep])
-        )
+            toDep(dep, packageJson.devDependencies[dep])
+          )
         : []
       return deps.concat(devDeps)
     } else {
@@ -121,7 +121,10 @@ export function refreshTree() {
 
 export function registerTree(disposables: vscode.Disposable[]) {
   const disposable = dependencies
-    ? vscode.window.registerTreeDataProvider('dependencies', dependencies)
+    ? vscode.window.registerTreeDataProvider(
+        'decentraland-sdk7.dependencies',
+        dependencies
+      )
     : null
   if (disposable) {
     disposables.push(disposable)

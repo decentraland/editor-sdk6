@@ -17,7 +17,6 @@ import { restart } from './commands/restart'
 import { inspector } from './commands/inspector'
 import { Dependency } from './views/dependency-tree/types'
 import { npmInstall, npmUninstall } from './modules/npm'
-import { ProjectType } from './modules/project'
 import { checkNodeBinaries, resolveVersion, setVersion } from './modules/node'
 import { unwatch, watch } from './modules/watch'
 import { log } from './modules/log'
@@ -107,7 +106,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Setup debugger
     vscode.debug.registerDebugConfigurationProvider(
-      'decentraland',
+      'decentraland-sdk7',
       {
         resolveDebugConfiguration() {
           if (!isDCL()) {
@@ -123,26 +122,28 @@ export async function activate(context: vscode.ExtensionContext) {
     )
 
     // Decentraland Commands
-    registerCommand('decentraland.commands.init', () => init().then(validate))
-    registerCommand('decentraland.commands.update', () => npmInstall())
-    registerCommand('decentraland.commands.install', () => install())
-    registerCommand('decentraland.commands.uninstall', () => uninstall())
-    registerCommand('decentraland.commands.start', () => start())
-    registerCommand('decentraland.commands.getDebugURL', () =>
+    registerCommand('decentraland-sdk7.commands.init', () =>
+      init().then(validate)
+    )
+    registerCommand('decentraland-sdk7.commands.update', () => npmInstall())
+    registerCommand('decentraland-sdk7.commands.install', () => install())
+    registerCommand('decentraland-sdk7.commands.uninstall', () => uninstall())
+    registerCommand('decentraland-sdk7.commands.start', () => start())
+    registerCommand('decentraland-sdk7.commands.getDebugURL', () =>
       getServerUrl(ServerName.RunScene)
     )
-    registerCommand('decentraland.commands.restart', () => restart())
-    registerCommand('decentraland.commands.deploy', () => deploy())
-    registerCommand('decentraland.commands.deployWorld', async () =>
+    registerCommand('decentraland-sdk7.commands.restart', () => restart())
+    registerCommand('decentraland-sdk7.commands.deploy', () => deploy())
+    registerCommand('decentraland-sdk7.commands.deployWorld', async () =>
       deploy(
         `--target-content https://worlds-content-server.decentraland.org`,
         true
       )
     )
-    registerCommand('decentraland.commands.deployTest', async () =>
+    registerCommand('decentraland-sdk7.commands.deployTest', async () =>
       deploy(`--target peer-testing.decentraland.org`)
     )
-    registerCommand('decentraland.commands.deployCustom', async () =>
+    registerCommand('decentraland-sdk7.commands.deployCustom', async () =>
       deploy(
         `--target ${await vscode.window.showInputBox({
           title: 'Deploy to custom Catalyst',
@@ -151,31 +152,35 @@ export async function activate(context: vscode.ExtensionContext) {
         })}`
       )
     )
-    registerCommand('decentraland.commands.browser.run', () =>
+    registerCommand('decentraland-sdk7.commands.browser.run', () =>
       browser(ServerName.RunScene)
     )
-    registerCommand('decentraland.commands.browser.deploy', () =>
+    registerCommand('decentraland-sdk7.commands.browser.deploy', () =>
       browser(ServerName.PublishScene)
     )
-    registerCommand('decentraland.commands.browser.web3', () =>
+    registerCommand('decentraland-sdk7.commands.browser.web3', () =>
       browser(ServerName.RunScene, '&ENABLE_WEB3')
     )
-    registerCommand('decentraland.commands.inspector', async () => inspector())
+    registerCommand('decentraland-sdk7.commands.inspector', async () =>
+      inspector()
+    )
 
     // Dependencies
     registerTree(disposables)
-    registerCommand('dependencies.commands.delete', (node: Dependency) =>
-      npmUninstall(node.label)
+    registerCommand(
+      'decentraland-sdk7.dependencies.delete',
+      (node: Dependency) => npmUninstall(node.label)
     )
-    registerCommand('dependencies.commands.update', (node: Dependency) =>
-      npmInstall(`${node.label}@latest`)
+    registerCommand(
+      'decentraland-sdk7.dependencies.update',
+      (node: Dependency) => npmInstall(`${node.label}@latest`)
     )
 
     // Walkthrough
-    registerCommand('walkthrough.createProject', () =>
-      init(ProjectType.SCENE).then(validate)
+    registerCommand('decentraland-sdk7.walkthrough.createProject', () =>
+      init().then(validate)
     )
-    registerCommand('walkthrough.viewCode', () => {
+    registerCommand('decentraland-sdk7.walkthrough.viewCode', () => {
       vscode.commands.executeCommand(
         'vscode.openFolder',
         vscode.Uri.joinPath(vscode.Uri.parse(getCwd()), 'src', 'game.ts')
@@ -197,22 +202,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // report activation success
     const isDecentraland = isDCL()
-    const decentralandEcsVersion = isDecentraland
-      ? getPackageVersion('decentraland-ecs', true)
-      : null
-    const dclSdkVersion = isDecentraland
+    const sdkVersion = isDecentraland
       ? getPackageVersion('@dcl/sdk', true)
       : null
-    const isSdk6 = isDecentraland && decentralandEcsVersion !== null
-    const isSdk7 = isDecentraland && dclSdkVersion !== null
     const info = {
       mode,
       is_dcl: isDecentraland,
       is_empty: !isDecentraland && isEmpty(),
-      decentraland_ecs_version: decentralandEcsVersion,
-      dcl_sdk_version: dclSdkVersion,
-      is_sdk6: isSdk6,
-      is_sdk7: isSdk7,
+      sdk_version: sdkVersion,
     }
     track('activation:success', info)
   } catch (error) {
