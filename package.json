@@ -20,19 +20,6 @@
   ],
   "activationEvents": [
     "onDebug",
-    "onView:decentraland",
-    "onView:dependencies",
-    "onCustomEditor:decentraland.GLTFPreview",
-    "onCommand:decentraland.commands.update",
-    "onCommand:decentraland.commands.install",
-    "onCommand:decentraland.commands.uninstall",
-    "onCommand:decentraland.commands.start",
-    "onCommand:decentraland.commands.deploy",
-    "onCommand:decentraland.commands.deployWorld",
-    "onCommand:decentraland.commands.deployTest",
-    "onCommand:decentraland.commands.deployCustom",
-    "onCommand:dependencies.commands.delete",
-    "onCommand:dependencies.commands.update",
     "onCommand:walkthrough.createProject",
     "onCommand:walkthrough.viewCode"
   ],
@@ -42,7 +29,7 @@
       "activitybar": [
         {
           "id": "decentraland",
-          "title": "Decentraland",
+          "title": "Decentraland SDK6",
           "icon": "resources/activitybar.svg"
         }
       ]
@@ -51,7 +38,7 @@
       "decentraland": [
         {
           "id": "decentraland",
-          "name": "Decentraland"
+          "name": "Editor"
         },
         {
           "id": "dependencies",
@@ -68,12 +55,12 @@
       },
       {
         "view": "decentraland",
-        "contents": "The current folder is empty, go ahead and create a new Decentraland project:\n[Create Project](command:decentraland.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
+        "contents": "The current folder is empty, go ahead and create a new Decentraland SDK6 project:\n[Create Project](command:decentraland.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
         "when": "workbenchState != empty && !decentraland.isDCL && decentraland.isEmpty"
       },
       {
         "view": "decentraland",
-        "contents": "The current folder does not contain a Decentraland project. Open a folder with an existing project, or an empty folder to scaffold a new project:\n[Open Folder](command:vscode.openFolder)\nTo learn more [read our docs](https://docs.decentraland.org/).",
+        "contents": "The current folder does not contain a Decentraland SDK6 project. Open a folder with an existing project, or an empty folder to scaffold a new project:\n[Open Folder](command:vscode.openFolder)\nTo learn more [read our docs](https://docs.decentraland.org/).",
         "when": "workbenchState != empty && !decentraland.isDCL && !decentraland.isEmpty"
       },
       {
