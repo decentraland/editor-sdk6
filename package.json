@@ -1,7 +1,7 @@
 {
   "name": "decentraland",
-  "displayName": "Decentraland Editor",
-  "description": "Visual Studio Code extension for Decentraland projects",
+  "displayName": "Decentraland Editor SDK6",
+  "description": "Visual Studio Code extension for Decentraland SDK6",
   "icon": "resources/logo128x128.png",
   "version": "0.0.0-development",
   "publisher": "DecentralandFoundation",
