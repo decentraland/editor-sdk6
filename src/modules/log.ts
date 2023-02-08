@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { SpanwedChild } from './spawn'
 
-export const output = vscode.window.createOutputChannel(`Decentraland`)
+export const output = vscode.window.createOutputChannel(`Decentraland SDK7`)
 
 /**
  * Append a message to the output

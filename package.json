@@ -20,42 +20,42 @@
   ],
   "activationEvents": [
     "onDebug",
-    "onView:decentraland",
-    "onView:dependencies",
-    "onCustomEditor:decentraland.GLTFPreview",
-    "onCommand:decentraland.commands.update",
-    "onCommand:decentraland.commands.install",
-    "onCommand:decentraland.commands.uninstall",
-    "onCommand:decentraland.commands.start",
-    "onCommand:decentraland.commands.deploy",
-    "onCommand:decentraland.commands.deployWorld",
-    "onCommand:decentraland.commands.deployTest",
-    "onCommand:decentraland.commands.deployCustom",
-    "onCommand:decentraland.commands.runInspector",
-    "onCommand:dependencies.commands.delete",
-    "onCommand:dependencies.commands.update",
-    "onCommand:walkthrough.createProject",
-    "onCommand:walkthrough.viewCode"
+    "onView:decentraland-sdk7.home",
+    "onView:decentraland-sdk7.dependencies",
+    "onCustomEditor:decentraland-sdk7.GLTFPreview",
+    "onCommand:decentraland-sdk7.commands.update",
+    "onCommand:decentraland-sdk7.commands.install",
+    "onCommand:decentraland-sdk7.commands.uninstall",
+    "onCommand:decentraland-sdk7.commands.start",
+    "onCommand:decentraland-sdk7.commands.deploy",
+    "onCommand:decentraland-sdk7.commands.deployWorld",
+    "onCommand:decentraland-sdk7.commands.deployTest",
+    "onCommand:decentraland-sdk7.commands.deployCustom",
+    "onCommand:decentraland-sdk7.commands.runInspector",
+    "onCommand:decentraland-sdk7.dependencies.delete",
+    "onCommand:decentraland-sdk7.dependencies.update",
+    "onCommand:decentraland-sdk7.walkthrough.createProject",
+    "onCommand:decentraland-sdk7.walkthrough.viewCode"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "decentraland",
-          "title": "Decentraland",
+          "id": "decentraland-sdk7",
+          "title": "Decentraland SDK7",
           "icon": "resources/activitybar.svg"
         }
       ]
     },
     "views": {
-      "decentraland": [
+      "decentraland-sdk7": [
         {
-          "id": "decentraland",
-          "name": "Decentraland"
+          "id": "decentraland-sdk7.home",
+          "name": "Decentraland SDK7"
         },
         {
-          "id": "dependencies",
+          "id": "decentraland-sdk7.dependencies",
           "name": "Dependencies",
           "when": "decentraland.isDCL"
         }
@@ -63,34 +63,34 @@
     },
     "viewsWelcome": [
       {
-        "view": "decentraland",
+        "view": "decentraland-sdk7.home",
         "contents": "In order to use the Decentraland features you need to open a folder with an existing project, or open a folder on which create a new project.\n[Open Folder](command:vscode.openFolder)",
         "when": "workbenchState == empty"
       },
       {
-        "view": "decentraland",
-        "contents": "The current folder is empty, go ahead and create a new Decentraland project:\n[Create Project](command:decentraland.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
+        "view": "decentraland-sdk7.home",
+        "contents": "The current folder is empty, go ahead and create a new Decentraland project:\n[Create Project](command:decentraland-sdk7.commands.init)\nTo learn more [read our docs](https://docs.decentraland.org/).",
         "when": "workbenchState != empty && !decentraland.isDCL && decentraland.isEmpty"
       },
       {
-        "view": "decentraland",
+        "view": "decentraland-sdk7.home",
         "contents": "The current folder does not contain a Decentraland project. Open a folder with an existing project, or an empty folder to scaffold a new project:\n[Open Folder](command:vscode.openFolder)\nTo learn more [read our docs](https://docs.decentraland.org/).",
         "when": "workbenchState != empty && !decentraland.isDCL && !decentraland.isEmpty"
       },
       {
-        "view": "decentraland",
-        "contents": "You can preview and try out your scene:\n[Run Scene](command:decentraland.commands.start)",
+        "view": "decentraland-sdk7.home",
+        "contents": "You can preview and try out your scene:\n[Run Scene](command:decentraland-sdk7.commands.start)",
         "when": "workbenchState != empty && decentraland.isDCL"
       },
       {
-        "view": "decentraland",
-        "contents": "Once you are done building your scene, you can publish it to Genesis City:\n[Publish Scene](command:decentraland.commands.deploy)",
+        "view": "decentraland-sdk7.home",
+        "contents": "Once you are done building your scene, you can publish it to Genesis City:\n[Publish Scene](command:decentraland-sdk7.commands.deploy)",
         "when": "workbenchState != empty && decentraland.isDCL"
       }
     ],
     "customEditors": [
       {
-        "viewType": "decentraland.GLTFPreview",
+        "viewType": "decentraland-sdk7.GLTFPreview",
         "displayName": "Preview",
         "selector": [
           {
@@ -102,100 +102,100 @@
     ],
     "commands": [
       {
-        "command": "decentraland.commands.init",
+        "command": "decentraland-sdk7.commands.init",
         "title": "Create Project",
         "enablement": "!decentraland.isDCL",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.install",
+        "command": "decentraland-sdk7.commands.install",
         "title": "Install Package",
         "icon": "$(add)",
         "enablement": "decentraland.isDCL",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.uninstall",
+        "command": "decentraland-sdk7.commands.uninstall",
         "title": "Uninstall Package",
         "icon": "$(remove)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.update",
+        "command": "decentraland-sdk7.commands.update",
         "title": "Update Dependencies",
         "icon": "$(sync)",
         "category": "Decentraland"
       },
       {
-        "command": "dependencies.commands.update",
+        "command": "decentraland-sdk7.dependencies.update",
         "title": "Update",
         "icon": "$(arrow-up)",
         "category": "Dependencies"
       },
       {
-        "command": "dependencies.commands.delete",
+        "command": "decentraland-sdk7.dependencies.delete",
         "title": "Delete",
         "icon": "$(trash)",
         "category": "Dependencies"
       },
       {
-        "command": "decentraland.commands.browser.run",
+        "command": "decentraland-sdk7.commands.browser.run",
         "title": "Open in browser",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.browser.web3",
+        "command": "decentraland-sdk7.commands.browser.web3",
         "title": "Open In Browser With Web3",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.browser.deploy",
+        "command": "decentraland-sdk7.commands.browser.deploy",
         "title": "Open in browser",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.deploy",
+        "command": "decentraland-sdk7.commands.deploy",
         "title": "Publish Scene",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.deployWorld",
+        "command": "decentraland-sdk7.commands.deployWorld",
         "title": "Publish Scene To Your World",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.deployTest",
+        "command": "decentraland-sdk7.commands.deployTest",
         "title": "Publish Scene To Test Server",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.deployCustom",
+        "command": "decentraland-sdk7.commands.deployCustom",
         "title": "Publish Scene To Custom Server",
         "icon": "$(rocket)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.start",
+        "command": "decentraland-sdk7.commands.start",
         "title": "Run Scene",
         "icon": "$(play)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.getDebugURL",
+        "command": "decentraland-sdk7.commands.getDebugURL",
         "title": "Get Debug URL",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.restart",
+        "command": "decentraland-sdk7.commands.restart",
         "title": "Restart Server",
         "icon": "$(debug-restart)",
         "category": "Decentraland"
       },
       {
-        "command": "decentraland.commands.inspector",
+        "command": "decentraland-sdk7.commands.inspector",
         "title": "Open Inspector",
         "icon": "$(play)",
         "category": "Decentraland"
@@ -203,7 +203,7 @@
     ],
     "keybindings": [
       {
-        "command": "decentraland.commands.start",
+        "command": "decentraland-sdk7.commands.start",
         "key": "ctrl+e",
         "mac": "cmd+e",
         "when": "decentraland.isDCL"
@@ -212,102 +212,102 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "decentraland.commands.browser.run",
+          "command": "decentraland-sdk7.commands.browser.run",
           "when": "false"
         },
         {
-          "command": "decentraland.commands.browser.deploy",
+          "command": "decentraland-sdk7.commands.browser.deploy",
           "when": "false"
         },
         {
-          "command": "dependencies.commands.delete",
+          "command": "decentraland-sdk7.dependencies.delete",
           "when": "false"
         },
         {
-          "command": "dependencies.commands.update",
+          "command": "decentraland-sdk7.dependencies.update",
           "when": "false"
         },
         {
-          "command": "decentraland.commands.getDebugURL",
+          "command": "decentraland-sdk7.commands.getDebugURL",
           "when": "false"
         }
       ],
       "editor/title": [
         {
-          "command": "decentraland.commands.browser.run",
+          "command": "decentraland-sdk7.commands.browser.run",
           "group": "navigation",
-          "when": "activeWebviewPanelId == decentraland.RunScene"
+          "when": "activeWebviewPanelId == decentraland-sdk7.webviews.RunScene"
         },
         {
-          "command": "decentraland.commands.browser.deploy",
+          "command": "decentraland-sdk7.commands.browser.deploy",
           "group": "navigation",
-          "when": "activeWebviewPanelId == decentraland.PublishScene"
+          "when": "activeWebviewPanelId == decentraland-sdk7.webviews.PublishScene"
         }
       ],
       "view/title": [
         {
-          "command": "decentraland.commands.deployWorld",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.deployWorld",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "1_actions@1"
         },
         {
-          "command": "decentraland.commands.deployTest",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.deployTest",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "1_actions@2"
         },
         {
-          "command": "decentraland.commands.deployCustom",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.deployCustom",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "1_actions@3"
         },
         {
-          "command": "decentraland.commands.browser.web3",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.browser.web3",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "1_actions@4"
         },
         {
-          "command": "decentraland.commands.inspector",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.inspector",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "1_actions@5"
         },
         {
-          "command": "decentraland.commands.restart",
-          "when": "view == decentraland && decentraland.isDCL",
+          "command": "decentraland-sdk7.commands.restart",
+          "when": "view == decentraland-sdk7.home && decentraland.isDCL",
           "group": "navigation"
         },
         {
-          "command": "decentraland.commands.install",
-          "when": "view == dependencies",
+          "command": "decentraland-sdk7.commands.install",
+          "when": "view == decentraland-sdk7.dependencies",
           "group": "navigation@1"
         },
         {
-          "command": "decentraland.commands.uninstall",
-          "when": "view == dependencies",
+          "command": "decentraland-sdk7.commands.uninstall",
+          "when": "view == decentraland-sdk7.dependencies",
           "group": "navigation@2"
         },
         {
-          "command": "decentraland.commands.update",
-          "when": "view == dependencies",
+          "command": "decentraland-sdk7.commands.update",
+          "when": "view == decentraland-sdk7.dependencies",
           "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
-          "command": "dependencies.commands.update",
-          "when": "view == dependencies && viewItem == dependency",
+          "command": "decentraland-sdk7.dependencies.update",
+          "when": "view == decentraland-sdk7.dependencies && viewItem == dependency",
           "group": "inline@1"
         },
         {
-          "command": "dependencies.commands.delete",
-          "when": "view == dependencies && viewItem == dependency",
+          "command": "decentraland-sdk7.dependencies.delete",
+          "when": "view == decentraland-sdk7.dependencies && viewItem == dependency",
           "group": "inline@2"
         }
       ]
     },
     "walkthroughs": [
       {
-        "id": "decentraland",
-        "title": "Decentraland",
+        "id": "decentraland-sdk7",
+        "title": "Decentraland SDK7",
         "description": "This guide will walk you through creating a Decentraland scene.",
         "steps": [
           {
@@ -326,39 +326,39 @@
           {
             "id": "init",
             "title": "Create project",
-            "description": "Scaffold an example scene project.\n[Create Project](command:walkthrough.createProject)",
+            "description": "Scaffold an example scene project.\n[Create Project](command:decentraland-sdk7.walkthrough.createProject)",
             "media": {
               "image": "resources/activitybar.svg",
               "altText": "Empty image"
             },
             "completionEvents": [
-              "onCommand:walkthrough.createProject"
+              "onCommand:decentraland-sdk7.walkthrough.createProject"
             ],
             "when": "workbenchState != empty"
           },
           {
             "id": "run",
             "title": "Run scene",
-            "description": "Run the scene you just created, try interacting with the cube.\n[Run Scene](command:decentraland.commands.start)",
+            "description": "Run the scene you just created, try interacting with the cube.\n[Run Scene](command:decentraland-sdk7.commands.start)",
             "media": {
               "image": "resources/activitybar.svg",
               "altText": "Run scene"
             },
             "completionEvents": [
-              "onCommand:decentraland.commands.start"
+              "onCommand:decentraland-sdk7.commands.start"
             ],
             "when": "workbenchState != empty"
           },
           {
             "id": "code",
             "title": "View code",
-            "description": "Open the source code of the scene, try making changes to it and see them reflected on the preview screen.\n[View Code](command:walkthrough.viewCode)",
+            "description": "Open the source code of the scene, try making changes to it and see them reflected on the preview screen.\n[View Code](command:decentraland-sdk7.walkthrough.viewCode)",
             "media": {
               "image": "resources/activitybar.svg",
               "altText": "View code"
             },
             "completionEvents": [
-              "onCommand:walkthrough.viewCode"
+              "onCommand:decentraland-sdk7.walkthrough.viewCode"
             ],
             "when": "workbenchState != empty"
           },
@@ -385,7 +385,7 @@
     ],
     "debuggers": [
       {
-        "type": "decentraland",
+        "type": "decentraland-sdk7",
         "languages": [
           "typescript"
         ],
@@ -395,7 +395,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Debug",
-            "url": "${command:decentraland.commands.getDebugURL}",
+            "url": "${command:decentraland-sdk7.commands.getDebugURL}",
             "webRoot": "${workspaceFolder}/src"
           }
         ]
@@ -435,7 +435,7 @@
   "dependencies": {
     "@dcl/inspector": "^0.1.0-4057700455.commit-453395e",
     "@dcl/schemas": "^5.18.1",
-    "@dcl/sdk": "^7.0.6-4115789462.commit-407b179",
+    "@dcl/sdk": "^7.0.6-4124638014.commit-0cffdf7",
     "@dcl/wearable-preview": "^1.14.0",
     "@types/analytics-node": "^3.1.9",
     "@types/cmd-shim": "^5.0.0",
