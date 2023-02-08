@@ -20,20 +20,7 @@
   ],
   "activationEvents": [
     "onDebug",
-    "onView:decentraland-sdk7.home",
-    "onView:decentraland-sdk7.dependencies",
-    "onCustomEditor:decentraland-sdk7.GLTFPreview",
-    "onCommand:decentraland-sdk7.commands.update",
-    "onCommand:decentraland-sdk7.commands.install",
-    "onCommand:decentraland-sdk7.commands.uninstall",
-    "onCommand:decentraland-sdk7.commands.start",
-    "onCommand:decentraland-sdk7.commands.deploy",
-    "onCommand:decentraland-sdk7.commands.deployWorld",
-    "onCommand:decentraland-sdk7.commands.deployTest",
-    "onCommand:decentraland-sdk7.commands.deployCustom",
     "onCommand:decentraland-sdk7.commands.runInspector",
-    "onCommand:decentraland-sdk7.dependencies.delete",
-    "onCommand:decentraland-sdk7.dependencies.update",
     "onCommand:decentraland-sdk7.walkthrough.createProject",
     "onCommand:decentraland-sdk7.walkthrough.viewCode"
   ],
@@ -52,7 +39,7 @@
       "decentraland-sdk7": [
         {
           "id": "decentraland-sdk7.home",
-          "name": "Decentraland SDK7"
+          "name": "Editor"
         },
         {
           "id": "decentraland-sdk7.dependencies",
