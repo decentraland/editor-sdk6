@@ -9,7 +9,6 @@ import { SpanwedChild } from '../../modules/spawn'
 import { log } from '../../modules/log'
 import { loader } from '../../modules/loader'
 import { hasNodeModules } from '../../modules/workspace'
-import { syncSdkVersion } from '../../modules/sdk'
 import { Server } from '../../modules/server'
 import { ServerName } from '../../types'
 
@@ -24,8 +23,6 @@ class RunSceneServer extends Server {
     if (!hasNodeModules()) {
       await npmInstall()
     }
-    // sync sdk version with workspace
-    await syncSdkVersion()
 
     // start scene preview server
     this.child = bin('decentraland', 'dcl', [
