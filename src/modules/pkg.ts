@@ -18,6 +18,7 @@ export function getPackageJson(
   }
   bin?: { [command: string]: string }
   dependencies: Record<string, string>
+  devDependencies: Record<string, string>
 } {
   const basePath = workspace ? getCwd() : getExtensionPath()
   const packageJsonPath = !!moduleName

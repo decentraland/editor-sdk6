@@ -36,8 +36,8 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    const pkg = getPackageJson()
-    return '@dcl/sdk' in pkg.dependencies
+    const pkg = getPackageJson(undefined, true)
+    return '@dcl/sdk' in pkg.dependencies || '@dcl/sdk' in pkg.devDependencies
   } catch (error) {
     return false
   }
