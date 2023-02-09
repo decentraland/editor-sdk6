@@ -36,8 +36,11 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    getPackageJson('decentraland-ecs', true)
-    return true
+    const pkg = getPackageJson(undefined, true)
+    return (
+      'decentraland-ecs' in pkg.dependencies ||
+      'decentraland-ecs' in pkg.devDependencies
+    )
   } catch (error) {
     return false
   }
