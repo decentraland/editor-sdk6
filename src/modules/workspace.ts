@@ -36,7 +36,7 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    return hasDependency('decentraland-ecs')
+    return hasDependency('decentraland-ecs', true)
   } catch (error) {
     return false
   }
