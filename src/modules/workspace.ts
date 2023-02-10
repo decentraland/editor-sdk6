@@ -36,7 +36,7 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    return hasDependency('@dcl/sdk')
+    return hasDependency('@dcl/sdk', true)
   } catch (error) {
     return false
   }
