@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import fs from 'fs'
 import path from 'path'
 import { Scene } from '@dcl/schemas'
+import { hasDependency } from './pkg'
 
 /**
  * Returns the path to the workspace's current working directory
@@ -35,7 +36,7 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    return true
+    return hasDependency('decentraland-ecs', true)
   } catch (error) {
     return false
   }

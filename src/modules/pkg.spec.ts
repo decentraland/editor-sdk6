@@ -1,4 +1,4 @@
-import { getPackageJson, getPackageVersion } from './pkg'
+import { getPackageJson, getPackageVersion, hasDependency } from './pkg'
 
 /********************************************************
                           Mocks
@@ -113,6 +113,45 @@ describe('pkg', () => {
       })
       it('should return null', () => {
         expect(getPackageVersion('some-non-existent-module')).toBeNull()
+      })
+    })
+  })
+  describe('When checking if a module is a dependency', () => {
+    describe('and the module is in the dependencies of the package.json', () => {
+      beforeEach(() => {
+        fsReadFileSyncMock.mockReturnValueOnce(
+          '{ "dependencies": { "my-dependency": "1.0.0" } }'
+        )
+      })
+      afterEach(() => {
+        fsReadFileSyncMock.mockReset()
+      })
+      it('should return true', () => {
+        expect(hasDependency('my-dependency')).toBe(true)
+      })
+    })
+    describe('and the module is in the devDependencies of the package.json', () => {
+      beforeEach(() => {
+        fsReadFileSyncMock.mockReturnValueOnce(
+          '{ "devDependencies": { "my-dependency": "1.0.0" } }'
+        )
+      })
+      afterEach(() => {
+        fsReadFileSyncMock.mockReset()
+      })
+      it('should return true', () => {
+        expect(hasDependency('my-dependency')).toBe(true)
+      })
+    })
+    describe('and the module is neither in the dependencies nor the devDependencies of the package.json', () => {
+      beforeEach(() => {
+        fsReadFileSyncMock.mockReturnValueOnce('{ "version": "1.0.0" }')
+      })
+      afterEach(() => {
+        fsReadFileSyncMock.mockReset()
+      })
+      it('should return true', () => {
+        expect(hasDependency('my-dependency')).toBe(false)
       })
     })
   })
