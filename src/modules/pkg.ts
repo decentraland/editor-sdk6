@@ -17,8 +17,8 @@ export function getPackageJson(
     node: string
   }
   bin?: { [command: string]: string }
-  dependencies: Record<string, string>
-  devDependencies: Record<string, string>
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
 } {
   const basePath = workspace ? getCwd() : getExtensionPath()
   const packageJsonPath = !!moduleName
@@ -44,4 +44,15 @@ export function getPackageVersion(moduleName?: string, workspace = false) {
   } catch (error) {
     return null
   }
+}
+
+/**
+ * Returns whether or not there's a dependency on a module
+ */
+export function hasDependency(moduleName: string, workspace = false) {
+  const pkg = getPackageJson(undefined, workspace)
+  const isDependency = !!pkg.dependencies && moduleName in pkg.dependencies
+  const isDevDependency =
+    !!pkg.devDependencies && moduleName in pkg.devDependencies
+  return isDependency || isDevDependency
 }
