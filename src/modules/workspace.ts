@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import fs from 'fs'
 import path from 'path'
 import { Scene } from '@dcl/schemas'
-import { getPackageJson } from './pkg'
+import { hasDependency } from './pkg'
 
 /**
  * Returns the path to the workspace's current working directory
@@ -36,8 +36,7 @@ export function getScene() {
 export function isDCL() {
   try {
     getScene()
-    const pkg = getPackageJson(undefined, true)
-    return '@dcl/sdk' in pkg.dependencies || '@dcl/sdk' in pkg.devDependencies
+    return hasDependency('@dcl/sdk')
   } catch (error) {
     return false
   }
