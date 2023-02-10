@@ -18,6 +18,12 @@ const fsExistsSyncMock = fs.existsSync as jest.MockedFunction<
   typeof fs.existsSync
 >
 
+import { hasDependency } from './pkg'
+jest.mock('./pkg')
+const hasDependencyMock = hasDependency as jest.MockedFunction<
+  typeof hasDependency
+>
+
 /********************************************************
                           Tests
 *********************************************************/
@@ -68,8 +74,27 @@ describe('workspace', () => {
       afterEach(() => {
         fsReadFileSyncMock.mockReset()
       })
-      it('should read the scene json file from the file system', () => {
-        expect(isDCL()).toBe(true)
+      describe('and the workspace has a dependency on @dcl/sdk', () => {
+        beforeEach(() => {
+          hasDependencyMock.mockReturnValueOnce(true)
+        })
+        afterEach(() => {
+          hasDependencyMock.mockReset()
+        })
+        it('should return true', () => {
+          expect(isDCL()).toBe(true)
+        })
+      })
+      describe('and the workspace does not have a dependency on @dcl/sdk', () => {
+        beforeEach(() => {
+          hasDependencyMock.mockReturnValueOnce(false)
+        })
+        afterEach(() => {
+          hasDependencyMock.mockReset()
+        })
+        it('should return false', () => {
+          expect(isDCL()).toBe(false)
+        })
       })
     })
     describe('and the workspace does not have a scene.json', () => {
