@@ -61,10 +61,13 @@ export async function activate(context: vscode.ExtensionContext) {
     await validate()
 
     // Initialize analytics
-    activateAnalytics(process.env.DCL_EDITOR_SEGMENT_KEY)
+    activateAnalytics(process.env.DCL_EDITOR_SDK6_SEGMENT_KEY)
 
     // Initialize error reporting
-    activateRollbar(context.extensionMode, process.env.DCL_EDITOR_ROLLBAR_KEY)
+    activateRollbar(
+      context.extensionMode,
+      process.env.DCL_EDITOR_SDK6_ROLLBAR_KEY
+    )
 
     // Set node binary version
     setVersion(await resolveVersion())
