@@ -420,7 +420,7 @@
     "cmd-shim": "^6.0.0",
     "cross-spawn": "^7.0.3",
     "decentraland": "^3.16.2",
-    "decentraland-ecs": "^6.11.13",
+    "decentraland-ecs": "^6.12.0",
     "dotenv": "^16.0.3",
     "estrella": "^1.4.1",
     "express": "^4.18.2",
