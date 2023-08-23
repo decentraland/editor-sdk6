@@ -63,7 +63,7 @@ describe('sentry', () => {
       })
     })
 
-    describe('and Sentry was already activated, it should not activate it again', () => {
+    describe('and Sentry was already activated', () => {
       const realConsoleWarn = console.warn
       beforeAll(() => {
         console.warn = jest.fn()
@@ -73,7 +73,7 @@ describe('sentry', () => {
         console.warn = realConsoleWarn
       })
 
-      it('should not activate Sentry', () => {
+      it('should not activate Sentry twice', () => {
         activateSentry(ExtensionMode.Test, 'https://public@sentry.example.com/1')
         activateSentry(ExtensionMode.Test, 'https://public@sentry.example.com/1')
         expect(SentryMock.init).toHaveBeenCalledTimes(1)
