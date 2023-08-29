@@ -410,6 +410,7 @@
   "dependencies": {
     "@dcl/schemas": "^5.18.1",
     "@dcl/wearable-preview": "^1.14.0",
+    "@sentry/node": "^7.64.0",
     "@types/analytics-node": "^3.1.9",
     "@types/cmd-shim": "^5.0.0",
     "@types/jest": "^29.2.3",
@@ -434,7 +435,6 @@
     "npm": "^8.19.2",
     "open": "^8.4.0",
     "rimraf": "^3.0.2",
-    "rollbar": "^2.25.2",
     "semver": "^7.3.8",
     "tar-fs": "^2.1.1",
     "tree-kill": "^1.2.2",

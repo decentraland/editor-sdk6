@@ -26,7 +26,7 @@ import {
   deactivateAnalytics,
   track,
 } from './modules/analytics'
-import { activateRollbar, deactivateRollbar, report } from './modules/rollbar'
+import { activateSentry, deactivateSentry, report } from './modules/sentry'
 import { getPackageJson, getPackageVersion } from './modules/pkg'
 import { getCwd, isDCL, isEmpty } from './modules/workspace'
 import { getServerUrl } from './utils'
@@ -64,9 +64,9 @@ export async function activate(context: vscode.ExtensionContext) {
     activateAnalytics(process.env.DCL_EDITOR_SDK6_SEGMENT_KEY)
 
     // Initialize error reporting
-    activateRollbar(
+    activateSentry(
       context.extensionMode,
-      process.env.DCL_EDITOR_SDK6_ROLLBAR_KEY
+      process.env.DCL_EDITOR_SDK6_SENTRY_DSN
     )
 
     // Set node binary version
@@ -220,7 +220,7 @@ export async function deactivate() {
   // Deactivate analytics
   deactivateAnalytics()
   // Deactivate error reporting
-  deactivateRollbar()
+  deactivateSentry()
 }
 
 export async function validate() {
